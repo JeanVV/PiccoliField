@@ -22,19 +22,27 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".login"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".loginActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
             android:name=".LoginActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".MenuActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".AttendanceHomeActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".MapMonitoringActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".AttendanceDetailActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".CollaboratorsActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
     </application>

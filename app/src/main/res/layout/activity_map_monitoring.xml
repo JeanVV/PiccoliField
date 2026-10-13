@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pantalla 2: Monitoreo en Mapa (activity_map_monitoring.xml) -->
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mapMonitoringRootLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/crema_vainilla">
+
+    <!-- Header Toolbar Superior -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/toolbarHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="@dimen/spacing_normal"
+        android:paddingTop="@dimen/spacing_medium"
+        android:paddingBottom="@dimen/spacing_small"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/tvToolbarTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/title_monitoreo_mapa"
+            android:textAppearance="@style/TextAppearance.Piccoli.ToolbarTitle"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Control Selector de Vista: Toggle Pill ("Mapa" | "Lista") -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardToggleViewSelector"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:layout_marginHorizontal="@dimen/spacing_normal"
+        android:layout_marginTop="@dimen/spacing_small"
+        app:cardBackgroundColor="@color/marfil_suave"
+        app:cardCornerRadius="22dp"
+        app:cardElevation="@dimen/card_elevation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbarHeader"
+        app:strokeColor="@color/stroke_color"
+        app:strokeWidth="1dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:padding="2dp">
+
+            <!-- Opción "Mapa" Seleccionada -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnToggleMap"
+                style="@style/Widget.Piccoli.Button.Primary"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:text="@string/btn_mapa"
+                android:textSize="@dimen/text_size_body_small" />
+
+            <!-- Opción "Lista" Deseleccionada -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnToggleList"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:text="@string/btn_lista"
+                android:textColor="@color/chocolate"
+                android:textSize="@dimen/text_size_body_small" />
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Contenedor del Mapa (Google Maps API) -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/mapFragment"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/spacing_medium"
+        app:layout_constraintBottom_toTopOf="@+id/bottomSheetZoneCollaborators"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cardToggleViewSelector"
+        tools:context=".MapMonitoringActivity" />
+
+    <!-- Capa de Overlays Simulados sobre el Mapa (Vista previa UI) -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layoutMapOverlays"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="@+id/mapFragment"
+        app:layout_constraintEnd_toEndOf="@+id/mapFragment"
+        app:layout_constraintStart_toStartOf="@+id/mapFragment"
+        app:layout_constraintTop_toTopOf="@+id/mapFragment">
+
+        <!-- Círculo de Geofencing Translucido -->
+        <View
+            android:id="@+id/vGeofenceCircle"
+            android:layout_width="220dp"
+            android:layout_height="220dp"
+            android:background="@drawable/bg_geofence_ring"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Tag de Rango de Asistencia -->
+        <TextView
+            android:id="@+id/tvAssistanceRangeTag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/bg_badge_on_time"
+            android:paddingHorizontal="@dimen/spacing_medium"
+            android:paddingVertical="4dp"
+            android:text="@string/label_rango_asistencia"
+            android:textAppearance="@style/TextAppearance.Piccoli.Caption"
+            android:textColor="@color/cafe_profundo"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@+id/cardMapMarkerTooltip"
+            app:layout_constraintEnd_toEndOf="@+id/cardMapMarkerTooltip"
+            app:layout_constraintStart_toStartOf="@+id/cardMapMarkerTooltip" />
+
+        <!-- Tooltip Marker del Mapa (BD: sede.nombre) -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardMapMarkerTooltip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:cardBackgroundColor="@color/cafe_profundo"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="4dp"
+            app:layout_constraintBottom_toBottomOf="@+id/vGeofenceCircle"
+            app:layout_constraintEnd_toEndOf="@+id/vGeofenceCircle"
+            app:layout_constraintStart_toStartOf="@+id/vGeofenceCircle"
+            app:layout_constraintTop_toTopOf="@+id/vGeofenceCircle">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingHorizontal="@dimen/spacing_normal"
+                android:paddingVertical="@dimen/spacing_small">
+
+                <TextView
+                    android:id="@+id/tvMarkerTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.Piccoli.BodyPrimary"
+                    android:textColor="@color/marfil_suave"
+                    tools:text="Sede Los Olivos - Plaza Vea" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Pin de Ubicación Central -->
+        <ImageView
+            android:id="@+id/ivCenterMapPin"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginTop="2dp"
+            android:contentDescription="@null"
+            app:layout_constraintEnd_toEndOf="@+id/cardMapMarkerTooltip"
+            app:layout_constraintStart_toStartOf="@+id/cardMapMarkerTooltip"
+            app:layout_constraintTop_toBottomOf="@+id/cardMapMarkerTooltip"
+            app:srcCompat="@drawable/ic_location_pin"
+            app:tint="@color/cafe_profundo" />
+
+        <!-- Botón Flotante para Mi Ubicación / Centrar Mapa -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabMyLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/spacing_normal"
+            android:layout_marginBottom="@dimen/spacing_normal"
+            android:contentDescription="@string/cd_location_icon"
+            app:backgroundTint="@color/marfil_suave"
+            app:fabSize="mini"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:srcCompat="@drawable/ic_navigation_directions"
+            app:tint="@color/cafe_profundo" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Card Inferior (BottomSheet) con Colaboradores en la Zona -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/bottomSheetZoneCollaborators"
+        style="@style/Widget.Piccoli.Card.Marfil"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/spacing_normal"
+        android:layout_marginBottom="@dimen/spacing_medium"
+        app:cardCornerRadius="@dimen/card_corner_radius_large"
+        app:layout_constraintBottom_toTopOf="@+id/bottomNavigation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/spacing_normal">
+
+            <!-- Título con Contador (BD: zona.colaboradores_count) -->
+            <TextView
+                android:id="@+id/tvZoneCollaboratorsCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.Piccoli.CardTitle"
+                tools:text="Colaboradores en la zona (14)" />
+
+            <!-- Lista Horizontal de Fotos Pequeñas de Colaboradores -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvZoneAvatars"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_small"
+                android:clipToPadding="false"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:itemCount="5"
+                tools:listitem="@layout/item_recent_personnel" />
+
+            <!-- Botones de Acción "Ver detalles" y "Cómo llegar" -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_medium"
+                android:orientation="horizontal">
+
+                <!-- Botón Ver Detalles (Relleno) -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnViewDetails"
+                    style="@style/Widget.Piccoli.Button.Primary"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/button_height"
+                    android:layout_marginEnd="@dimen/spacing_small"
+                    android:layout_weight="1.2"
+                    android:text="@string/btn_ver_detalles" />
+
+                <!-- Botón Cómo Llegar (Outlined) -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnHowToGetThere"
+                    style="@style/Widget.Piccoli.Button.Outlined"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/button_height"
+                    android:layout_marginStart="@dimen/spacing_small"
+                    android:layout_weight="1"
+                    android:text="@string/btn_como_llegar"
+                    app:icon="@drawable/ic_location_pin"
+                    app:iconTint="@color/cafe_profundo" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Barra de Navegación Inferior -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/marfil_suave"
+        app:itemIconTint="@color/cafe_profundo"
+        app:itemTextColor="@color/cafe_profundo"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:menu="@menu/bottom_nav_menu" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
