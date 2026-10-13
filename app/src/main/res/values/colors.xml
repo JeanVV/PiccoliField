@@ -2,4 +2,22 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="cafe_profundo">#2B170F</color>
+    <color name="chocolate">#4A2B1C</color>
+    <color name="dorado_premium">#C99A32</color>
+    <color name="crema_vainilla">#F3E4C7</color>
+    <color name="beige_licor">#D9C09A</color>
+    <color name="caramelo">#B9783E</color>
+    <color name="marfil_suave">#FFF9EF</color>
+
+    <color name="color_primario">#2B170F</color>
+    <color name="color_secundario">#4A2B1C</color>
+    <color name="color_acento">#C99A32</color>
+    <color name="color_fondo">#FFF9EF</color>
+    <color name="color_superficie">#D9C09A</color>
+    <color name="color_texto">#2B170F</color>
+    <color name="color_texto_secundario">#4A2B1C</color>
+    <color name="color_boton">#C99A32</color>
+    <color name="color_boton_texto">#2B170F</color>
 </resources>

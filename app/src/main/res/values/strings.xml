@@ -1,5 +1,16 @@
 <resources>
     <string name="app_name">PiccoliField</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!-- Splash / Main -->
+    <string name="comenzar">Comenzar</string>
+
+    <!-- Login -->
+    <string name="hint_correo_usuario">Correo electrónico o usuario</string>
+    <string name="hint_contrasena">Contraseña</string>
+    <string name="recordarme">Recordarme</string>
+    <string name="olvidaste_contrasena">¿Olvidaste tu contraseña?</string>
+    <string name="iniciar_sesion">Iniciar sesión</string>
+    <string name="no_tienes_cuenta">¿No tienes una cuenta? </string>
+    <string name="registrate">Regístrate</string>
 </resources>
