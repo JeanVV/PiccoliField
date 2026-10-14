@@ -24,23 +24,36 @@ public class SplashStorage {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         return sharedPreferences.getBoolean("ingreso", false);
     }
-    public static void registrarSesionActiva(Context context){
+
+    public static void registrarSesionActiva(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        // Usamos una LLAVE NUEVA exclusiva para el login
         editor.putBoolean("sesion_iniciada", true);
         editor.apply();
     }
 
-    public static void limpiarSesionActiva(Context context){
+    public static void limpiarSesionActiva(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean("sesion_iniciada", false);
+        editor.remove("auth_token");
         editor.apply();
     }
 
-    public static boolean consultarSesionActiva(Context context){
+    public static boolean consultarSesionActiva(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         return sharedPreferences.getBoolean("sesion_iniciada", false);
+    }
+
+    public static void guardarToken(Context context, String token) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("auth_token", token);
+        editor.apply();
+    }
+
+    public static String obtenerToken(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        return sharedPreferences.getString("auth_token", "");
     }
 }

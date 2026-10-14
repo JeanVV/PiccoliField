@@ -1,6 +1,9 @@
 package com.piccolifield.data.remote.dto;
 
+import android.util.Log;
+
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -11,7 +14,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
-    public static final String URL_API_SERVICE = "http://127.0.0.1:5000";
+    public static final String URL_API_SERVICE = "https://piccolifield-api.onrender.com/api/";
     public static String API_TOKEN;
 
     private static class AuthInterceptor implements Interceptor {
@@ -19,7 +22,8 @@ public class RetrofitClient {
         public Response intercept(Chain chain) throws IOException {
             Request original = chain.request();
             Request.Builder requestBuilder = original.newBuilder()
-                    .header("Content-Type", "application/json");
+                    .header("Content-Type", "application/json")
+                    .header("Accept", "application/json");
 
             String token = API_TOKEN;
             if (token != null && !token.isEmpty()) {
@@ -31,12 +35,33 @@ public class RetrofitClient {
         }
     }
 
-    private static OkHttpClient.Builder httpClient = new OkHttpClient.Builder()
-            .addInterceptor(new AuthInterceptor());
+    private static class LoggingInterceptor implements Interceptor {
+        @Override
+        public Response intercept(Chain chain) throws IOException {
+            Request request = chain.request();
+            Log.d("RetrofitClient", "--> " + request.method() + " " + request.url());
+            try {
+                Response response = chain.proceed(request);
+                Log.d("RetrofitClient", "<-- " + response.code() + " " + response.message() + " (" + response.request().url() + ")");
+                return response;
+            } catch (IOException e) {
+                Log.e("RetrofitClient", "<-- FAILED " + request.url() + ": " + e.getMessage());
+                throw e;
+            }
+        }
+    }
 
-    public static Retrofit API_SERVICE = new Retrofit.Builder()
+    private static final OkHttpClient httpClient = new OkHttpClient.Builder()
+            .connectTimeout(60, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .writeTimeout(60, TimeUnit.SECONDS)
+            .addInterceptor(new LoggingInterceptor())
+            .addInterceptor(new AuthInterceptor())
+            .build();
+
+    public static final Retrofit API_SERVICE = new Retrofit.Builder()
             .baseUrl(URL_API_SERVICE)
-            .client(httpClient.build())
+            .client(httpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build();
 
