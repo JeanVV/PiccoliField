@@ -1,7 +1,7 @@
 package com.piccolifield;
 
-import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,6 +13,7 @@ import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
 
 import com.piccolifield.databinding.ActivityMenuBinding;
+import com.piccolifield.ui.asistencia.AsistenciaHomeFragment;
 import com.piccolifield.ui.perfil.PerfilFragment;
 
 public class MenuActivity extends AppCompatActivity {
@@ -51,16 +52,16 @@ public class MenuActivity extends AppCompatActivity {
                     cargarFragmento(new PerfilFragment());
                     break;
                 case 1:
-                    // Conexión con el Módulo Asistencia
-                    startActivity(new Intent(MenuActivity.this, AsistenciaInicioActivity.class));
+                    // Módulo Asistencia
+                    cargarFragmento(new AsistenciaHomeFragment());
                     break;
                 case 2:
-                    // Buscar
-                    cargarFragmento(new PerfilFragment());
+                    // Módulo en desarrollo
+                    Toast.makeText(this, "Módulo en desarrollo", Toast.LENGTH_SHORT).show();
                     break;
                 case 3:
-                    // Perfil
-                    cargarFragmento(new PerfilFragment());
+                    // Módulo en desarrollo
+                    Toast.makeText(this, "Módulo en desarrollo", Toast.LENGTH_SHORT).show();
                     break;
             }
         });

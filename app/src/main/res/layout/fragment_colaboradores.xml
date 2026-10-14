@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Pantalla 4: Colaboradores (activity_collaborators.xml) -->
+<!-- Fragmento 3: Colaboradores (fragment_colaboradores.xml) -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/collaboratorsRootLayout"
+    android:id="@+id/colaboradoresRootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/crema_vainilla"
-    tools:context=".TrabajadoresAsistenciaActivity">
+    tools:context=".ui.asistencia.ColaboradoresFragment">
 
     <!-- Header Toolbar Superior -->
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -116,7 +116,7 @@
 
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- Estado Vacío (Empty State si no hay resultados) -->
+    <!-- Estado Vacío -->
     <LinearLayout
         android:id="@+id/layoutEmptyCollaboratorsState"
         android:layout_width="match_parent"
@@ -125,7 +125,7 @@
         android:orientation="vertical"
         android:padding="@dimen/spacing_huge"
         android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/bottomNavigation"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/cardSearchContainer"
         tools:visibility="gone">
 
@@ -153,24 +153,11 @@
         android:clipToPadding="false"
         android:paddingBottom="@dimen/spacing_medium"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintBottom_toTopOf="@+id/bottomNavigation"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/cardSearchContainer"
         tools:itemCount="4"
         tools:listitem="@layout/item_collaborator" />
-
-    <!-- Barra de Navegación Inferior -->
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNavigation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/marfil_suave"
-        app:itemIconTint="@color/cafe_profundo"
-        app:itemTextColor="@color/cafe_profundo"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:menu="@menu/bottom_nav_menu" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
