@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingVertical="16dp"
+    android:paddingHorizontal="8dp"
+    android:background="?attr/selectableItemBackground"> <!-- Efecto ripple -->
+
+    <!-- Icono de Tienda -->
+    <ImageView
+        android:id="@+id/ivIconoTienda"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/bg_search_rounded"
+        android:padding="8dp"
+        android:src="@drawable/ic_store"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <!-- Nombre del Punto de Venta -->
+    <TextView
+        android:id="@+id/tvNombrePdv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        tools:text="Licorería El Buen Sabor"
+        android:textColor="@color/color_texto"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@id/ivIconoTienda"
+        app:layout_constraintEnd_toStartOf="@+id/tvEstadoPdv"
+        app:layout_constraintTop_toTopOf="@id/ivIconoTienda" />
+
+    <!-- Dirección -->
+    <TextView
+        android:id="@+id/tvDireccionPdv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        tools:text="📍 Av. Santa Victoria 456, Chiclayo"
+        android:textColor="@color/color_texto_secundario"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="@id/tvNombrePdv"
+        app:layout_constraintTop_toBottomOf="@id/tvNombrePdv"
+        app:layout_constraintBottom_toBottomOf="@id/ivIconoTienda" />
+
+    <!-- Estado (Activo/Inactivo) -->
+    <TextView
+        android:id="@+id/tvEstadoPdv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Activo"
+        android:textColor="@color/status_green_check"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <!-- Línea divisoria -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="16dp"
+        android:background="@color/crema_vainilla"
+        app:layout_constraintTop_toBottomOf="@id/ivIconoTienda"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
