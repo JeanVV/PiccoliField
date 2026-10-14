@@ -54,7 +54,7 @@
         android:id="@+id/tvSubtituloVentas"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Volumen de ventas"
+        android:text="Cant. productos vendidos"
         android:textColor="@color/color_texto_secundario"
         android:textSize="12sp"
         app:layout_constraintStart_toStartOf="@id/tvNombreLocal"

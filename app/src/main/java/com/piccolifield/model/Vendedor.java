@@ -1,19 +1,34 @@
 package com.piccolifield.model;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Vendedor {
-    private int posicion;
+    @SerializedName("idUsuario")
+    private int idUsuario;
+
+    @SerializedName("nombre")
     private String nombre;
+
+    @SerializedName("local")
     private String local;
-    private int cantVentas;
-    public Vendedor(int posicion, String nombre, String local,int cantVentas) {
+
+    @SerializedName("cantidadVendida")
+    private double cantVentas;
+
+    @SerializedName("posicion")
+    private int posicion;
+
+    public Vendedor(int idUsuario, int posicion, String nombre, String local,int cantVentas) {
+        this.idUsuario = idUsuario;
         this.posicion = posicion;
         this.nombre = nombre;
         this.local = local;
         this.cantVentas = cantVentas;
     }
 
+    public int getIdUsuario(){ return idUsuario; }
     public int getPosicion() { return posicion; }
     public String getNombre() { return nombre; }
     public String getLocal() { return local; }
-    public int getCantVentas(){ return cantVentas;}
+    public double getCantVentas(){ return cantVentas;}
 }

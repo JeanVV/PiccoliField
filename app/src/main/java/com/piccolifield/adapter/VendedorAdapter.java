@@ -37,18 +37,14 @@ public class VendedorAdapter extends RecyclerView.Adapter<VendedorAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Vendedor vendedor = listaVendedores.get(position);
+        String textoCombinado = vendedor.getNombre() + " - " + vendedor.getLocal(); // o vendedor.getLocal_pertenece()
 
-        // Asignamos los datos a los textos
-        holder.tvPosicion.setText(String.valueOf(vendedor.getPosicion()));
-        holder.tvNombreLocal.setText(vendedor.getNombre() + " - " + vendedor.getLocal());
+        holder.tvNombreLocal.setText(textoCombinado);
+        holder.tvVolumenVentas.setText(vendedor.getCantVentas() + " productos");
 
-        holder.tvVolumenVentas.setText(vendedor.getCantVentas() + " ventas");
-
-        // Configuramos el clic en el ítem completo para ir a la interfaz de Rendimiento
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, DetalleVendedorActivity.class);
-            // Opcional: puedes enviar el nombre del vendedor a la otra pantalla
-            intent.putExtra("NOMBRE_VENDEDOR", vendedor.getNombre());
+            intent.putExtra("ID_VENDEDOR", vendedor.getIdUsuario());
             context.startActivity(intent);
         });
     }

@@ -16,6 +16,7 @@ import com.piccolifield.databinding.ActivityMenuBinding;
 import com.piccolifield.ui.asistencia.AsistenciaHomeFragment;
 import com.piccolifield.ui.despacho.PuntosDespachoFragment;
 import com.piccolifield.ui.perfil.PerfilFragment;
+import com.piccolifield.ui.supervisionPdv.SupervisionFragment;
 
 public class MenuActivity extends AppCompatActivity {
 
@@ -63,7 +64,7 @@ public class MenuActivity extends AppCompatActivity {
                     break;
                 case 2:
                     // Buscar
-                    cargarFragmento(new PerfilFragment());
+                    cargarFragmento(new SupervisionFragment());
                     break;
                 case 3:
                     // Perfil

@@ -83,7 +83,7 @@
                         android:id="@+id/tvNombreVendedor"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Luis Rojas Pérez"
+                        android:text="..."
                         android:textColor="@color/color_texto"
                         android:textSize="18sp"
                         android:textStyle="bold" />
@@ -93,7 +93,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="📍 Licorería El Buen Sabor"
+                        android:text="..."
                         android:textColor="@color/chocolate"
                         android:textSize="14sp" />
                 </LinearLayout>
@@ -126,7 +126,7 @@
                     android:id="@+id/tvMontoTotal"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="S/ 580.00"
+                    android:text="..."
                     android:textColor="@color/chocolate"
                     android:textSize="28sp"
                     android:textStyle="bold"
@@ -152,7 +152,7 @@
                         android:id="@+id/tvPorcentaje"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="75%"
+                        android:text="..."
                         android:textColor="@color/chocolate"
                         android:textStyle="bold"/>
                 </LinearLayout>
@@ -164,7 +164,7 @@
                     android:layout_height="8dp"
                     android:layout_marginTop="8dp"
                     android:max="100"
-                    android:progress="75"
+                    android:progress="1"
                     android:progressTint="@color/chocolate" />
 
                 <TextView
@@ -172,7 +172,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="75 productos vendidos de 100 asignados"
+                    android:text="..."
                     android:textColor="@color/color_texto_secundario"
                     android:textSize="12sp" />
             </LinearLayout>

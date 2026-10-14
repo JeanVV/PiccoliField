@@ -2,10 +2,13 @@ package com.piccolifield.data.remote.api;
 
 import java.util.List;
 
+import com.piccolifield.data.model.AlertaDetalle;
 import com.piccolifield.data.model.AsistenciaResumen;
 import com.piccolifield.data.model.RegistroAsistencia;
+import com.piccolifield.data.model.ResumenDashboard;
 import com.piccolifield.data.model.TurnoHistorial;
 import com.piccolifield.data.model.Usuario;
+import com.piccolifield.data.model.VendedorDetalle;
 import com.piccolifield.data.remote.dto.EstadoRequest;
 import com.piccolifield.data.remote.dto.EstadoUsuarioRequest;
 import com.piccolifield.data.remote.dto.FcmTokenRequest;
@@ -17,6 +20,7 @@ import com.piccolifield.model.Pedido;
 import com.piccolifield.model.Producto;
 import com.piccolifield.model.PuntoVenta;
 import com.piccolifield.model.StockRegistro;
+import com.piccolifield.model.Vendedor;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -227,4 +231,23 @@ public interface ApiService {
 
     @GET("productos")
     Call<ApiResponse<List<Producto>>> listarProductos();
+
+    // -------------------------------------------------------------
+    // Superivisión de PDV
+    // -------------------------------------------------------------
+    @GET("supervision/resumen")
+    Call<ApiResponse<ResumenDashboard>> obtenerResumenDashboard();
+
+    @GET("supervision/vendedores")
+    Call<ApiResponse<List<Vendedor>>> listarMejoresVendedores();
+
+    @GET("supervision/vendedores/{id}")
+    Call<ApiResponse<VendedorDetalle>> obtenerDetalleVendedor(
+            @Path("id") int idUsuario
+    );
+
+    @GET("supervision/alertas/{id}")
+    Call<ApiResponse<AlertaDetalle>> obtenerDetalleAlerta(
+            @Path("id") int idAlerta
+    );
 }
