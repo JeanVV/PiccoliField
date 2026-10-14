@@ -28,9 +28,9 @@ public class CurvedBottomNavigationView extends FrameLayout {
     private static final int TAB_COUNT = 4;
     private final int[] TAB_ICONS = new int[]{
             R.drawable.ic_home,
-            R.drawable.ic_favorite,
-            R.drawable.ic_search,
-            R.drawable.ic_settings
+            R.drawable.ic_asistencias,
+            R.drawable.ic_puntos_venta,
+            R.drawable.ic_puntos_despacho
     };
 
     private Paint mPaint;

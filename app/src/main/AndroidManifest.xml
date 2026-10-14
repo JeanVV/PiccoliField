@@ -35,6 +35,43 @@
             android:name=".MenuActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".DetallePuntoVentaActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".DetallePedidoActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".SupervisionpdvActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".DetalleAlertaActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".DetalleVendedorActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".AttendanceHomeActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".AttendanceDetailActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".CollaboratorsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".MapMonitoringActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>

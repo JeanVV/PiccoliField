@@ -5,6 +5,7 @@ import android.view.ViewGroup;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
@@ -13,7 +14,7 @@ import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
 
 import com.piccolifield.databinding.ActivityMenuBinding;
-import com.piccolifield.ui.perfil.PerfilFragment;
+import com.piccolifield.ui.inicio.InicioFragment;
 
 public class MenuActivity extends AppCompatActivity {
 
@@ -26,9 +27,14 @@ public class MenuActivity extends AppCompatActivity {
         binding = ActivityMenuBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.color_fondo));
+        getWindow().setNavigationBarColor(ContextCompat.getColor(this, R.color.color_fondo));
+
         WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
-        controller.setAppearanceLightStatusBars(true);
-        controller.setAppearanceLightNavigationBars(true);
+        if (controller != null) {
+            controller.setAppearanceLightStatusBars(true);
+            controller.setAppearanceLightNavigationBars(true);
+        }
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.main, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -44,26 +50,27 @@ public class MenuActivity extends AppCompatActivity {
             return insets;
         });
 
-        // Cargar por defecto la primera pantalla (Inicio)
+        // Cargar por defecto la pantalla de Inicio
         if (savedInstanceState == null) {
-            cargarFragmento(new PerfilFragment());
+            cargarFragmento(new InicioFragment());
         }
 
         binding.curvedBottomNav.setOnTabSelectedListener(position -> {
             switch (position) {
                 case 0:
-                    // Inicio / Home
-                    cargarFragmento(new PerfilFragment());
+                    cargarFragmento(new InicioFragment());
                     break;
                 case 1:
-                    // Favoritos
+                    cargarFragmento(new com.piccolifield.ui.asistencias.AsistenciasFragment());
                     break;
                 case 2:
-                    // Buscar
+                    cargarFragmento(new com.piccolifield.ui.perfil.PerfilFragment());
                     break;
                 case 3:
-                    // Perfil
-                    cargarFragmento(new PerfilFragment());
+                    cargarFragmento(new com.piccolifield.ui.despacho.PuntosDespachoFragment());
+                    break;
+                default:
+                    cargarFragmento(new InicioFragment());
                     break;
             }
         });
