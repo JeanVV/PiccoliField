@@ -1,4 +1,4 @@
-package com.piccolifield.adapter; // Asegúrate de que el paquete sea el correcto
+package com.piccolifield.adapter;
 
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -11,14 +11,46 @@ import com.piccolifield.R;
 import com.piccolifield.data.model.RegistroAsistencia;
 import com.piccolifield.databinding.ItemCollaboratorBinding;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ColaboradorAdapter extends RecyclerView.Adapter<ColaboradorAdapter.ViewHolder> {
 
+    public interface OnItemClickListener {
+        void onItemClick(RegistroAsistencia item);
+    }
+
+    private List<RegistroAsistencia> listaOriginal;
     private List<RegistroAsistencia> lista;
+    private OnItemClickListener listener;
 
     public ColaboradorAdapter(List<RegistroAsistencia> lista) {
-        this.lista = lista;
+        this.listaOriginal = new ArrayList<>(lista != null ? lista : new ArrayList<>());
+        this.lista = new ArrayList<>(listaOriginal);
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.listener = listener;
+    }
+
+    public void filtrar(String query, String filtroEstado) {
+        lista.clear();
+        String q = query != null ? query.toLowerCase().trim() : "";
+        String estado = filtroEstado != null ? filtroEstado.toUpperCase().trim() : "";
+
+        for (RegistroAsistencia item : listaOriginal) {
+            boolean coincideNombre = q.isEmpty() ||
+                    (item.getNombreCompleto() != null && item.getNombreCompleto().toLowerCase().contains(q)) ||
+                    (item.getSede() != null && item.getSede().toLowerCase().contains(q));
+
+            boolean coincideEstado = estado.isEmpty() || "TODOS".equals(estado) ||
+                    (item.getEstado() != null && item.getEstado().equalsIgnoreCase(estado));
+
+            if (coincideNombre && coincideEstado) {
+                lista.add(item);
+            }
+        }
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -33,7 +65,7 @@ public class ColaboradorAdapter extends RecyclerView.Adapter<ColaboradorAdapter.
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         RegistroAsistencia item = lista.get(position);
-        holder.bind(item);
+        holder.bind(item, listener);
     }
 
     @Override
@@ -49,23 +81,29 @@ public class ColaboradorAdapter extends RecyclerView.Adapter<ColaboradorAdapter.
             this.binding = binding;
         }
 
-        void bind(RegistroAsistencia item) {
+        void bind(RegistroAsistencia item, OnItemClickListener listener) {
             binding.tvCollaboratorName.setText(item.getNombreCompleto());
             binding.tvCollaboratorLocation.setText(item.getSede());
 
             String hora = item.getHoraMarcado();
             if (hora != null && hora.length() >= 16) {
                 binding.tvCollaboratorTime.setText(hora.substring(11, 16));
+            } else if (hora != null) {
+                binding.tvCollaboratorTime.setText(hora);
             } else {
                 binding.tvCollaboratorTime.setText("--:--");
             }
 
-            // 🔑 Llamada al método static
             configurarBadge(binding.tvCollaboratorStatusBadge, item.getEstado());
+
+            itemView.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onItemClick(item);
+                }
+            });
         }
     }
 
-    // 🔑 AGREGA "static" AQUÍ TAMBIÉN
     private static void configurarBadge(TextView badge, String estado) {
         if (estado == null) {
             badge.setText("Desconocido");

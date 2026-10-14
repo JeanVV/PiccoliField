@@ -1,120 +1,139 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Layout de ítem para lista de Colaboradores (activity_collaborators.xml) -->
+<!-- Layout de ítem para lista de Colaboradores -->
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/cardCollaboratorItem"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="@dimen/spacing_normal"
-    android:layout_marginVertical="@dimen/spacing_micro"
-    app:cardBackgroundColor="@color/marfil_suave"
-    app:cardCornerRadius="@dimen/card_corner_radius"
-    app:cardElevation="@dimen/card_elevation"
-    app:strokeColor="@color/stroke_color"
+    android:layout_marginHorizontal="0dp"
+    android:layout_marginVertical="5dp"
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="0dp"
+    app:strokeColor="#E5D5C0"
     app:strokeWidth="1dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="@dimen/spacing_medium">
+        android:padding="14dp">
 
-        <!-- Foto circular de perfil (BD: colaborador.foto_url) -->
+        <!-- Foto circular de perfil centrada verticalmente -->
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/ivCollaboratorPhoto"
-            android:layout_width="@dimen/avatar_size_medium"
-            android:layout_height="@dimen/avatar_size_medium"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
             android:contentDescription="@string/cd_user_avatar"
             android:scaleType="centerCrop"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:shapeAppearanceOverlay="@style/ShapeAppearance.Piccoli.Circular"
+            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent"
             app:srcCompat="@drawable/ic_avatar_placeholder" />
 
-        <!-- Nombre del Colaborador (BD: colaborador.nombre) -->
-        <TextView
-            android:id="@+id/tvCollaboratorName"
+        <!-- Contenedor del texto del colaborador centrado verticalmente con la imagen -->
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/spacing_medium"
-            android:layout_marginEnd="@dimen/spacing_micro"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:textAppearance="@style/TextAppearance.Piccoli.BodyPrimary"
-            app:layout_constraintEnd_toStartOf="@+id/ivWarningIcon"
+            android:layout_marginStart="14dp"
+            android:gravity="center_vertical"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/ivCollaboratorPhoto"
-            app:layout_constraintTop_toTopOf="@+id/ivCollaboratorPhoto"
-            tools:text="Luís Rojas" />
+            app:layout_constraintTop_toTopOf="parent">
 
-        <!-- Ícono de Alerta/Advertencia opcional (BD: incidencia.requiere_atencion) -->
-        <ImageView
-            android:id="@+id/ivWarningIcon"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:layout_marginEnd="@dimen/spacing_small"
-            android:contentDescription="@null"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="@+id/tvCollaboratorName"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/tvCollaboratorName"
-            app:srcCompat="@drawable/ic_warning_alert"
-            tools:visibility="visible" />
+            <!-- Fila Superior: Nombre y Alerta -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-        <!-- Ícono de Ubicación -->
-        <ImageView
-            android:id="@+id/ivLocationIcon"
-            android:layout_width="14dp"
-            android:layout_height="14dp"
-            android:layout_marginTop="4dp"
-            android:contentDescription="@string/cd_location_icon"
-            app:layout_constraintStart_toStartOf="@+id/tvCollaboratorName"
-            app:layout_constraintTop_toBottomOf="@+id/tvCollaboratorName"
-            app:srcCompat="@drawable/ic_location_pin"
-            app:tint="@color/chocolate" />
+                <TextView
+                    android:id="@+id/tvCollaboratorName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:fontFamily="serif"
+                    android:maxLines="1"
+                    android:textColor="@color/cafe_profundo"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    tools:text="Luís Rojas" />
 
-        <!-- Ubicación asignada o Sede (BD: sede.nombre_comercial) -->
-        <TextView
-            android:id="@+id/tvCollaboratorLocation"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="@dimen/spacing_small"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:textAppearance="@style/TextAppearance.Piccoli.BodySecondary"
-            app:layout_constraintBottom_toBottomOf="@+id/ivLocationIcon"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/ivLocationIcon"
-            app:layout_constraintTop_toTopOf="@+id/ivLocationIcon"
-            tools:text="Licorería El Buen Sabor" />
+                <ImageView
+                    android:id="@+id/ivWarningIcon"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_marginStart="6dp"
+                    android:contentDescription="@null"
+                    android:visibility="gone"
+                    app:srcCompat="@drawable/ic_warning_alert"
+                    tools:visibility="visible" />
+            </LinearLayout>
 
-        <!-- Chip/Badge de Estado (BD: estado_asistencia -> A tiempo / Tardanza / Falta / Permiso) -->
-        <TextView
-            android:id="@+id/tvCollaboratorStatusBadge"
-            android:layout_width="wrap_content"
-            android:layout_height="@dimen/badge_height"
-            android:layout_marginTop="@dimen/spacing_small"
-            android:background="@drawable/bg_badge_on_time"
-            android:gravity="center"
-            android:paddingHorizontal="@dimen/spacing_medium"
-            android:textAppearance="@style/TextAppearance.Piccoli.Badge"
-            android:textColor="@color/status_on_time_text"
-            app:layout_constraintStart_toStartOf="@+id/ivLocationIcon"
-            app:layout_constraintTop_toBottomOf="@+id/tvCollaboratorLocation"
-            tools:text="A tiempo" />
+            <!-- Fila Media: Ícono de Ubicación y Nombre de Sede -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-        <!-- Hora registrada de entrada (BD: asistencia.hora_entrada) -->
-        <TextView
-            android:id="@+id/tvCollaboratorTime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/spacing_small"
-            android:textAppearance="@style/TextAppearance.Piccoli.Caption"
-            app:layout_constraintBottom_toBottomOf="@+id/tvCollaboratorStatusBadge"
-            app:layout_constraintStart_toEndOf="@+id/tvCollaboratorStatusBadge"
-            app:layout_constraintTop_toTopOf="@+id/tvCollaboratorStatusBadge"
-            tools:text="- 08:02 a.m." />
+                <ImageView
+                    android:id="@+id/ivLocationIcon"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:contentDescription="@string/cd_location_icon"
+                    app:srcCompat="@drawable/ic_location_pin"
+                    app:tint="@color/chocolate" />
+
+                <TextView
+                    android:id="@+id/tvCollaboratorLocation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="@color/chocolate"
+                    android:textSize="13sp"
+                    tools:text="Licorería El Buen Sabor" />
+            </LinearLayout>
+
+            <!-- Fila Inferior: Badge de Estado y Hora -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tvCollaboratorStatusBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="26dp"
+                    android:background="@drawable/bg_badge_on_time"
+                    android:gravity="center"
+                    android:paddingHorizontal="12dp"
+                    android:textColor="@color/status_on_time_text"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    tools:text="A tiempo" />
+
+                <TextView
+                    android:id="@+id/tvCollaboratorTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:textColor="@color/color_text_muted"
+                    android:textSize="11sp"
+                    tools:text="- 08:02 a.m." />
+            </LinearLayout>
+
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

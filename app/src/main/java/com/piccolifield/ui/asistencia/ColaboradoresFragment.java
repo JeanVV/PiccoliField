@@ -1,16 +1,20 @@
 package com.piccolifield.ui.asistencia;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.PopupMenu;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.piccolifield.R;
 import com.piccolifield.adapter.ColaboradorAdapter;
 import com.piccolifield.data.model.RegistroAsistencia;
 import com.piccolifield.data.remote.api.ApiService;
@@ -29,6 +33,8 @@ public class ColaboradoresFragment extends Fragment {
 
     private FragmentColaboradoresBinding binding;
     private ApiService apiService;
+    private ColaboradorAdapter adapter;
+    private String estadoFiltroActual = "TODOS";
 
     public ColaboradoresFragment() {
         // Required empty public constructor
@@ -52,7 +58,66 @@ public class ColaboradoresFragment extends Fragment {
 
         apiService = RetrofitClient.createService();
 
+        setupListeners();
         cargarColaboradores();
+    }
+
+    private void setupListeners() {
+        // Búsqueda en tiempo real
+        if (binding.etSearchCollaborator != null) {
+            binding.etSearchCollaborator.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    if (adapter != null) {
+                        adapter.filtrar(s.toString(), estadoFiltroActual);
+                    }
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {}
+            });
+        }
+
+        // Botón Filtros
+        View btnFiltroTarget = binding.btnFiltrosContainer != null ? binding.btnFiltrosContainer : binding.btnFilter;
+        if (btnFiltroTarget != null) {
+            btnFiltroTarget.setOnClickListener(this::mostrarPopupMenuFiltros);
+        }
+    }
+
+    private void mostrarPopupMenuFiltros(View view) {
+        PopupMenu popup = new PopupMenu(requireContext(), view);
+        popup.getMenu().add(0, 1, 0, "Todos los estados");
+        popup.getMenu().add(0, 2, 1, "A tiempo");
+        popup.getMenu().add(0, 3, 2, "Tardanza");
+        popup.getMenu().add(0, 4, 3, "Falta");
+
+        popup.setOnMenuItemClickListener(item -> {
+            switch (item.getItemId()) {
+                case 1:
+                    estadoFiltroActual = "TODOS";
+                    break;
+                case 2:
+                    estadoFiltroActual = "A_TIEMPO";
+                    break;
+                case 3:
+                    estadoFiltroActual = "TARDANZA";
+                    break;
+                case 4:
+                    estadoFiltroActual = "FALTA";
+                    break;
+            }
+
+            if (adapter != null && binding.etSearchCollaborator != null) {
+                adapter.filtrar(binding.etSearchCollaborator.getText().toString(), estadoFiltroActual);
+            }
+            return true;
+        });
+
+        popup.show();
     }
 
     private void cargarColaboradores() {
@@ -72,7 +137,16 @@ public class ColaboradoresFragment extends Fragment {
                         binding.layoutEmptyCollaboratorsState.setVisibility(View.GONE);
                         binding.rvCollaborators.setVisibility(View.VISIBLE);
                         binding.rvCollaborators.setLayoutManager(new LinearLayoutManager(getContext()));
-                        binding.rvCollaborators.setAdapter(new ColaboradorAdapter(lista));
+
+                        adapter = new ColaboradorAdapter(lista);
+                        adapter.setOnItemClickListener(item -> {
+                            DetalleAsistenciaFragment fragment = DetalleAsistenciaFragment.newInstance(item);
+                            getParentFragmentManager().beginTransaction()
+                                    .replace(R.id.fragmentContainer, fragment)
+                                    .addToBackStack(null)
+                                    .commit();
+                        });
+                        binding.rvCollaborators.setAdapter(adapter);
                     }
                 } else {
                     Log.e("ColaboradoresFragment", "Error respuesta: " + response.code());

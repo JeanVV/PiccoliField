@@ -1,34 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Layout de ítem para RecyclerView "Personal Reciente" (Inicio de Asistencias) -->
+<!-- Layout de ítem para RecyclerView "Personal Reciente" -->
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/cardRecentPersonnel"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="@dimen/spacing_normal"
-    android:layout_marginVertical="@dimen/spacing_micro"
-    app:cardBackgroundColor="@color/marfil_suave"
-    app:cardCornerRadius="@dimen/card_corner_radius"
-    app:cardElevation="@dimen/card_elevation"
-    app:strokeColor="@color/stroke_color"
+    android:layout_marginHorizontal="0dp"
+    android:layout_marginVertical="4dp"
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="0dp"
+    app:strokeColor="#E5D5C0"
     app:strokeWidth="1dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="@dimen/spacing_medium">
+        android:padding="12dp">
 
         <!-- Foto de perfil circular del colaborador (BD: colaborador.foto_url) -->
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/ivPersonnelPhoto"
-            android:layout_width="@dimen/avatar_size_medium"
-            android:layout_height="@dimen/avatar_size_medium"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:contentDescription="@string/cd_user_avatar"
             android:scaleType="centerCrop"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:shapeAppearanceOverlay="@style/ShapeAppearance.Piccoli.Circular"
+            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent"
             app:srcCompat="@drawable/ic_avatar_placeholder" />
 
         <!-- Nombre completo del colaborador (BD: colaborador.nombre_completo) -->
@@ -36,11 +36,14 @@
             android:id="@+id/tvPersonnelName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/spacing_medium"
-            android:layout_marginEnd="@dimen/spacing_small"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="8dp"
             android:ellipsize="end"
+            android:fontFamily="serif"
             android:maxLines="1"
-            android:textAppearance="@style/TextAppearance.Piccoli.BodyPrimary"
+            android:textColor="@color/cafe_profundo"
+            android:textSize="15sp"
+            android:textStyle="bold"
             app:layout_constraintEnd_toStartOf="@+id/tvPersonnelTime"
             app:layout_constraintStart_toEndOf="@+id/ivPersonnelPhoto"
             app:layout_constraintTop_toTopOf="@+id/ivPersonnelPhoto"
@@ -64,10 +67,11 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
-            android:layout_marginEnd="@dimen/spacing_small"
+            android:layout_marginEnd="8dp"
             android:ellipsize="end"
             android:maxLines="1"
-            android:textAppearance="@style/TextAppearance.Piccoli.BodySecondary"
+            android:textColor="@color/chocolate"
+            android:textSize="13sp"
             app:layout_constraintBottom_toBottomOf="@+id/ivLocationIcon"
             app:layout_constraintEnd_toStartOf="@+id/tvPersonnelStatusBadge"
             app:layout_constraintStart_toEndOf="@+id/ivLocationIcon"
@@ -79,22 +83,24 @@
             android:id="@+id/tvPersonnelTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.Piccoli.Caption"
+            android:textColor="@color/color_text_muted"
+            android:textSize="11sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/tvPersonnelName"
             tools:text="08:02 a.m." />
 
-        <!-- Badge con el Estado (BD: asistencia.estado_codigo -> "A tiempo" / "Tarde") -->
+        <!-- Badge con el Estado -->
         <TextView
             android:id="@+id/tvPersonnelStatusBadge"
             android:layout_width="wrap_content"
-            android:layout_height="@dimen/badge_height"
+            android:layout_height="26dp"
             android:layout_marginTop="4dp"
             android:background="@drawable/bg_badge_on_time"
             android:gravity="center"
-            android:paddingHorizontal="@dimen/spacing_medium"
-            android:textAppearance="@style/TextAppearance.Piccoli.Badge"
+            android:paddingHorizontal="12dp"
             android:textColor="@color/status_on_time_text"
+            android:textSize="11sp"
+            android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvPersonnelTime"
