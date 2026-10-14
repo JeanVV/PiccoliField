@@ -41,32 +41,32 @@ public class AsistenciaHomeFragment extends Fragment {
         // Listeners de búsqueda y notificación
         if (binding.btnFilter != null) {
             binding.btnFilter.setOnClickListener(v ->
-                Toast.makeText(getContext(), "Filtrar resultados", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(getContext(), "Filtrar resultados", Toast.LENGTH_SHORT).show()
             );
         }
 
         if (binding.btnNotification != null) {
             binding.btnNotification.setOnClickListener(v ->
-                Toast.makeText(getContext(), "Notificaciones de asistencias", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(getContext(), "Notificaciones de asistencias", Toast.LENGTH_SHORT).show()
             );
         }
 
         // Navegación interna entre Fragments
         if (binding.cardGoToMap != null) {
             binding.cardGoToMap.setOnClickListener(v ->
-                getParentFragmentManager().beginTransaction()
-                    .replace(R.id.fragmentContainer, new MapaFragment())
-                    .addToBackStack(null)
-                    .commit()
+                    getParentFragmentManager().beginTransaction()
+                            .replace(R.id.fragmentContainer, new MapaFragment())
+                            .addToBackStack(null)
+                            .commit()
             );
         }
 
         if (binding.cardGoToCollaborators != null) {
             binding.cardGoToCollaborators.setOnClickListener(v ->
-                getParentFragmentManager().beginTransaction()
-                    .replace(R.id.fragmentContainer, new ColaboradoresFragment())
-                    .addToBackStack(null)
-                    .commit()
+                    getParentFragmentManager().beginTransaction()
+                            .replace(R.id.fragmentContainer, new ColaboradoresFragment())
+                            .addToBackStack(null)
+                            .commit()
             );
         }
     }
