@@ -2,6 +2,9 @@ package com.piccolifield.data.remote.api;
 
 import java.util.List;
 
+import com.piccolifield.data.model.AsistenciaResumen;
+import com.piccolifield.data.model.RegistroAsistencia;
+import com.piccolifield.data.model.TurnoHistorial;
 import com.piccolifield.data.model.Usuario;
 import com.piccolifield.data.remote.dto.EstadoRequest;
 import com.piccolifield.data.remote.dto.EstadoUsuarioRequest;
@@ -202,11 +205,22 @@ public interface ApiService {
     // -------------------------------------------------------------
     // ASISTENCIAS Y STOCK (Módulos adicionales)
     // -------------------------------------------------------------
-    @POST("asistencias")
-    Call<ApiResponse<Asistencia>> registrarAsistencia(@Body Asistencia asistencia);
 
-    @GET("asistencias/usuario/{idUsuario}")
-    Call<ApiResponse<List<Asistencia>>> listarAsistenciasUsuario(@Path("idUsuario") int idUsuario);
+    // ASISTENCIAS
+    @GET("asistencias/resumen")
+    Call<ApiResponse<AsistenciaResumen>> obtenerResumenAsistencias();
+
+    @GET("asistencias/recientes")
+    Call<ApiResponse<List<RegistroAsistencia>>> obtenerPersonalReciente();
+
+    @GET("asistencias/colaboradores")
+    Call<ApiResponse<List<RegistroAsistencia>>> obtenerColaboradoresConAsistencia();
+
+    @GET("asistencias/detalle/{idUsuario}")
+    Call<ApiResponse<RegistroAsistencia>> obtenerDetalleAsistencia(@Path("idUsuario") int idUsuario);
+
+    @GET("asistencias/historial/{idUsuario}")
+    Call<ApiResponse<List<TurnoHistorial>>> obtenerHistorialTurnos(@Path("idUsuario") int idUsuario);
 
     @GET("stock/punto/{idPuntosVenta}")
     Call<ApiResponse<List<StockRegistro>>> obtenerStockPuntoVenta(@Path("idPuntosVenta") int idPuntosVenta);
