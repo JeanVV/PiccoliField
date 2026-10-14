@@ -2,7 +2,6 @@ package com.piccolifield;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,7 +13,7 @@ import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.piccolifield.databinding.ActivityMapMonitoringBinding;
 
-public class MapMonitoringActivity extends AppCompatActivity {
+public class MonitoreoMapaActivity extends AppCompatActivity {
 
     private ActivityMapMonitoringBinding binding;
 
@@ -45,24 +44,21 @@ public class MapMonitoringActivity extends AppCompatActivity {
         binding.bottomNavigation.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
             if (itemId == R.id.nav_home) {
-                startActivity(new Intent(this, AttendanceHomeActivity.class));
+                startActivity(new Intent(this, AsistenciaInicioActivity.class));
                 finish();
                 return true;
             } else if (itemId == R.id.nav_map) {
                 return true;
             } else if (itemId == R.id.nav_collaborators) {
-                startActivity(new Intent(this, CollaboratorsActivity.class));
+                startActivity(new Intent(this, TrabajadoresAsistenciaActivity.class));
                 finish();
-                return true;
-            } else if (itemId == R.id.nav_reports) {
-                Toast.makeText(this, "Reportes", Toast.LENGTH_SHORT).show();
                 return true;
             }
             return false;
         });
 
         binding.btnViewDetails.setOnClickListener(v -> 
-            startActivity(new Intent(this, AttendanceDetailActivity.class))
+            startActivity(new Intent(this, DetalleAsistenciaActivity.class))
         );
     }
 

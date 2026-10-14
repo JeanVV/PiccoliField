@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.piccolifield.databinding.ActivityAttendanceHomeBinding;
 
-public class AttendanceHomeActivity extends AppCompatActivity {
+public class AsistenciaInicioActivity extends AppCompatActivity {
 
     private ActivityAttendanceHomeBinding binding;
 
@@ -63,6 +63,21 @@ public class AttendanceHomeActivity extends AppCompatActivity {
             );
         }
 
+        // Navegación mediante Cards de Acceso Rápido (Llama a finish() para no acumular en el stack)
+        if (binding.cardGoToMap != null) {
+            binding.cardGoToMap.setOnClickListener(v -> {
+                startActivity(new Intent(this, MonitoreoMapaActivity.class));
+                finish();
+            });
+        }
+
+        if (binding.cardGoToCollaborators != null) {
+            binding.cardGoToCollaborators.setOnClickListener(v -> {
+                startActivity(new Intent(this, TrabajadoresAsistenciaActivity.class));
+                finish();
+            });
+        }
+
         // Configuración de la Barra de Navegación Inferior (BottomNavigationView)
         if (binding.bottomNavigation != null) {
             binding.bottomNavigation.setSelectedItemId(R.id.nav_home);
@@ -71,13 +86,12 @@ public class AttendanceHomeActivity extends AppCompatActivity {
                 if (itemId == R.id.nav_home) {
                     return true;
                 } else if (itemId == R.id.nav_map) {
-                    startActivity(new Intent(this, MapMonitoringActivity.class));
+                    startActivity(new Intent(this, MonitoreoMapaActivity.class));
+                    finish();
                     return true;
                 } else if (itemId == R.id.nav_collaborators) {
-                    startActivity(new Intent(this, CollaboratorsActivity.class));
-                    return true;
-                } else if (itemId == R.id.nav_reports) {
-                    Toast.makeText(this, "Reportes de Asistencia", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(this, TrabajadoresAsistenciaActivity.class));
+                    finish();
                     return true;
                 }
                 return false;

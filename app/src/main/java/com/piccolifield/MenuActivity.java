@@ -1,5 +1,6 @@
 package com.piccolifield;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
@@ -26,8 +27,10 @@ public class MenuActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
-        controller.setAppearanceLightStatusBars(true);
-        controller.setAppearanceLightNavigationBars(true);
+        if (controller != null) {
+            controller.setAppearanceLightStatusBars(true);
+            controller.setAppearanceLightNavigationBars(true);
+        }
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.main, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -48,8 +51,8 @@ public class MenuActivity extends AppCompatActivity {
                     cargarFragmento(new PerfilFragment());
                     break;
                 case 1:
-                    // Favoritos
-                    cargarFragmento(new PerfilFragment());
+                    // Conexión con el Módulo Asistencia
+                    startActivity(new Intent(MenuActivity.this, AsistenciaInicioActivity.class));
                     break;
                 case 2:
                     // Buscar

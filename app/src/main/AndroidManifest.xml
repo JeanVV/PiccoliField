@@ -32,19 +32,19 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".AttendanceHomeActivity"
+            android:name=".AsistenciaInicioActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".MapMonitoringActivity"
+            android:name=".MonitoreoMapaActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".AttendanceDetailActivity"
+            android:name=".DetalleAsistenciaActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".CollaboratorsActivity"
+            android:name=".TrabajadoresAsistenciaActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity

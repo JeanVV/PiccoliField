@@ -1,5 +1,6 @@
 package com.piccolifield;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
@@ -10,17 +11,17 @@ import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 
-import com.piccolifield.databinding.ActivityAttendanceDetailBinding;
+import com.piccolifield.databinding.ActivityCollaboratorsBinding;
 
-public class AttendanceDetailActivity extends AppCompatActivity {
+public class TrabajadoresAsistenciaActivity extends AppCompatActivity {
 
-    private ActivityAttendanceDetailBinding binding;
+    private ActivityCollaboratorsBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        binding = ActivityAttendanceDetailBinding.inflate(getLayoutInflater());
+        binding = ActivityCollaboratorsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
@@ -29,13 +30,32 @@ public class AttendanceDetailActivity extends AppCompatActivity {
             controller.setAppearanceLightNavigationBars(true);
         }
 
-        ViewCompat.setOnApplyWindowInsetsListener(binding.attendanceDetailRootLayout, (v, insets) -> {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.collaboratorsRootLayout, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0);
             return insets;
         });
 
-        binding.btnBack.setOnClickListener(v -> finish());
+        setupUI();
+    }
+
+    private void setupUI() {
+        binding.bottomNavigation.setSelectedItemId(R.id.nav_collaborators);
+        binding.bottomNavigation.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+            if (itemId == R.id.nav_home) {
+                startActivity(new Intent(this, AsistenciaInicioActivity.class));
+                finish();
+                return true;
+            } else if (itemId == R.id.nav_map) {
+                startActivity(new Intent(this, MonitoreoMapaActivity.class));
+                finish();
+                return true;
+            } else if (itemId == R.id.nav_collaborators) {
+                return true;
+            }
+            return false;
+        });
     }
 
     @Override
