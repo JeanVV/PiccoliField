@@ -1,7 +1,7 @@
 package com.piccolifield;
 
 import android.os.Bundle;
-import android.widget.Toast;
+import android.view.ViewGroup;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,7 +13,6 @@ import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
 
 import com.piccolifield.databinding.ActivityMenuBinding;
-import com.piccolifield.ui.asistencia.AsistenciaHomeFragment;
 import com.piccolifield.ui.perfil.PerfilFragment;
 
 public class MenuActivity extends AppCompatActivity {
@@ -28,15 +27,20 @@ public class MenuActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
-        if (controller != null) {
-            controller.setAppearanceLightStatusBars(true);
-            controller.setAppearanceLightNavigationBars(true);
-        }
+        controller.setAppearanceLightStatusBars(true);
+        controller.setAppearanceLightNavigationBars(true);
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.main, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             binding.fragmentContainer.setPadding(systemBars.left, systemBars.top, systemBars.right, 0);
-            binding.curvedBottomNav.setPadding(0, 0, 0, systemBars.bottom);
+
+            // Elevar la barra de navegación curva por encima de los botones/gestos del celular
+            if (binding.curvedBottomNav.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) binding.curvedBottomNav.getLayoutParams();
+                params.bottomMargin = systemBars.bottom + 12;
+                binding.curvedBottomNav.setLayoutParams(params);
+            }
+
             return insets;
         });
 
@@ -48,20 +52,18 @@ public class MenuActivity extends AppCompatActivity {
         binding.curvedBottomNav.setOnTabSelectedListener(position -> {
             switch (position) {
                 case 0:
-                    // Inicio
+                    // Inicio / Home
                     cargarFragmento(new PerfilFragment());
                     break;
                 case 1:
-                    // Módulo Asistencia
-                    cargarFragmento(new AsistenciaHomeFragment());
+                    // Favoritos
                     break;
                 case 2:
-                    // Módulo en desarrollo
-                    Toast.makeText(this, "Módulo en desarrollo", Toast.LENGTH_SHORT).show();
+                    // Buscar
                     break;
                 case 3:
-                    // Módulo en desarrollo
-                    Toast.makeText(this, "Módulo en desarrollo", Toast.LENGTH_SHORT).show();
+                    // Perfil
+                    cargarFragmento(new PerfilFragment());
                     break;
             }
         });

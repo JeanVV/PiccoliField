@@ -4,65 +4,115 @@ import com.google.gson.annotations.SerializedName;
 
 public class Usuario {
 
-    @SerializedName(value = "usuarioId", alternate = {"idUsuario", "id_usuario", "id"})
-    private int usuarioId;
+    @SerializedName(value = "idUsuario", alternate = {"usuarioId", "id_usuario", "id"})
+    private int idUsuario;
 
-    @SerializedName(value = "nombres", alternate = {"nombre", "first_name"})
+    @SerializedName(value = "nombres", alternate = {"nombre"})
     private String nombres;
 
-    @SerializedName(value = "apellidos", alternate = {"apellido", "last_name"})
-    private String apellidos;
+    @SerializedName("apePaterno")
+    private String apePaterno;
 
-    @SerializedName(value = "email", alternate = {"correo", "usuario"})
-    private String email;
+    @SerializedName("apeMaterno")
+    private String apeMaterno;
 
-    @SerializedName("rol")
+    @SerializedName(value = "correo", alternate = {"email"})
+    private String correo;
+
+    @SerializedName("foto_perfil")
+    private String fotoPerfil;
+
+    @SerializedName("rol") // ENUM('ADMINISTRADOR', 'PROMOTOR', 'IMPULSADOR')
     private String rol;
 
-    @SerializedName("estado")
+    @SerializedName("estado") // ENUM('ACTIVO', 'INACTIVO')
     private String estado;
+
+    @SerializedName("idDistrito")
+    private int idDistrito;
+
+    @SerializedName("idSede")
+    private int idSede;
 
     public Usuario() {}
 
-    public Usuario(int usuarioId, String nombres, String apellidos, String email, String rol, String estado) {
-        this.usuarioId = usuarioId;
+    public Usuario(int idUsuario, String nombres, String apePaterno, String apeMaterno, String correo, String rol, String estado) {
+        this.idUsuario = idUsuario;
         this.nombres = nombres;
-        this.apellidos = apellidos;
-        this.email = email;
+        this.apePaterno = apePaterno;
+        this.apeMaterno = apeMaterno;
+        this.correo = correo;
         this.rol = rol;
         this.estado = estado;
     }
 
-    public int getUsuarioId() {
-        return usuarioId;
+    public int getIdUsuario() {
+        return idUsuario;
     }
 
-    public void setUsuarioId(int usuarioId) {
-        this.usuarioId = usuarioId;
+    public void setIdUsuario(int idUsuario) {
+        this.idUsuario = idUsuario;
+    }
+
+    public int getUsuarioId() {
+        return idUsuario;
     }
 
     public String getNombres() {
-        return nombres;
+        return nombres != null ? nombres : "";
     }
 
     public void setNombres(String nombres) {
         this.nombres = nombres;
     }
 
-    public String getApellidos() {
-        return apellidos;
+    public String getApePaterno() {
+        return apePaterno != null ? apePaterno : "";
     }
 
-    public void setApellidos(String apellidos) {
-        this.apellidos = apellidos;
+    public void setApePaterno(String apePaterno) {
+        this.apePaterno = apePaterno;
+    }
+
+    public String getApeMaterno() {
+        return apeMaterno != null ? apeMaterno : "";
+    }
+
+    public void setApeMaterno(String apeMaterno) {
+        this.apeMaterno = apeMaterno;
+    }
+
+    public String getApellidos() {
+        String ap = ((apePaterno != null ? apePaterno : "") + " " + (apeMaterno != null ? apeMaterno : "")).trim();
+        return ap;
+    }
+
+    public String getNombreCompleto() {
+        return (getNombres() + " " + getApellidos()).trim();
     }
 
     public String getEmail() {
-        return email;
+        return correo;
+    }
+
+    public String getCorreo() {
+        return correo;
+    }
+
+    public void setCorreo(String correo) {
+        this.correo = correo;
     }
 
     public void setEmail(String email) {
-        this.email = email;
+        this.correo = email;
+    }
+
+    public String getFotoPerfil() {
+        return fotoPerfil;
+    }
+
+    public void setFotoPerfil(String fotoPerfil) {
+        this.fotoPerfil = fotoPerfil;
     }
 
     public String getRol() {
@@ -79,5 +129,21 @@ public class Usuario {
 
     public void setEstado(String estado) {
         this.estado = estado;
+    }
+
+    public int getIdDistrito() {
+        return idDistrito;
+    }
+
+    public void setIdDistrito(int idDistrito) {
+        this.idDistrito = idDistrito;
+    }
+
+    public int getIdSede() {
+        return idSede;
+    }
+
+    public void setIdSede(int idSede) {
+        this.idSede = idSede;
     }
 }

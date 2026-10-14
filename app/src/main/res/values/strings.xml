@@ -14,6 +14,14 @@
     <string name="no_tienes_cuenta">¿No tienes una cuenta? </string>
     <string name="registrate">Regístrate</string>
 
+    <!-- Puntos de Despacho / Distribución -->
+    <string name="puntos_distribucion">Puntos de\ndistribución</string>
+    <string name="puntos_distribucion_sub">Gestiona y supervisa los puntos de venta de Piccoli Cocktail.</string>
+    <string name="hint_buscar_puntos">Buscar por ciudad, zona o tienda...</string>
+    <string name="total_puntos">Total de puntos</string>
+    <string name="ciudades">Ciudades</string>
+    <string name="activos">Activos</string>
+
     <!-- Nuevos Strings para Módulos de Asistencias -->
     <string name="title_inicio_asistencias">Inicio de Asistencias</string>
     <string name="title_monitoreo_mapa">Monitoreo en Mapa</string>
