@@ -2,6 +2,9 @@ package com.piccolifield.data.remote.api;
 
 import java.util.List;
 
+import com.piccolifield.data.model.AsistenciaResumen;
+import com.piccolifield.data.model.RegistroAsistencia;
+import com.piccolifield.data.model.TurnoHistorial;
 import com.piccolifield.data.model.Usuario;
 import com.piccolifield.data.remote.dto.request.LoginRequest;
 import com.piccolifield.data.remote.dto.response.ApiResponse;
@@ -49,4 +52,20 @@ public interface ApiService {
             @Path("idUsuario") int idUsuario,
             @Body EstadoUsuarioRequest request
     );
+
+    // ASISTENCIAS
+    @GET("asistencias/resumen")
+    Call<ApiResponse<AsistenciaResumen>> obtenerResumenAsistencias();
+
+    @GET("asistencias/recientes")
+    Call<ApiResponse<List<RegistroAsistencia>>> obtenerPersonalReciente();
+
+    @GET("asistencias/colaboradores")
+    Call<ApiResponse<List<RegistroAsistencia>>> obtenerColaboradoresConAsistencia();
+
+    @GET("asistencias/detalle/{idUsuario}")
+    Call<ApiResponse<RegistroAsistencia>> obtenerDetalleAsistencia(@Path("idUsuario") int idUsuario);
+
+    @GET("asistencias/historial/{idUsuario}")
+    Call<ApiResponse<List<TurnoHistorial>>> obtenerHistorialTurnos(@Path("idUsuario") int idUsuario);
 }

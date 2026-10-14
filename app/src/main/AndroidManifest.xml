@@ -12,6 +12,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PiccoliField">
 
+        <!-- Clave de API de Google Maps -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="YOUR_MAPS_API_KEY_HERE" />
+
         <!-- MainActivity vuelve a ser tu pantalla de inicio -->
         <activity
             android:name=".MainActivity"

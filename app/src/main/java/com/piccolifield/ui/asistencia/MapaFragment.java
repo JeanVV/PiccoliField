@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.gms.maps.SupportMapFragment;
 import com.piccolifield.R;
 import com.piccolifield.databinding.FragmentMapaBinding;
 
@@ -30,6 +31,21 @@ public class MapaFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // Inicializar SupportMapFragment como fragmento hijo de forma segura
+        try {
+            SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager()
+                    .findFragmentById(R.id.mapContainer);
+
+            if (mapFragment == null) {
+                mapFragment = SupportMapFragment.newInstance();
+                getChildFragmentManager().beginTransaction()
+                        .replace(R.id.mapContainer, mapFragment)
+                        .commit();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         if (binding.btnViewDetails != null) {
             binding.btnViewDetails.setOnClickListener(v ->
