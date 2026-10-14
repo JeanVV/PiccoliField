@@ -2,7 +2,6 @@ package com.piccolifield.ui.perfil;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -62,9 +61,10 @@ public class PerfilFragment extends Fragment {
 
                 if (response.isSuccessful() && response.body() != null) {
                     ApiResponse<Usuario> apiResponse = response.body();
-                    Usuario usuario = apiResponse.getData();
 
-                    if (usuario != null) {
+                    if (apiResponse.getData() != null) {
+                        Usuario usuario = apiResponse.getData();
+
                         String nombres = usuario.getNombres() != null ? usuario.getNombres() : "";
                         String apellidos = usuario.getApellidos() != null ? usuario.getApellidos() : "";
                         String nombreCompleto = (nombres + " " + apellidos).trim();
@@ -74,12 +74,11 @@ public class PerfilFragment extends Fragment {
                         binding.tvRol.setText("Rol: " + (usuario.getRol() != null ? usuario.getRol() : "CLIENTE"));
                         binding.tvEstado.setText("Estado: " + (usuario.getEstado() != null ? usuario.getEstado() : "ACTIVO"));
                     } else {
-                        String msg = apiResponse.getMessage() != null ? apiResponse.getMessage() : "Error al obtener perfil";
+                        String msg = apiResponse.getMessage() != null ? apiResponse.getMessage() : "No se encontraron datos";
                         Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Log.e("PerfilFragment", "Error HTTP: " + response.code());
-                    Toast.makeText(getContext(), "No se pudo cargar el perfil (" + response.code() + ")", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Error al cargar perfil (" + response.code() + ")", Toast.LENGTH_SHORT).show();
                 }
             }
 

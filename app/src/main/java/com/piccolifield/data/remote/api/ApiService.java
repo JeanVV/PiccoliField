@@ -7,7 +7,6 @@ import com.piccolifield.data.remote.dto.request.LoginRequest;
 import com.piccolifield.data.remote.dto.response.ApiResponse;
 import com.piccolifield.data.remote.dto.EstadoUsuarioRequest;
 import com.piccolifield.data.remote.dto.FcmTokenRequest;
-import com.piccolifield.data.remote.dto.response.LoginResponse;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -21,9 +20,9 @@ import retrofit2.http.Query;
 
 public interface ApiService {
 
-    // Endpoint para autenticar usuario contra la BD
+    // Endpoint para autenticar usuario contra la BD (regresa JSON dinámico)
     @POST("auth/login")
-    Call<ApiResponse<LoginResponse>> iniciarSesion(@Body LoginRequest request);
+    Call<ResponseBody> iniciarSesion(@Body LoginRequest request);
 
     // 1. Obtener perfil del usuario autenticado
     @GET("perfil")

@@ -16,15 +16,11 @@ public class LoginRequest {
     @SerializedName("password")
     private String password;
 
-    @SerializedName("contrasena")
-    private String contrasena;
-
     public LoginRequest(String email, String password) {
         this.email = email;
         this.correo = email;
         this.usuario = email;
         this.password = password;
-        this.contrasena = password;
     }
 
     public String getEmail() {
