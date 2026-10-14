@@ -4,13 +4,22 @@ import com.google.gson.annotations.SerializedName;
 
 public class Usuario {
 
-    @SerializedName("usuarioId")
+    @SerializedName(value = "usuarioId", alternate = {"idUsuario", "id_usuario", "id"})
     private int usuarioId;
 
+    @SerializedName(value = "nombres", alternate = {"nombre", "first_name"})
     private String nombres;
+
+    @SerializedName(value = "apellidos", alternate = {"apellido", "last_name"})
     private String apellidos;
+
+    @SerializedName(value = "email", alternate = {"correo", "usuario"})
     private String email;
+
+    @SerializedName("rol")
     private String rol;
+
+    @SerializedName("estado")
     private String estado;
 
     public Usuario() {}

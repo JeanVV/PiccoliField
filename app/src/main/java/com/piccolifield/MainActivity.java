@@ -19,6 +19,7 @@ import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 
+import com.piccolifield.data.remote.dto.RetrofitClient;
 import com.piccolifield.databinding.ActivityMainBinding;
 import com.piccolifield.sharedpreferences.SplashStorage;
 
@@ -68,6 +69,10 @@ public class MainActivity extends AppCompatActivity {
 
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
                 boolean sesionActiva = SplashStorage.consultarSesionActiva(MainActivity.this);
+                if (sesionActiva) {
+                    // Cargar el token guardado en RetrofitClient
+                    RetrofitClient.API_TOKEN = SplashStorage.obtenerToken(MainActivity.this);
+                }
                 Intent intent = new Intent(MainActivity.this, sesionActiva ? MenuActivity.class : LoginActivity.class);
                 startActivity(intent);
                 finish();

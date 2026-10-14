@@ -70,7 +70,7 @@ public class CurvedBottomNavigationView extends FrameLayout {
 
         mCurveWidth = dpToPx(110);
         mCurveDepth = dpToPx(28);
-        mBarTopY = dpToPx(20);
+        mBarTopY = dpToPx(18);
 
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mPaint.setStyle(Paint.Style.FILL);
@@ -158,7 +158,7 @@ public class CurvedBottomNavigationView extends FrameLayout {
             if (circleRadius == 0) circleRadius = dpToPx(26);
 
             float targetX = mCurveCenterX - circleRadius;
-            float targetY = mBarTopY + (mCurveDepth / 2f) - circleRadius + dpToPx(2);
+            float targetY = mBarTopY + (mCurveDepth / 2f) - circleRadius + dpToPx(1);
 
             mActiveCircleView.setX(targetX);
             mActiveCircleView.setY(targetY);

@@ -1,6 +1,7 @@
 package com.piccolifield;
 
 import android.os.Bundle;
+import android.view.ViewGroup;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,7 +33,14 @@ public class MenuActivity extends AppCompatActivity {
         ViewCompat.setOnApplyWindowInsetsListener(binding.main, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             binding.fragmentContainer.setPadding(systemBars.left, systemBars.top, systemBars.right, 0);
-            binding.curvedBottomNav.setPadding(0, 0, 0, systemBars.bottom);
+
+            // Elevar la barra de navegación curva por encima de los botones/gestos del celular
+            if (binding.curvedBottomNav.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) binding.curvedBottomNav.getLayoutParams();
+                params.bottomMargin = systemBars.bottom + 12;
+                binding.curvedBottomNav.setLayoutParams(params);
+            }
+
             return insets;
         });
 
@@ -44,16 +52,14 @@ public class MenuActivity extends AppCompatActivity {
         binding.curvedBottomNav.setOnTabSelectedListener(position -> {
             switch (position) {
                 case 0:
-                    // Inicio
+                    // Inicio / Home
                     cargarFragmento(new PerfilFragment());
                     break;
                 case 1:
                     // Favoritos
-                    cargarFragmento(new PerfilFragment());
                     break;
                 case 2:
                     // Buscar
-                    cargarFragmento(new PerfilFragment());
                     break;
                 case 3:
                     // Perfil

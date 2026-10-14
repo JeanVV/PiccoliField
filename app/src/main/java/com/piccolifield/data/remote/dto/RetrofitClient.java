@@ -11,15 +11,14 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
-    public static final String URL_API_SERVICE = "http://127.0.0.1:5000";
+    public static final String URL_API_SERVICE = "https://piccolifield-api.onrender.com/api/";
     public static String API_TOKEN;
 
     private static class AuthInterceptor implements Interceptor {
         @Override
         public Response intercept(Chain chain) throws IOException {
             Request original = chain.request();
-            Request.Builder requestBuilder = original.newBuilder()
-                    .header("Content-Type", "application/json");
+            Request.Builder requestBuilder = original.newBuilder().header("Content-Type", "application/json");
 
             String token = API_TOKEN;
             if (token != null && !token.isEmpty()) {
@@ -31,8 +30,7 @@ public class RetrofitClient {
         }
     }
 
-    private static OkHttpClient.Builder httpClient = new OkHttpClient.Builder()
-            .addInterceptor(new AuthInterceptor());
+    private static OkHttpClient.Builder httpClient = new OkHttpClient.Builder().addInterceptor(new AuthInterceptor());
 
     public static Retrofit API_SERVICE = new Retrofit.Builder()
             .baseUrl(URL_API_SERVICE)
