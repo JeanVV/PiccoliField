@@ -2,6 +2,7 @@ package com.piccolifield;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,6 +26,8 @@ public class DetallePuntoVentaActivity extends AppCompatActivity {
 
     private int idPuntoVenta;
     private String nombrePuntoVenta;
+    private String numeroPedido = "0245";
+    private String estadoDespacho = "En preparación";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,25 +66,62 @@ public class DetallePuntoVentaActivity extends AppCompatActivity {
         if (getIntent() != null) {
             idPuntoVenta = getIntent().getIntExtra("ID_PDV", -1);
             nombrePuntoVenta = getIntent().getStringExtra("NOMBRE_PDV");
+            String direccion = getIntent().getStringExtra("DIRECCION");
+            String distancia = getIntent().getStringExtra("DISTANCIA");
+            String numPed = getIntent().getStringExtra("NUMERO_PEDIDO");
+            String estadoDisp = getIntent().getStringExtra("ESTADO_DESPACHO");
+            String badgeNum = getIntent().getStringExtra("BADGE_NUMERO");
 
             if (nombrePuntoVenta != null && !nombrePuntoVenta.isEmpty()) {
                 tvNombreTienda.setText(nombrePuntoVenta);
+            }
+            if (badgeNum != null && !badgeNum.isEmpty() && tvBadgeNumero != null) {
+                tvBadgeNumero.setText(badgeNum);
+            }
+            if (direccion != null && !direccion.isEmpty() && tvDireccionVal != null) {
+                tvDireccionVal.setText(direccion);
+            }
+            if (distancia != null && !distancia.isEmpty() && tvDistanciaVal != null) {
+                tvDistanciaVal.setText(distancia);
+            }
+            if (numPed != null && !numPed.isEmpty()) {
+                numeroPedido = numPed;
+                if (tvPedidoNumVal != null) {
+                    tvPedidoNumVal.setText(numPed);
+                }
+            }
+            if (estadoDisp != null && !estadoDisp.isEmpty()) {
+                estadoDespacho = estadoDisp;
+                if (tvEstadoBadge != null) {
+                    tvEstadoBadge.setText(estadoDisp);
+                }
             }
         }
 
         // 3. Listener del botón atrás
         btnBack.setOnClickListener(v -> finish());
 
-        // 4. Listener Ver Todos -> Abre Detalle del Pedido
-        if (btnVerTodosProductos != null) {
-            btnVerTodosProductos.setOnClickListener(v -> {
-                Intent intent = new Intent(this, DetallePedidoActivity.class);
-                intent.putExtra("ID_PEDIDO", 1);
-                intent.putExtra("NOMBRE_TIENDA", tvNombreTienda.getText().toString());
-                intent.putExtra("NUMERO_PEDIDO", "0245");
-                intent.putExtra("ESTADO_PEDIDO", "En preparación");
+        // 4. Listener Ver Todos / Productos -> Abre Detalle del Pedido
+        View.OnClickListener abrirDetallePedido = v -> {
+            try {
+                Intent intent = new Intent(DetallePuntoVentaActivity.this, DetallePedidoActivity.class);
+                intent.putExtra("ID_PEDIDO", idPuntoVenta);
+                intent.putExtra("NOMBRE_TIENDA", tvNombreTienda != null ? tvNombreTienda.getText().toString() : "Licorería El Buen Sabor");
+                intent.putExtra("NUMERO_PEDIDO", numeroPedido);
+                intent.putExtra("ESTADO_PEDIDO", estadoDespacho);
                 startActivity(intent);
-            });
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        };
+
+        if (btnVerTodosProductos != null) {
+            btnVerTodosProductos.setOnClickListener(abrirDetallePedido);
+        }
+
+        View layoutProductosHeader = findViewById(R.id.layoutProductosHeader);
+        if (layoutProductosHeader != null) {
+            layoutProductosHeader.setOnClickListener(abrirDetallePedido);
         }
 
         // 5. Listener Ver Ruta de Entrega

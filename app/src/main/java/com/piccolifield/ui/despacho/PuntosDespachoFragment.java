@@ -62,7 +62,18 @@ public class PuntosDespachoFragment extends Fragment {
 
     private void setupRecyclerView() {
         binding.rvListaPuntos.setLayoutManager(new LinearLayoutManager(requireContext()));
-        adapter = new PuntoVentaAdapter(listaPuntosFiltrada, requireContext());
+        adapter = new PuntoVentaAdapter(listaPuntosFiltrada, requireActivity(), pdv -> {
+            if (pdv == null) return;
+            Intent intent = new Intent(requireActivity(), DetallePuntoVentaActivity.class);
+            intent.putExtra("ID_PDV", pdv.getId());
+            intent.putExtra("NOMBRE_PDV", pdv.getNombre());
+            intent.putExtra("DIRECCION", pdv.getDireccion());
+            intent.putExtra("DISTANCIA", pdv.getDistancia());
+            intent.putExtra("NUMERO_PEDIDO", pdv.getNumeroPedido());
+            intent.putExtra("ESTADO_DESPACHO", pdv.getEstadoDespacho());
+            intent.putExtra("BADGE_NUMERO", pdv.getBadgeNumero());
+            startActivity(intent);
+        });
         binding.rvListaPuntos.setAdapter(adapter);
     }
 
@@ -156,7 +167,7 @@ public class PuntosDespachoFragment extends Fragment {
 
     private void setupListeners() {
         binding.cardTooltipStore.setOnClickListener(v -> {
-            Intent intent = new Intent(requireContext(), DetallePuntoVentaActivity.class);
+            Intent intent = new Intent(requireActivity(), DetallePuntoVentaActivity.class);
             intent.putExtra("ID_PDV", 1);
             intent.putExtra("NOMBRE_PDV", "Licorería El Buen Sabor");
             startActivity(intent);
