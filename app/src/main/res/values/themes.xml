@@ -6,4 +6,8 @@
     </style>
 
     <style name="Theme.PiccoliField" parent="Base.Theme.PiccoliField" />
+
+    <style name="ShapeAppearanceOverlay.App.CornerSize50Percent" parent="">
+        <item name="cornerSize">50%</item>
+    </style>
 </resources>

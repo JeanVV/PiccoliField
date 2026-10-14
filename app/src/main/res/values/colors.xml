@@ -20,4 +20,19 @@
     <color name="color_texto_secundario">#4A2B1C</color>
     <color name="color_boton">#C99A32</color>
     <color name="color_boton_texto">#2B170F</color>
+
+    <!-- Nuevos Colores para Sistema de Asistencias -->
+    <color name="status_on_time_bg">#E2D5B8</color>
+    <color name="status_on_time_text">#2B170F</color>
+    <color name="status_late_bg">#B9783E</color>
+    <color name="status_late_text">#FFF9EF</color>
+    <color name="status_absent_bg">#4A2B1C</color>
+    <color name="status_absent_text">#FFF9EF</color>
+    <color name="status_permission_bg">#8C7A6B</color>
+    <color name="status_permission_text">#FFF9EF</color>
+    <color name="color_text_muted">#7A6253</color>
+    <color name="stroke_color">#C0A884</color>
+    <color name="geofence_fill">#33C99A32</color>
+    <color name="geofence_stroke">#C99A32</color>
+    <color name="status_green_check">#4CAF50</color>
 </resources>

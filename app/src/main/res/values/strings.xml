@@ -13,4 +13,46 @@
     <string name="iniciar_sesion">Iniciar sesión</string>
     <string name="no_tienes_cuenta">¿No tienes una cuenta? </string>
     <string name="registrate">Regístrate</string>
+
+    <!-- Nuevos Strings para Módulos de Asistencias -->
+    <string name="title_inicio_asistencias">Inicio de Asistencias</string>
+    <string name="title_monitoreo_mapa">Monitoreo en Mapa</string>
+    <string name="title_detalle_asistencia">Detalle de Asistencia</string>
+    <string name="title_colaboradores">Colaboradores</string>
+
+    <string name="label_asistencias_hoy">Asistencias de Hoy</string>
+    <string name="label_presentes">Presentes</string>
+    <string name="label_a_tiempo">A tiempo</string>
+    <string name="label_tardanzas">Tardanzas</string>
+    <string name="label_personal_reciente">Personal Reciente</string>
+    <string name="label_marcar_entrada_salida">Marcar Entrada/Salida</string>
+    <string name="label_evidencia">Evidencia</string>
+    <string name="label_historial_turnos">Historial de Turnos</string>
+    <string name="label_rango_asistencia">Rango de asistencia</string>
+
+    <string name="hint_search_collaborators">Buscar colaboradores&#8230;</string>
+
+    <string name="btn_mapa">Mapa</string>
+    <string name="btn_lista">Lista</string>
+    <string name="btn_ver_detalles">Ver detalles</string>
+    <string name="btn_como_llegar">Cómo llegar</string>
+    <string name="btn_justificar">Justificar</string>
+    <string name="btn_confirmar">Confirmar</string>
+
+    <string name="empty_recent_personnel">No hay registros de personal reciente</string>
+    <string name="empty_collaborators">No se encontraron colaboradores</string>
+    <string name="empty_shift_history">Sin historial de turnos para hoy</string>
+
+    <string name="nav_inicio">Inicio</string>
+    <string name="nav_mapa">Mapa</string>
+    <string name="nav_colaboradores">Colaboradores</string>
+    <string name="nav_reportes">Reportes</string>
+
+    <string name="cd_notification">Notificaciones</string>
+    <string name="cd_filter">Filtrar</string>
+    <string name="cd_back">Volver</string>
+    <string name="cd_camera">Tomar foto de evidencia</string>
+    <string name="cd_user_avatar">Foto de perfil</string>
+    <string name="cd_location_icon">Ubicación</string>
+    <string name="cd_check_icon">Estado de verificación</string>
 </resources>

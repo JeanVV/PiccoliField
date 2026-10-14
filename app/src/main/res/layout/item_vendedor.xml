@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingVertical="12dp"
+    android:background="?attr/selectableItemBackground">
+
+    <!-- Número de posición -->
+    <TextView
+        android:id="@+id/tvPosicion"
+        android:layout_width="24dp"
+        android:layout_height="wrap_content"
+        tools:text="1"
+        android:textColor="@color/color_texto"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <!-- Foto de perfil circular -->
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/ivAvatar"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="8dp"
+        android:scaleType="centerCrop"
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent"
+        tools:src="@tools:sample/avatars"
+        app:layout_constraintStart_toEndOf="@id/tvPosicion"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <!-- Nombre y Local -->
+    <TextView
+        android:id="@+id/tvNombreLocal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        tools:text="Luis Rojas - Licorería El Buen Sabor"
+        android:textColor="@color/color_texto"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@id/ivAvatar"
+        app:layout_constraintEnd_toStartOf="@+id/tvVolumenVentas"
+        app:layout_constraintTop_toTopOf="@id/ivAvatar"
+        app:layout_constraintBottom_toTopOf="@+id/tvSubtituloVentas" />
+
+    <!-- Subtítulo -->
+    <TextView
+        android:id="@+id/tvSubtituloVentas"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Volumen de ventas"
+        android:textColor="@color/color_texto_secundario"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="@id/tvNombreLocal"
+        app:layout_constraintTop_toBottomOf="@id/tvNombreLocal"
+        app:layout_constraintBottom_toBottomOf="@id/ivAvatar" />
+
+    <!-- Cifra de ventas -->
+    <TextView
+        android:id="@+id/tvVolumenVentas"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="25 ventas"
+        android:textColor="@color/color_texto_secundario"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

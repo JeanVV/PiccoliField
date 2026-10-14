@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginBottom="16dp"
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="0dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <!-- Icono de la alerta -->
+        <ImageView
+            android:id="@+id/ivIconoAlerta"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_search_rounded"
+            android:backgroundTint="@color/status_on_time_bg"
+            android:padding="8dp"
+            android:src="@drawable/ic_warning_alert"
+            app:tint="@color/dorado_premium"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Título -->
+        <TextView
+            android:id="@+id/tvTituloAlerta"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            tools:text="Stock crítico de producto"
+            android:textColor="@color/color_texto"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@id/ivIconoAlerta"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/ivIconoAlerta" />
+
+        <!-- Subtítulo (Local) -->
+        <TextView
+            android:id="@+id/tvLocalAlerta"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            tools:text="Licorería El Buen Sabor"
+            android:textColor="@color/color_texto_secundario"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="@id/tvTituloAlerta"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvTituloAlerta" />
+
+        <!-- Detalle (Ej. Whisky - 2 unidades) -->
+        <TextView
+            android:id="@+id/tvDetalleAlerta"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            tools:text="Whisky · 2 unidades disponibles"
+            android:textColor="@color/color_texto_secundario"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="@id/tvTituloAlerta"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvLocalAlerta" />
+
+        <!-- Tiempo transcurrido -->
+        <TextView
+            android:id="@+id/tvTiempoAlerta"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            tools:text="Hace 5 min"
+            android:textColor="@color/color_texto_secundario"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvDetalleAlerta" />
+
+        <!-- Estado / Severidad -->
+        <TextView
+            android:id="@+id/tvSeveridadAlerta"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="Crítica"
+            android:textColor="#D32F2F"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tvTiempoAlerta"
+            app:layout_constraintBottom_toBottomOf="@id/tvTiempoAlerta" />
+
+        <!-- Línea separadora -->
+        <View
+            android:id="@+id/viewDivider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="12dp"
+            android:background="@color/caramelo"
+            app:layout_constraintTop_toBottomOf="@id/tvTiempoAlerta" />
+
+        <!-- Botón Ver Detalle -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnVerDetalleAlerta"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="12dp"
+            android:text="Ver detalle"
+            android:textColor="@color/white"
+            android:textAllCaps="false"
+            app:backgroundTint="@color/color_texto_secundario"
+            app:cornerRadius="25dp"
+            app:layout_constraintTop_toBottomOf="@id/viewDivider" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>
