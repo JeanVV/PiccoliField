@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Pantalla 1: Inicio de Asistencias (activity_attendance_home.xml) -->
+<!-- Fragmento 1: Inicio de Asistencias (fragment_asistencia_home.xml) -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/attendanceHomeRootLayout"
+    android:id="@+id/asistenciaHomeRootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/crema_vainilla"
-    tools:context=".AttendanceHomeActivity">
+    tools:context=".ui.asistencia.AsistenciaHomeFragment">
 
     <!-- Header Toolbar Superior -->
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -60,7 +60,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:fillViewport="true"
-        app:layout_constraintBottom_toTopOf="@+id/bottomNavigation"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbarHeader">
@@ -68,7 +68,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingBottom="@dimen/spacing_large">
 
             <!-- Barra de Búsqueda de Colaboradores -->
             <com.google.android.material.card.MaterialCardView
@@ -181,7 +182,7 @@
                         app:layout_constraintStart_toStartOf="@+id/pbAttendancePercentage"
                         app:layout_constraintTop_toTopOf="@+id/pbAttendancePercentage">
 
-                        <!-- BD: @{viewModel.attendancePercentageText} ej. "84%" -->
+                        <!-- BD: porcentaje -->
                         <TextView
                             android:id="@+id/tvAttendancePercentage"
                             android:layout_width="wrap_content"
@@ -196,7 +197,7 @@
                             android:text="@string/label_presentes"
                             android:textAppearance="@style/TextAppearance.Piccoli.Caption" />
 
-                        <!-- BD: @{viewModel.presentFractionText} ej. "76/90" -->
+                        <!-- BD: presentes_fraccion -->
                         <TextView
                             android:id="@+id/tvPresentesFraction"
                             android:layout_width="wrap_content"
@@ -221,7 +222,7 @@
                 android:baselineAligned="false"
                 android:orientation="horizontal">
 
-                <!-- Card 1: A tiempo (BD: colaboradores_a_tiempo_count) -->
+                <!-- Card 1: A tiempo -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardOnTime"
                     style="@style/Widget.Piccoli.Card.Primary"
@@ -244,7 +245,7 @@
                             android:text="@string/label_a_tiempo"
                             android:textAppearance="@style/TextAppearance.Piccoli.CardTitle" />
 
-                        <!-- BD: @{viewModel.onTimeCount} ej. "(64)" -->
+                        <!-- BD: a_tiempo_count -->
                         <TextView
                             android:id="@+id/tvOnTimeCount"
                             android:layout_width="wrap_content"
@@ -257,7 +258,7 @@
 
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Card 2: Tardanzas (BD: colaboradores_tardanza_count) -->
+                <!-- Card 2: Tardanzas -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardLate"
                     style="@style/Widget.Piccoli.Card.Primary"
@@ -280,7 +281,7 @@
                             android:text="@string/label_tardanzas"
                             android:textAppearance="@style/TextAppearance.Piccoli.CardTitle" />
 
-                        <!-- BD: @{viewModel.lateCount} ej. "(12)" -->
+                        <!-- BD: tardanzas_count -->
                         <TextView
                             android:id="@+id/tvLateCount"
                             android:layout_width="wrap_content"
@@ -295,6 +296,99 @@
 
             </LinearLayout>
 
+            <!-- ACCESOS RÁPIDOS A MAPA Y COLABORADORES -->
+            <TextView
+                android:id="@+id/tvQuickAccessTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/spacing_normal"
+                android:layout_marginTop="@dimen/spacing_normal"
+                android:layout_marginBottom="@dimen/spacing_small"
+                android:text="Accesos Rápidos"
+                android:textAppearance="@style/TextAppearance.Piccoli.SectionHeader" />
+
+            <LinearLayout
+                android:id="@+id/layoutQuickAccess"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/spacing_normal"
+                android:layout_marginBottom="@dimen/spacing_normal"
+                android:orientation="horizontal">
+
+                <!-- Card para ir al Mapa -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardGoToMap"
+                    style="@style/Widget.Piccoli.Card.Primary"
+                    android:layout_width="0dp"
+                    android:layout_height="100dp"
+                    android:layout_marginEnd="@dimen/spacing_small"
+                    android:layout_weight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="@dimen/spacing_medium">
+
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:contentDescription="@null"
+                            app:srcCompat="@drawable/ic_nav_map"
+                            app:tint="@color/marfil_suave" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="Ver Mapa"
+                            android:textAppearance="@style/TextAppearance.Piccoli.BodyPrimary"
+                            android:textColor="@color/marfil_suave" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Card para ir a Colaboradores -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardGoToCollaborators"
+                    style="@style/Widget.Piccoli.Card.Marfil"
+                    android:layout_width="0dp"
+                    android:layout_height="100dp"
+                    android:layout_marginStart="@dimen/spacing_small"
+                    android:layout_weight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="@dimen/spacing_medium">
+
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:contentDescription="@null"
+                            app:srcCompat="@drawable/ic_nav_people"
+                            app:tint="@color/cafe_profundo" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="Colaboradores"
+                            android:textAppearance="@style/TextAppearance.Piccoli.BodyPrimary"
+                            android:textColor="@color/cafe_profundo" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+
             <!-- Título de Sección: "Personal Reciente" -->
             <TextView
                 android:id="@+id/tvRecentPersonnelTitle"
@@ -305,7 +399,7 @@
                 android:text="@string/label_personal_reciente"
                 android:textAppearance="@style/TextAppearance.Piccoli.SectionHeader" />
 
-            <!-- Estado Vacío (Empty State cuando no existen registros en la BD) -->
+            <!-- Estado Vacío -->
             <LinearLayout
                 android:id="@+id/layoutEmptyRecentState"
                 android:layout_width="match_parent"
@@ -346,18 +440,5 @@
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
-
-    <!-- Barra de Navegación Inferior -->
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNavigation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/marfil_suave"
-        app:itemIconTint="@color/cafe_profundo"
-        app:itemTextColor="@color/cafe_profundo"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:menu="@menu/bottom_nav_menu" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

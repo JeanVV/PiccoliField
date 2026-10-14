@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Pantalla 3: Detalle de Asistencia (activity_attendance_detail.xml) -->
+<!-- Fragmento 4: Detalle de Asistencia (fragment_detalle_asistencia.xml) -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/attendanceDetailRootLayout"
+    android:id="@+id/detalleAsistenciaRootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/crema_vainilla"
-    tools:context=".AttendanceDetailActivity">
+    tools:context=".ui.asistencia.DetalleAsistenciaFragment">
 
     <!-- Header Toolbar con Botón Volver -->
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -78,7 +78,6 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <!-- Banner Oscuro Superior -->
                     <TextView
                         android:id="@+id/tvAttendanceBannerTitle"
                         android:layout_width="match_parent"
@@ -90,13 +89,11 @@
                         android:textAppearance="@style/TextAppearance.Piccoli.CardTitle"
                         android:textColor="@color/marfil_suave" />
 
-                    <!-- Detalles del Estado de Asistencia -->
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:padding="@dimen/spacing_normal">
 
-                        <!-- Ícono Check Verde -->
                         <ImageView
                             android:id="@+id/ivCheckStatus"
                             android:layout_width="36dp"
@@ -106,7 +103,7 @@
                             app:layout_constraintTop_toTopOf="parent"
                             app:srcCompat="@drawable/ic_check_circle_green" />
 
-                        <!-- Título del Estado (BD: registro_asistencia.tipo_registro -> "Entrada registrada") -->
+                        <!-- BD: registro_asistencia.tipo_registro -->
                         <TextView
                             android:id="@+id/tvStatusTitle"
                             android:layout_width="0dp"
@@ -118,7 +115,7 @@
                             app:layout_constraintTop_toTopOf="@+id/ivCheckStatus"
                             tools:text="Entrada registrada" />
 
-                        <!-- Hora (BD: registro_asistencia.hora) -->
+                        <!-- BD: registro_asistencia.hora_marcado -->
                         <TextView
                             android:id="@+id/tvAttendanceTime"
                             android:layout_width="0dp"
@@ -130,7 +127,6 @@
                             app:layout_constraintTop_toBottomOf="@+id/tvStatusTitle"
                             tools:text="08:00 a.m." />
 
-                        <!-- Ícono Ubicación -->
                         <ImageView
                             android:id="@+id/ivLocationIconHeader"
                             android:layout_width="16dp"
@@ -142,7 +138,7 @@
                             app:srcCompat="@drawable/ic_location_pin"
                             app:tint="@color/chocolate" />
 
-                        <!-- Nombre de Ubicación / Sede (BD: sede.nombre_direccion) -->
+                        <!-- BD: sede.nombre_direccion -->
                         <TextView
                             android:id="@+id/tvAttendanceLocation"
                             android:layout_width="0dp"
@@ -174,13 +170,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
-                    <!-- Mapa interactivo / vista previa -->
                     <com.google.android.gms.maps.MapView
                         android:id="@+id/miniMapView"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent" />
 
-                    <!-- Pin de Mapa Simulado sobre el MapView -->
                     <ImageView
                         android:id="@+id/ivMiniMapPin"
                         android:layout_width="28dp"
@@ -220,7 +214,7 @@
                     android:layout_height="wrap_content"
                     android:padding="@dimen/spacing_small">
 
-                    <!-- Imagen de la Evidencia (BD: evidencia.foto_url) -->
+                    <!-- BD: evidencia.foto_url -->
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/ivEvidencePhoto"
                         android:layout_width="match_parent"
@@ -232,7 +226,6 @@
                         app:shapeAppearanceOverlay="@style/ShapeAppearance.Piccoli.Rounded"
                         app:srcCompat="@drawable/fondopicolli" />
 
-                    <!-- Botón/Ícono Flotante de Cámara -->
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/cardCameraBadge"
                         android:layout_width="32dp"
@@ -273,7 +266,7 @@
                     android:layout_height="wrap_content"
                     android:padding="@dimen/spacing_medium">
 
-                    <!-- Foto Circular (BD: colaborador.foto_url) -->
+                    <!-- BD: colaborador.foto_url -->
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/ivUserPhoto"
                         android:layout_width="@dimen/avatar_size_large"
@@ -285,7 +278,7 @@
                         app:shapeAppearanceOverlay="@style/ShapeAppearance.Piccoli.Circular"
                         app:srcCompat="@drawable/ic_avatar_placeholder" />
 
-                    <!-- Nombre del Colaborador (BD: colaborador.nombre) -->
+                    <!-- BD: colaborador.nombre -->
                     <TextView
                         android:id="@+id/tvUserName"
                         android:layout_width="0dp"
@@ -297,7 +290,6 @@
                         app:layout_constraintTop_toTopOf="@+id/ivUserPhoto"
                         tools:text="Luis Rojas" />
 
-                    <!-- Ícono de Ubicación -->
                     <ImageView
                         android:id="@+id/ivUserLocationIcon"
                         android:layout_width="14dp"
@@ -309,7 +301,7 @@
                         app:srcCompat="@drawable/ic_location_pin"
                         app:tint="@color/chocolate" />
 
-                    <!-- Ubicación (BD: colaborador.sede_actual) -->
+                    <!-- BD: colaborador.sede_actual -->
                     <TextView
                         android:id="@+id/tvUserLocation"
                         android:layout_width="0dp"
@@ -336,24 +328,6 @@
                 android:text="@string/label_historial_turnos"
                 android:textAppearance="@style/TextAppearance.Piccoli.SectionHeader" />
 
-            <!-- Empty State Historial de Turnos -->
-            <LinearLayout
-                android:id="@+id/layoutEmptyShiftState"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:padding="@dimen/spacing_medium"
-                android:visibility="gone">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/empty_shift_history"
-                    android:textAppearance="@style/TextAppearance.Piccoli.BodySecondary" />
-
-            </LinearLayout>
-
             <!-- RecyclerView Historial de Turnos -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvShiftHistory"
@@ -369,7 +343,7 @@
 
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Botones de Acción al Final: "Justificar" y "Confirmar" -->
+    <!-- Botones de Acción al Final -->
     <LinearLayout
         android:id="@+id/layoutBottomActions"
         android:layout_width="match_parent"
@@ -382,7 +356,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <!-- Botón Justificar (Outlined) -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnJustify"
             style="@style/Widget.Piccoli.Button.Outlined"
@@ -392,7 +365,6 @@
             android:layout_weight="1"
             android:text="@string/btn_justificar" />
 
-        <!-- Botón Confirmar (Relleno) -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnConfirm"
             style="@style/Widget.Piccoli.Button.Primary"

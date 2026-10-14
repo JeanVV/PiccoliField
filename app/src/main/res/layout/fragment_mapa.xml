@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Pantalla 2: Monitoreo en Mapa (activity_map_monitoring.xml) -->
+<!-- Fragmento 2: Monitoreo en Mapa (fragment_mapa.xml) -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/mapMonitoringRootLayout"
+    android:id="@+id/mapaRootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/crema_vainilla">
+    android:background="@color/crema_vainilla"
+    tools:context=".ui.asistencia.MapaFragment">
 
     <!-- Header Toolbar Superior -->
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -56,7 +57,6 @@
             android:orientation="horizontal"
             android:padding="2dp">
 
-            <!-- Opción "Mapa" Seleccionada -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnToggleMap"
                 style="@style/Widget.Piccoli.Button.Primary"
@@ -68,7 +68,6 @@
                 android:text="@string/btn_mapa"
                 android:textSize="@dimen/text_size_body_small" />
 
-            <!-- Opción "Lista" Deseleccionada -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnToggleList"
                 style="@style/Widget.Material3.Button.TextButton"
@@ -96,9 +95,9 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/cardToggleViewSelector"
-        tools:context=".MapMonitoringActivity" />
+        tools:context=".ui.asistencia.MapaFragment" />
 
-    <!-- Capa de Overlays Simulados sobre el Mapa (Vista previa UI) -->
+    <!-- Capa de Overlays Simulados sobre el Mapa -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layoutMapOverlays"
         android:layout_width="0dp"
@@ -182,7 +181,7 @@
             app:srcCompat="@drawable/ic_location_pin"
             app:tint="@color/cafe_profundo" />
 
-        <!-- Botón Flotante para Mi Ubicación / Centrar Mapa -->
+        <!-- Botón Flotante para Mi Ubicación -->
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fabMyLocation"
             android:layout_width="wrap_content"
@@ -208,7 +207,7 @@
         android:layout_marginHorizontal="@dimen/spacing_normal"
         android:layout_marginBottom="@dimen/spacing_medium"
         app:cardCornerRadius="@dimen/card_corner_radius_large"
-        app:layout_constraintBottom_toTopOf="@+id/bottomNavigation"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
@@ -245,7 +244,6 @@
                 android:layout_marginTop="@dimen/spacing_medium"
                 android:orientation="horizontal">
 
-                <!-- Botón Ver Detalles (Relleno) -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnViewDetails"
                     style="@style/Widget.Piccoli.Button.Primary"
@@ -255,7 +253,6 @@
                     android:layout_weight="1.2"
                     android:text="@string/btn_ver_detalles" />
 
-                <!-- Botón Cómo Llegar (Outlined) -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnHowToGetThere"
                     style="@style/Widget.Piccoli.Button.Outlined"
@@ -272,18 +269,5 @@
         </LinearLayout>
 
     </com.google.android.material.card.MaterialCardView>
-
-    <!-- Barra de Navegación Inferior -->
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNavigation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/marfil_suave"
-        app:itemIconTint="@color/cafe_profundo"
-        app:itemTextColor="@color/cafe_profundo"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:menu="@menu/bottom_nav_menu" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
