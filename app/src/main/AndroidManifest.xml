@@ -17,7 +17,7 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="YOUR_MAPS_API_KEY_HERE" />
 
-        <!-- MainActivity vuelve a ser tu pantalla de inicio -->
+        <!-- MainActivity es tu pantalla de inicio -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -32,18 +32,32 @@
             android:name=".LoginActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+
         <activity
             android:name=".MenuActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".DetalleAlertaActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
+
         <activity
             android:name=".DetallePuntoVentaActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".DetallePedidoActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".DetalleAlertaActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".SupervisionpdvActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
         <activity
             android:name=".DetalleVendedorActivity"
             android:exported="false"
