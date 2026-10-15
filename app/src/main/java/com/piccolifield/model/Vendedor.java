@@ -18,12 +18,16 @@ public class Vendedor {
     @SerializedName("posicion")
     private int posicion;
 
-    public Vendedor(int idUsuario, int posicion, String nombre, String local,int cantVentas) {
+    @SerializedName("meta_asignada")
+    private int meta_asignada;
+
+    public Vendedor(int idUsuario, int posicion, String nombre, String local,int cantVentas, int meta_asignada) {
         this.idUsuario = idUsuario;
         this.posicion = posicion;
         this.nombre = nombre;
         this.local = local;
         this.cantVentas = cantVentas;
+        this.meta_asignada = meta_asignada;
     }
 
     public int getIdUsuario(){ return idUsuario; }
@@ -31,4 +35,7 @@ public class Vendedor {
     public String getNombre() { return nombre; }
     public String getLocal() { return local; }
     public double getCantVentas(){ return cantVentas;}
+    public int getMeta_asignada() {
+        return meta_asignada;
+    }
 }

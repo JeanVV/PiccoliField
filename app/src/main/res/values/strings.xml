@@ -38,6 +38,27 @@
     <string name="label_historial_turnos">Historial de Turnos</string>
     <string name="label_rango_asistencia">Rango de asistencia</string>
 
+    <!-- Nuevos Strings para módulos de supervisión -->
+    <string name="label_rendimiento_personal">Rendimiento del personal</string>
+    <string name="label_monto_total">Monto total vendido</string>
+    <string name="label_barra_progreso">Progreso de asignación</string>
+    <string name="label_sup_acciones">Acciones de supervisión</string>
+    <string name="label_titulo_Supervision">Supervisión</string>
+    <string name="label_pdv_activos">Puntos activos</string>
+    <string name="label_alertas">Alertas de Stock</string>
+    <string name="label_mejores_impulsadores">Mejores impulsadores</string>
+    <string name="label_cant_productos">Cant. productos vendidos</string>
+
+
+    <string name="btn_evidencias">Ver evidencias fotográficas</string>
+    <string name="btn_reasignar">Reasignar a otro punto de venta</string>
+    <string name="btn_pdv">Punto de venta</string>
+    <string name="btn_alerta">Alerta</string>
+    <string name="btn_detalle_venta">Ver detalle</string>
+
+
+    <string name="hint_buscar_impulsador">Buscar impulsador..</string>
+
     <string name="hint_search_collaborators">Buscar colaboradores&#8230;</string>
 
     <string name="btn_mapa">Mapa</string>
@@ -63,4 +84,46 @@
     <string name="cd_user_avatar">Foto de perfil</string>
     <string name="cd_location_icon">Ubicación</string>
     <string name="cd_check_icon">Estado de verificación</string>
+
+    <string name="datos_vacios">...</string>
+
+    <!-- Errores y Mensajes -->
+    <string name="error_cargar_datos">Error al cargar datos</string>
+    <string name="error_falla_red">Falla de red: %1$s</string>
+    <string name="error_cargar_vendedores">No se pudieron cargar los vendedores</string>
+    <string name="error_red_vendedores">Falla de red cargando vendedores</string>
+    <string name="error_cargar_alertas">No se pudieron cargar las alertas</string>
+    <string name="error_red_alertas">Falla de red cargando alertas</string>
+    <string name="error_cargar_pdvs">No se pudieron cargar los PDVs</string>
+    <string name="error_red_pdvs">Falla de red cargando PDVs</string>
+    <string name="error_cargar_alerta">Error al cargar la alerta</string>
+
+    <!-- Supervision Fragment y Detalle Vendedor -->
+    <string name="label_mejores_vendedores">Mejores Vendedores</string>
+    <string name="label_lista_pdv">Lista de Puntos de Venta</string>
+    <string name="label_vendidos">%1$s / %2$s vendidos</string>
+    <string name="label_moneda_soles">S/ %1$s</string>
+    <string name="label_pin_local">📍 %1$s</string>
+
+    <!-- Detalle Alerta -->
+    <string name="label_estado_alerta">Estado: %1$s</string>
+    <string name="label_nivel_alerta">Nivel: %1$s</string>
+    <string name="label_producto_alerta">Producto: %1$s</string>
+    <string name="label_responsable_alerta">Responsable: %1$s</string>
+    <string name="label_rol_alerta">Rol: %1$s</string>
+    <string name="label_stock_critico">Stock crítico de producto</string>
+    <string name="label_stock_actual">Stock actual</string>
+    <string name="label_unidades">unidades</string>
+    <string name="label_stock_minimo">Stock mínimo</string>
+    <string name="msg_advertencia_stock">El producto se encuentra por debajo del stock mínimo establecido. Se recomienda realizar la reposición lo antes posible para evitar quiebres de stock.</string>
+    <string name="label_responsable">Responsable</string>
+    <string name="label_resolucion">Resolución</string>
+    <string name="msg_resolucion_pendiente">Aún no se ha registrado la reposición.\nSe espera confirmación del área de almacén.</string>
+    <string name="btn_marcar_resuelta">Marcar como resuelta</string>
+
+    <!-- Default Text values -->
+    <string name="default_capacidad">750 ml</string>
+    <string name="default_sin_nombre">Sin nombre</string>
+    <string name="default_sin_direccion">Sin dirección</string>
+    <string name="default_estado_desconocido">DESCONOCIDO</string>
 </resources>

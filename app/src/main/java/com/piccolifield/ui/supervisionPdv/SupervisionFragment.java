@@ -18,9 +18,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.piccolifield.R;
-import com.piccolifield.adapter.VendedorAdapter; // Asegúrate de que este import sea correcto
+import com.piccolifield.adapter.VendedorAdapter;
+import com.piccolifield.adapter.AlertaAdapter;
+import com.piccolifield.adapter.SupervisionPuntoVentaAdapter;
 import com.piccolifield.data.model.ResumenDashboard;
+import com.piccolifield.model.Alerta;
 import com.piccolifield.model.Vendedor;
+import com.piccolifield.model.SupervisionPuntoVenta;
 import com.piccolifield.data.remote.api.ApiService;
 import com.piccolifield.data.remote.dto.response.ApiResponse;
 import com.piccolifield.data.remote.dto.RetrofitClient;
@@ -42,6 +46,8 @@ public class SupervisionFragment extends Fragment {
 
     // Listas y Contenedores
     private RecyclerView rvVendedores;
+    private RecyclerView rvAlertas;
+    private RecyclerView rvPuntosVenta;
     private View layoutDashboard; // Para ocultar/mostrar las tarjetas de resumen
     private TextView tvTituloLista;
 
@@ -68,6 +74,14 @@ public class SupervisionFragment extends Fragment {
         // El RecyclerView de Vendedores
         rvVendedores = view.findViewById(R.id.rvVendedores);
         rvVendedores.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        // El RecyclerView de Alertas
+        rvAlertas = view.findViewById(R.id.rvAlertas);
+        rvAlertas.setLayoutManager(new LinearLayoutManager(getContext()));
+        
+        // El RecyclerView de Puntos de Venta
+        rvPuntosVenta = view.findViewById(R.id.rvPuntosVenta);
+        rvPuntosVenta.setLayoutManager(new LinearLayoutManager(getContext()));
 
         // (Opcional pero recomendado) En tu XML deberías envolver tus 2 MaterialCardView del dashboard
         // dentro de un LinearLayout con el id "@+id/layoutDashboard" para poder ocultarlos fácilmente.
@@ -106,9 +120,11 @@ public class SupervisionFragment extends Fragment {
                 tvTabInicio.setTextColor(Color.WHITE); // Blanco para que contraste con el chocolate
                 tvTabInicio.setTypeface(null, Typeface.BOLD);
 
-                tvTituloLista.setText("Mejores Vendedores");
+                tvTituloLista.setText(getString(R.string.label_mejores_vendedores));
                 if (layoutDashboard != null) layoutDashboard.setVisibility(View.VISIBLE);
                 rvVendedores.setVisibility(View.VISIBLE);
+                if (rvAlertas != null) rvAlertas.setVisibility(View.GONE);
+                if (rvPuntosVenta != null) rvPuntosVenta.setVisibility(View.GONE);
 
                 cargarResumenDashboard();
                 cargarMejoresVendedores();
@@ -119,9 +135,13 @@ public class SupervisionFragment extends Fragment {
                 tvTabPuntos.setTextColor(Color.WHITE);
                 tvTabPuntos.setTypeface(null, Typeface.BOLD);
 
-                tvTituloLista.setText("Lista de Puntos de Venta");
+                tvTituloLista.setText(getString(R.string.label_lista_pdv));
                 if (layoutDashboard != null) layoutDashboard.setVisibility(View.GONE);
                 rvVendedores.setVisibility(View.GONE);
+                if (rvAlertas != null) rvAlertas.setVisibility(View.GONE);
+                if (rvPuntosVenta != null) rvPuntosVenta.setVisibility(View.VISIBLE);
+                
+                cargarPuntosVenta();
                 break;
 
             case 2: // ALERTAS
@@ -129,9 +149,13 @@ public class SupervisionFragment extends Fragment {
                 tvTabAlertas.setTextColor(Color.WHITE);
                 tvTabAlertas.setTypeface(null, Typeface.BOLD);
 
-                tvTituloLista.setText("Alertas de Stock");
+                tvTituloLista.setText(getString(R.string.label_alertas));
                 if (layoutDashboard != null) layoutDashboard.setVisibility(View.GONE);
                 rvVendedores.setVisibility(View.GONE);
+                if (rvPuntosVenta != null) rvPuntosVenta.setVisibility(View.GONE);
+                if (rvAlertas != null) rvAlertas.setVisibility(View.VISIBLE);
+                
+                cargarAlertas();
                 break;
         }
     }
@@ -175,13 +199,61 @@ public class SupervisionFragment extends Fragment {
                     VendedorAdapter adapter = new VendedorAdapter(listaVendedores, requireContext());
                     rvVendedores.setAdapter(adapter);
                 } else {
-                    Toast.makeText(getContext(), "No se pudieron cargar los vendedores", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), getString(R.string.error_cargar_vendedores), Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<ApiResponse<List<Vendedor>>> call, Throwable t) {
-                Toast.makeText(getContext(), "Falla de red cargando vendedores", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), getString(R.string.error_red_vendedores), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void cargarAlertas() {
+        String token = SplashStorage.obtenerToken(requireContext());
+        if (token == null || token.isEmpty()) return;
+
+        ApiService apiService = RetrofitClient.createService();
+        apiService.listarAlertasSupervision().enqueue(new Callback<ApiResponse<List<Alerta>>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<List<Alerta>>> call, Response<ApiResponse<List<Alerta>>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Alerta> listaAlertas = response.body().getData();
+                    AlertaAdapter adapter = new AlertaAdapter(listaAlertas, requireContext());
+                    rvAlertas.setAdapter(adapter);
+                } else {
+                    Toast.makeText(getContext(), getString(R.string.error_cargar_alertas), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<List<Alerta>>> call, Throwable t) {
+                Toast.makeText(getContext(), getString(R.string.error_red_alertas), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void cargarPuntosVenta() {
+        String token = SplashStorage.obtenerToken(requireContext());
+        if (token == null || token.isEmpty()) return;
+
+        ApiService apiService = RetrofitClient.createService();
+        apiService.listarPuntosVentaSupervision().enqueue(new Callback<ApiResponse<List<SupervisionPuntoVenta>>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<List<SupervisionPuntoVenta>>> call, Response<ApiResponse<List<SupervisionPuntoVenta>>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<SupervisionPuntoVenta> lista = response.body().getData();
+                    SupervisionPuntoVentaAdapter adapter = new SupervisionPuntoVentaAdapter(lista, requireContext());
+                    rvPuntosVenta.setAdapter(adapter);
+                } else {
+                    Toast.makeText(getContext(), getString(R.string.error_cargar_pdvs), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<List<SupervisionPuntoVenta>>> call, Throwable t) {
+                Toast.makeText(getContext(), getString(R.string.error_red_pdvs), Toast.LENGTH_SHORT).show();
             }
         });
     }

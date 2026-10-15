@@ -6,7 +6,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/color_fondo"
-    android:fitsSystemWindows="true"
     tools:context="com.piccolifield.ui.supervisionPdv.SupervisionFragment">
 
     <!-- ScrollView para el contenido principal -->
@@ -20,6 +19,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
+            android:paddingTop="12dp"
             android:padding="20dp">
 
             <!-- Cabecera -->
@@ -32,7 +32,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
-                    android:text="Supervisión"
+                    android:text="@string/label_titulo_Supervision"
                     android:textColor="@color/color_texto"
                     android:textSize="18sp"
                     android:textStyle="bold" />
@@ -48,7 +48,7 @@
                 android:drawableStart="@drawable/ic_search"
                 android:drawableTint="@color/chocolate"
                 android:drawablePadding="12dp"
-                android:hint="Buscar a trabajador..."
+                android:hint="@string/hint_buscar_impulsador"
                 android:paddingHorizontal="16dp"
                 android:textColor="@color/color_texto_secundario"
                 android:textColorHint="@color/color_texto_secundario"
@@ -68,7 +68,7 @@
                     android:layout_height="36dp"
                     android:gravity="center"
                     android:paddingHorizontal="24dp"
-                    android:text="Inicio"
+                    android:text="@string/nav_inicio"
                     android:textColor="@color/black"
                     android:textStyle="bold" />
 
@@ -79,7 +79,7 @@
                     android:layout_marginStart="16dp"
                     android:gravity="center"
                     android:paddingHorizontal="16dp"
-                    android:text="Puntos de venta"
+                    android:text="@string/btn_pdv"
                     android:textColor="@color/black" />
 
                 <TextView
@@ -89,7 +89,7 @@
                     android:layout_marginStart="16dp"
                     android:gravity="center"
                     android:paddingHorizontal="16dp"
-                    android:text="Alertas"
+                    android:text="@string/btn_alerta"
                     android:textColor="@color/black" />
             </LinearLayout>
 
@@ -110,7 +110,7 @@
                         android:id="@+id/tvTotalVentasLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Total Ventas"
+                        android:text="@string/label_monto_total"
                         android:textColor="@color/white"
                         android:textSize="14sp"
                         app:layout_constraintStart_toStartOf="parent"
@@ -121,7 +121,7 @@
                         android:id="@+id/tvTotalVentasValue"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="..."
+                        android:text="@string/datos_vacios"
                         android:textColor="@color/white"
                         android:textSize="28sp"
                         android:textStyle="bold"
@@ -168,7 +168,7 @@
                             android:id="@+id/tvPuntosLabel"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Puntos Activos"
+                            android:text="@string/label_pdv_activos"
                             android:textColor="@color/black"
                             android:textSize="12sp"/>
                         <TextView
@@ -177,7 +177,7 @@
                             android:layout_height="wrap_content"
                             android:layout_below="@id/tvPuntosLabel"
                             android:layout_marginTop="8dp"
-                            android:text="..."
+                            android:text="@string/datos_vacios"
                             android:textColor="@color/black"
                             android:textSize="24sp"
                             android:textStyle="bold"/>
@@ -208,7 +208,7 @@
                             android:id="@+id/tvAlertasLabel"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Alertas de Stock"
+                            android:text="@string/label_alertas"
                             android:textColor="@color/black"
                             android:textSize="12sp"/>
                         <TextView
@@ -217,7 +217,7 @@
                             android:layout_height="wrap_content"
                             android:layout_below="@id/tvAlertasLabel"
                             android:layout_marginTop="8dp"
-                            android:text="..."
+                            android:text="@string/datos_vacios"
                             android:textColor="@color/black"
                             android:textSize="24sp"
                             android:textStyle="bold"/>
@@ -242,7 +242,7 @@
                     android:id="@+id/tvTituloLista"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Mejores Vendedores"
+                    android:text="@string/label_mejores_impulsadores"
                     android:textColor="@color/color_texto"
                     android:textSize="18sp"
                     android:textStyle="bold" />
@@ -256,6 +256,26 @@
                 android:layout_height="wrap_content"
                 android:nestedScrollingEnabled="false"
                 tools:listitem="@layout/item_vendedor"
+                tools:itemCount="4"/>
+
+            <!-- Lista de Puntos de Venta -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvPuntosVenta"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:visibility="gone"
+                tools:listitem="@layout/item_supervision_puntoventa"
+                tools:itemCount="4"/>
+
+            <!-- Lista de Alertas -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvAlertas"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:visibility="gone"
+                tools:listitem="@layout/item_alerta"
                 tools:itemCount="4"/>
 
         </LinearLayout>

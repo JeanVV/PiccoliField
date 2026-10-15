@@ -30,7 +30,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:text="Rendimiento del Personal"
+        android:text="@string/label_rendimiento_personal"
         android:textColor="@color/color_texto"
         android:textSize="18sp"
         android:textStyle="bold" />
@@ -83,7 +83,7 @@
                         android:id="@+id/tvNombreVendedor"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="..."
+                        android:text="@string/datos_vacios"
                         android:textColor="@color/color_texto"
                         android:textSize="18sp"
                         android:textStyle="bold" />
@@ -93,7 +93,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="..."
+                        android:text="@string/datos_vacios"
                         android:textColor="@color/chocolate"
                         android:textSize="14sp" />
                 </LinearLayout>
@@ -118,7 +118,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Total Monto Vendido"
+                    android:text="@string/label_monto_total"
                     android:textColor="@color/color_texto_secundario"
                     android:textSize="14sp" />
 
@@ -126,7 +126,7 @@
                     android:id="@+id/tvMontoTotal"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="..."
+                    android:text="@string/datos_vacios"
                     android:textColor="@color/chocolate"
                     android:textSize="28sp"
                     android:textStyle="bold"
@@ -144,7 +144,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Progreso de asignación"
+                        android:text="@string/label_barra_progreso"
                         android:textColor="@color/color_texto"
                         android:textStyle="bold"/>
 
@@ -152,7 +152,7 @@
                         android:id="@+id/tvPorcentaje"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="..."
+                        android:text="@string/datos_vacios"
                         android:textColor="@color/chocolate"
                         android:textStyle="bold"/>
                 </LinearLayout>
@@ -172,7 +172,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="..."
+                    android:text="@string/datos_vacios"
                     android:textColor="@color/color_texto_secundario"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -182,7 +182,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Acciones de supervisión"
+            android:text="@string/label_sup_acciones"
             android:textColor="@color/color_texto"
             android:textSize="16sp"
             android:textStyle="bold"
@@ -193,7 +193,7 @@
             android:id="@+id/btnVerEvidencias"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:text="Ver evidencias fotográficas"
+            android:text="@string/btn_evidencias"
             android:textColor="@color/white"
             app:icon="@drawable/ic_photos"
             app:iconTint="@color/white"
@@ -207,7 +207,7 @@
             android:id="@+id/btnReasignar"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:text="Reasignar a otro punto de venta"
+            android:text="@string/btn_reasignar"
             app:icon="@drawable/ic_replay"
             app:iconTint="@color/white"
             app:iconGravity="textStart"

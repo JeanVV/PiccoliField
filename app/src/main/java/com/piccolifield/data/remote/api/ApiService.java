@@ -250,4 +250,10 @@ public interface ApiService {
     Call<ApiResponse<AlertaDetalle>> obtenerDetalleAlerta(
             @Path("id") int idAlerta
     );
+
+    @GET("supervision/alertas")
+    Call<ApiResponse<List<Alerta>>> listarAlertasSupervision();
+
+    @GET("supervision/puntos-venta")
+    Call<ApiResponse<List<com.piccolifield.model.SupervisionPuntoVenta>>> listarPuntosVentaSupervision();
 }

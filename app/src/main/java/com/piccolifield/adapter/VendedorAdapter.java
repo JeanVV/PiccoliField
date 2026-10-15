@@ -45,6 +45,8 @@ public class VendedorAdapter extends RecyclerView.Adapter<VendedorAdapter.ViewHo
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, DetalleVendedorActivity.class);
             intent.putExtra("ID_VENDEDOR", vendedor.getIdUsuario());
+            intent.putExtra("CANTIDAD_VENDIDA", vendedor.getCantVentas());
+            intent.putExtra("META_ASIGNADA", vendedor.getMeta_asignada());
             context.startActivity(intent);
         });
     }

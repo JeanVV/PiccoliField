@@ -41,10 +41,6 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".SupervisionpdvActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
             android:name=".DetallePuntoVentaActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />

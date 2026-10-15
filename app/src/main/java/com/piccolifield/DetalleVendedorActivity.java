@@ -23,7 +23,7 @@ import retrofit2.Response;
 public class DetalleVendedorActivity extends AppCompatActivity {
 
     private ImageView btnBack;
-    private TextView tvNombreVendedor, tvPuntoVenta, tvMontoTotal, tvProgresoAsignacion;
+    private TextView tvNombreVendedor, tvPuntoVenta, tvMontoTotal, tvProgresoAsignacion, tvCantidades;
     private ProgressBar progressBarAsignacion;
 
     private int idUsuarioSeleccionado;
@@ -42,12 +42,13 @@ public class DetalleVendedorActivity extends AppCompatActivity {
         // Aquí corregimos los IDs por los que usaste en el XML
         tvProgresoAsignacion = findViewById(R.id.tvPorcentaje);
         progressBarAsignacion = findViewById(R.id.pbVentas);
+        tvCantidades = findViewById(R.id.tvCantidades);
 
         btnBack.setOnClickListener(v -> finish());
         idUsuarioSeleccionado = getIntent().getIntExtra("ID_VENDEDOR", -1);
 
         if (idUsuarioSeleccionado == -1) {
-            Toast.makeText(this, "Error al cargar el vendedor", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.error_cargar_datos), Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -77,24 +78,42 @@ public class DetalleVendedorActivity extends AppCompatActivity {
 
                     if (vendedor != null) {
                         tvNombreVendedor.setText(vendedor.getNombre());
-                        tvPuntoVenta.setText("📍 " + vendedor.getLocal_pertenece());
-                        tvMontoTotal.setText("S/ " + String.format("%.2f", vendedor.getMonto_vendido()));
+                        tvPuntoVenta.setText(getString(R.string.label_pin_local, vendedor.getLocal_pertenece()));
+                        tvMontoTotal.setText(getString(R.string.label_moneda_soles, String.format("%.2f", vendedor.getMonto_vendido())));
 
-                        int porcentajeInt = (int) Math.round(vendedor.getPorcentaje_logro());
+                        // Si la API no trae cantidadVendida o meta, usamos las que pasamos por el Intent
+                        int cantidadVendida = (int) vendedor.getCantidadVendida();
+                        if (cantidadVendida == 0) {
+                            cantidadVendida = (int) getIntent().getDoubleExtra("CANTIDAD_VENDIDA", 0);
+                        }
+                        
+                        int meta = vendedor.getMeta();
+                        if (meta == 0) {
+                            meta = getIntent().getIntExtra("META_ASIGNADA", 1);
+                        }
+
+                        if (meta == 0) {
+                            meta = 1; // Para evitar división por cero si aún sigue en 0
+                        }
+
+                        // Calculamos manualmente el porcentaje para que coincida exactamente con los datos de cantidad / meta
+                        double porcentajeDouble = ((double) cantidadVendida / meta) * 100;
+                        int porcentajeInt = (int) Math.round(porcentajeDouble);
 
                         // Modificamos el texto para que diga el % en el formato de tu diseño
                         tvProgresoAsignacion.setText(porcentajeInt + "%");
                         progressBarAsignacion.setProgress(porcentajeInt);
+                        tvCantidades.setText(getString(R.string.label_vendidos, cantidadVendida, meta));
                     }
 
                 } else {
-                    Toast.makeText(DetalleVendedorActivity.this, "Error al cargar datos", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(DetalleVendedorActivity.this, getString(R.string.error_cargar_datos), Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<ApiResponse<VendedorDetalle>> call, Throwable t) {
-                Toast.makeText(DetalleVendedorActivity.this, "Falla de red: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(DetalleVendedorActivity.this, getString(R.string.error_falla_red, t.getMessage()), Toast.LENGTH_SHORT).show();
             }
         });
     }
