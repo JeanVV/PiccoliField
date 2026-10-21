@@ -14,7 +14,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
-    public static final String URL_API_SERVICE = "https://piccolifield-api.onrender.com/api/";
+    public static final String URL_API_SERVICE = "https://piccolifield-api-smkc.onrender.com/api/";
     public static String API_TOKEN;
 
     private static class AuthInterceptor implements Interceptor {

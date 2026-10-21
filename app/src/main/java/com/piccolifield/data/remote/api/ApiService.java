@@ -9,17 +9,11 @@ import com.piccolifield.data.model.ResumenDashboard;
 import com.piccolifield.data.model.TurnoHistorial;
 import com.piccolifield.data.model.Usuario;
 import com.piccolifield.data.model.VendedorDetalle;
-import com.piccolifield.data.remote.dto.EstadoRequest;
-import com.piccolifield.data.remote.dto.EstadoUsuarioRequest;
 import com.piccolifield.data.remote.dto.FcmTokenRequest;
 import com.piccolifield.data.remote.dto.request.LoginRequest;
 import com.piccolifield.data.remote.dto.response.ApiResponse;
 import com.piccolifield.model.Alerta;
-import com.piccolifield.model.Asistencia;
-import com.piccolifield.model.Pedido;
-import com.piccolifield.model.Producto;
 import com.piccolifield.model.PuntoVenta;
-import com.piccolifield.model.StockRegistro;
 import com.piccolifield.model.Vendedor;
 
 import okhttp3.ResponseBody;
