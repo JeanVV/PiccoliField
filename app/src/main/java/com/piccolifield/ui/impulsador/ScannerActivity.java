@@ -59,6 +59,7 @@ public class ScannerActivity extends AppCompatActivity {
         cameraExecutor = Executors.newSingleThreadExecutor();
     }
 
+    @androidx.camera.core.ExperimentalGetImage
     private void startCamera() {
         ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(this);
 
@@ -73,7 +74,7 @@ public class ScannerActivity extends AppCompatActivity {
                         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                         .build();
 
-                imageAnalysis.setAnalyzer(cameraExecutor, this::analyzeImage);
+                imageAnalysis.setAnalyzer(cameraExecutor, imageProxy -> analyzeImage(imageProxy));
 
                 CameraSelector cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA;
 

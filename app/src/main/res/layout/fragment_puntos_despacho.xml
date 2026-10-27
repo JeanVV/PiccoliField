@@ -693,7 +693,7 @@
                     android:layout_height="wrap_content"
                     android:nestedScrollingEnabled="false"
                     android:visibility="visible"
-                    tools:listitem="@layout/item_punto_venta" />
+                    tools:listitem="@layout/item_punto_distribucion" />
 
             </FrameLayout>
 

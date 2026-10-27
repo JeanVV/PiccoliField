@@ -122,7 +122,7 @@
     <string name="label_stock_minimo_valor">Stock Mínimo: %1$s</string>
     <string name="label_sku_valor">SKU: %1$s</string>
     <string name="hint_nombre_producto">Nombre del Producto</string>
-    <string name="label_vendidos">%1$s / %2$s vendidos</string>
+    <string name="label_vendidos">%1$d / %2$d vendidos</string>
     <string name="label_moneda_soles">S/ %1$s</string>
     <string name="label_pin_local">📍 %1$s</string>
 
