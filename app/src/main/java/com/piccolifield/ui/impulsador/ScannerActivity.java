@@ -59,7 +59,7 @@ public class ScannerActivity extends AppCompatActivity {
         cameraExecutor = Executors.newSingleThreadExecutor();
     }
 
-    @androidx.camera.core.ExperimentalGetImage
+    @androidx.annotation.OptIn(markerClass = androidx.camera.core.ExperimentalGetImage.class)
     private void startCamera() {
         ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(this);
 
@@ -87,7 +87,7 @@ public class ScannerActivity extends AppCompatActivity {
         }, ContextCompat.getMainExecutor(this));
     }
 
-    @androidx.camera.core.ExperimentalGetImage
+    @androidx.annotation.OptIn(markerClass = androidx.camera.core.ExperimentalGetImage.class)
     private void analyzeImage(ImageProxy imageProxy) {
         if (isProcessing || imageProxy.getImage() == null) {
             imageProxy.close();
