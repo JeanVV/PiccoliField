@@ -25,11 +25,21 @@ public class SplashStorage {
         return sharedPreferences.getBoolean("ingreso", false);
     }
 
-    public static void registrarSesionActiva(Context context) {
+    public static void registrarSesionActiva(Context context, String rol) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean("sesion_iniciada", true);
+        editor.putString("user_rol", rol);
         editor.apply();
+    }
+
+    public static void registrarSesionActiva(Context context) {
+        registrarSesionActiva(context, "SUPERVISOR");
+    }
+
+    public static String obtenerRol(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        return sharedPreferences.getString("user_rol", "SUPERVISOR");
     }
 
     public static void limpiarSesionActiva(Context context) {

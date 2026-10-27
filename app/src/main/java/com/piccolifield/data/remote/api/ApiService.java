@@ -18,7 +18,11 @@ import com.piccolifield.data.remote.dto.request.LoginRequest;
 import com.piccolifield.data.remote.dto.request.ReasignarImpulsadorRequest;
 import com.piccolifield.data.remote.dto.response.ApiResponse;
 import com.piccolifield.model.Alerta;
+import com.piccolifield.data.model.ImpulsadorDashboard;
+import com.piccolifield.data.model.ProductoBuscado;
 import com.piccolifield.model.PuntoDistribucion;
+import com.piccolifield.data.remote.dto.request.IncidenciaRequest;
+import com.piccolifield.data.remote.dto.request.RegistrarVentaRequest;
 import com.piccolifield.model.Vendedor;
 
 import okhttp3.ResponseBody;
@@ -131,5 +135,29 @@ public interface ApiService {
     @GET("supervision/productos/{id}/foto")
     Call<ResponseBody> obtenerFotoProducto(
             @Path("id") int idProducto
+    );
+
+    // =============================================================
+    // 3. IMPULSADOR / VENDEDOR
+    // =============================================================
+    @GET("impulsador/dashboard")
+    Call<ApiResponse<ImpulsadorDashboard>> obtenerDashboardImpulsador();
+
+    @GET("impulsador/historial")
+    Call<ApiResponse<List<PuntoVentaHistorial>>> obtenerHistorialAsignacionesImpulsador();
+
+    @GET("impulsador/productos/buscar")
+    Call<ApiResponse<ProductoBuscado>> buscarProductoPorCodigo(
+            @Query("codigo") String codigo
+    );
+
+    @POST("impulsador/ventas/registrar")
+    Call<ApiResponse<Object>> registrarVenta(
+            @Body RegistrarVentaRequest request
+    );
+
+    @POST("impulsador/incidencias")
+    Call<ApiResponse<Object>> reportarIncidencia(
+            @Body IncidenciaRequest request
     );
 }

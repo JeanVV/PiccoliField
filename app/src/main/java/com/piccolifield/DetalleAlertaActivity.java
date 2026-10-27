@@ -1,7 +1,9 @@
 package com.piccolifield;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.graphics.Bitmap;
@@ -10,7 +12,6 @@ import okhttp3.ResponseBody;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.bumptech.glide.Glide;
 import com.piccolifield.data.model.AlertaDetalle;
 import com.piccolifield.data.remote.api.ApiService;
 import com.piccolifield.data.remote.dto.response.ApiResponse;
@@ -27,6 +28,8 @@ public class DetalleAlertaActivity extends AppCompatActivity {
     private TextView tvEstadoAlerta, tvNombreLocal, tvDireccionLocal;
     private TextView tvNivelAlerta, tvProductoNombre, tvStockActual, tvStockMinimo;
     private TextView tvResponsableNombre, tvResponsableRol;
+    private ProgressBar pbLoading;
+    private androidx.core.widget.NestedScrollView scrollView;
 
     private int idAlertaSeleccionada;
 
@@ -48,6 +51,8 @@ public class DetalleAlertaActivity extends AppCompatActivity {
         tvStockMinimo = findViewById(R.id.tvStockMinimo);
         tvResponsableNombre = findViewById(R.id.tvResponsableNombre);
         tvResponsableRol = findViewById(R.id.tvResponsableRol);
+        pbLoading = findViewById(R.id.pbLoading);
+        scrollView = findViewById(R.id.scrollView);
 
         // Botón de retroceso
         btnBack.setOnClickListener(v -> finish());
@@ -66,6 +71,8 @@ public class DetalleAlertaActivity extends AppCompatActivity {
     }
 
     private void cargarDatosAlerta() {
+        if (pbLoading != null) pbLoading.setVisibility(View.VISIBLE);
+        if (scrollView != null) scrollView.setVisibility(View.GONE);
         String token = SplashStorage.obtenerToken(this);
 
         if (token == null || token.isEmpty()) {
@@ -80,6 +87,8 @@ public class DetalleAlertaActivity extends AppCompatActivity {
         apiService.obtenerDetalleAlerta(idAlertaSeleccionada).enqueue(new Callback<ApiResponse<AlertaDetalle>>() {
             @Override
             public void onResponse(Call<ApiResponse<AlertaDetalle>> call, Response<ApiResponse<AlertaDetalle>> response) {
+                if (pbLoading != null) pbLoading.setVisibility(View.GONE);
+                if (scrollView != null) scrollView.setVisibility(View.VISIBLE);
 
                 if (response.isSuccessful() && response.body() != null) {
                     AlertaDetalle alerta = response.body().getData();
@@ -148,6 +157,7 @@ public class DetalleAlertaActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<ApiResponse<AlertaDetalle>> call, Throwable t) {
+                if (pbLoading != null) pbLoading.setVisibility(View.GONE);
                 Toast.makeText(DetalleAlertaActivity.this, getString(R.string.error_falla_red, t.getMessage()), Toast.LENGTH_SHORT).show();
             }
         });

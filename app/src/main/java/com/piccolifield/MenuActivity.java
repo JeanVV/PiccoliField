@@ -13,8 +13,10 @@ import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
 
 import com.piccolifield.databinding.ActivityMenuBinding;
+import com.piccolifield.sharedpreferences.SplashStorage;
 import com.piccolifield.ui.asistencia.AsistenciaHomeFragment;
 import com.piccolifield.ui.despacho.PuntosDespachoFragment;
+import com.piccolifield.ui.impulsador.ImpulsadorHomeFragment;
 import com.piccolifield.ui.perfil.PerfilFragment;
 import com.piccolifield.ui.supervisionPdv.SupervisionFragment;
 
@@ -49,29 +51,55 @@ public class MenuActivity extends AppCompatActivity {
 
         // Cargar por defecto la primera pantalla (Inicio)
         if (savedInstanceState == null) {
-            cargarFragmento(new PerfilFragment());
+            cargarFragmentoPorRol(0);
         }
 
-        binding.curvedBottomNav.setOnTabSelectedListener(position -> {
+        binding.curvedBottomNav.setOnTabSelectedListener(this::cargarFragmentoPorRol);
+    }
+
+    private void cargarFragmentoPorRol(int position) {
+        String rol = SplashStorage.obtenerRol(this);
+
+        if ("IMPULSADOR".equalsIgnoreCase(rol)) {
+            // Flujo del Impulsador
+            switch (position) {
+                case 0:
+                    // Inicio / Home (Ahora es Perfil para Impulsador)
+                    cargarFragmento(new PerfilFragment());
+                    break;
+                case 1:
+                    // Asistencias
+                    cargarFragmento(new AsistenciaHomeFragment());
+                    break;
+                case 2:
+                    // Supervision (Ahora es el ImpulsadorHomeFragment)
+                    cargarFragmento(new ImpulsadorHomeFragment());
+                    break;
+                case 3:
+                    // Despacho (Lo dejamos vacío o puedes poner otra cosa para Impulsador)
+                    break;
+            }
+        } else {
+            // Flujo del Supervisor / Despacho (original)
             switch (position) {
                 case 0:
                     // Inicio / Home
                     cargarFragmento(new PerfilFragment());
                     break;
                 case 1:
-                    // Favoritos
+                    // Asistencias
                     cargarFragmento(new AsistenciaHomeFragment());
                     break;
                 case 2:
-                    // Buscar
+                    // Supervision
                     cargarFragmento(new SupervisionFragment());
                     break;
                 case 3:
-                    // Perfil
+                    // Despacho
                     cargarFragmento(new PuntosDespachoFragment());
                     break;
             }
-        });
+        }
     }
 
     private void cargarFragmento(Fragment fragment) {

@@ -6,6 +6,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -53,6 +54,8 @@ public class DetallePuntoVentaSupervisionActivity extends AppCompatActivity {
     private TextView tvImpulsadorNombre, tvImpulsadorCorreo;
     private MaterialButton btnReasignar, btnHistorial;
     private RecyclerView rvProductosSupervision;
+    private ProgressBar pbLoading;
+    private androidx.core.widget.NestedScrollView scrollView;
 
     private int idPuntoVenta;
 
@@ -86,6 +89,8 @@ public class DetallePuntoVentaSupervisionActivity extends AppCompatActivity {
         tvImpulsadorCorreo = findViewById(R.id.tvImpulsadorCorreo);
         btnReasignar = findViewById(R.id.btnReasignar);
         btnHistorial = findViewById(R.id.btnHistorial);
+        pbLoading = findViewById(R.id.pbLoading);
+        scrollView = findViewById(R.id.scrollView);
         rvProductosSupervision = findViewById(R.id.rvProductosSupervision);
         rvProductosSupervision.setLayoutManager(new LinearLayoutManager(this));
 
@@ -107,6 +112,8 @@ public class DetallePuntoVentaSupervisionActivity extends AppCompatActivity {
     }
 
     private void cargarDetallePuntoVenta() {
+        if (pbLoading != null) pbLoading.setVisibility(View.VISIBLE);
+        if (scrollView != null) scrollView.setVisibility(View.GONE);
         String token = SplashStorage.obtenerToken(this);
         if (token == null || token.isEmpty()) return;
 
@@ -116,6 +123,8 @@ public class DetallePuntoVentaSupervisionActivity extends AppCompatActivity {
         apiService.obtenerDetallePuntoVentaSupervision(idPuntoVenta).enqueue(new Callback<ApiResponse<PuntoVentaDetalle>>() {
             @Override
             public void onResponse(Call<ApiResponse<PuntoVentaDetalle>> call, Response<ApiResponse<PuntoVentaDetalle>> response) {
+                if (pbLoading != null) pbLoading.setVisibility(View.GONE);
+                if (scrollView != null) scrollView.setVisibility(View.VISIBLE);
                 if (response.isSuccessful() && response.body() != null) {
                     PuntoVentaDetalle detalle = response.body().getData();
                     if (detalle != null) {
@@ -163,6 +172,7 @@ public class DetallePuntoVentaSupervisionActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<ApiResponse<PuntoVentaDetalle>> call, Throwable t) {
+                if (pbLoading != null) pbLoading.setVisibility(View.GONE);
                 Toast.makeText(DetallePuntoVentaSupervisionActivity.this, "Error de red: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
