@@ -30,6 +30,18 @@ public class AlertaDetalle {
 
     @SerializedName("stock_minimo")
     private int stockMinimo;
+
+    @SerializedName("url_foto_producto")
+    private String urlFotoProducto;
+
+    @SerializedName("responsable_foto")
+    private String responsableFoto;
+
+    @SerializedName("idProductos")
+    private int idProductos;
+
+    @SerializedName("responsable_id")
+    private int responsableId;
     
     public String getEstadoResolucion() { return estadoResolucion; }
     public String getLocalDireccion() { return localDireccion; }
@@ -40,4 +52,8 @@ public class AlertaDetalle {
     public String getResponsableRol() { return responsableRol; }
     public int getStockActual() { return stockActual; }
     public int getStockMinimo() { return stockMinimo; }
+    public String getUrlFotoProducto() { return urlFotoProducto; }
+    public String getResponsableFoto() { return responsableFoto; }
+    public int getIdProductos() { return idProductos; }
+    public int getResponsableId() { return responsableId; }
 }

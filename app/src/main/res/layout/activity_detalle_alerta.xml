@@ -140,7 +140,8 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="@string/label_stock_actual"
-                                    android:textSize="12sp"/>
+                                    android:textSize="12sp"
+                                    android:textColor="@color/cafe_profundo"/>
                                 <TextView
                                     android:id="@+id/tvStockActual"
                                     android:layout_width="wrap_content"
@@ -148,11 +149,12 @@
                                     android:text="@string/datos_vacios"
                                     android:textSize="20sp"
                                     android:textStyle="bold"
-                                    android:textColor="@color/color_texto"/>
+                                    android:textColor="@color/cafe_profundo"/>
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="@string/label_unidades"
+                                    android:textColor="@color/cafe_profundo"
                                     android:textSize="12sp"/>
                             </LinearLayout>
 
@@ -165,7 +167,8 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="@string/label_stock_minimo"
-                                    android:textSize="12sp"/>
+                                    android:textSize="12sp"
+                                    android:textColor="@color/cafe_profundo"/>
                                 <TextView
                                     android:id="@+id/tvStockMinimo"
                                     android:layout_width="wrap_content"
@@ -173,11 +176,12 @@
                                     android:text="@string/datos_vacios"
                                     android:textSize="20sp"
                                     android:textStyle="bold"
-                                    android:textColor="@color/color_texto"/>
+                                    android:textColor="@color/cafe_profundo"/>
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="@string/label_unidades"
+                                    android:textColor="@color/cafe_profundo"
                                     android:textSize="12sp"/>
                             </LinearLayout>
                         </LinearLayout>

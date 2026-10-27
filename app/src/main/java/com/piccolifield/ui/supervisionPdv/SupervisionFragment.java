@@ -173,6 +173,7 @@ public class SupervisionFragment extends Fragment {
         apiService.obtenerResumenDashboard().enqueue(new Callback<ApiResponse<ResumenDashboard>>() {
             @Override
             public void onResponse(Call<ApiResponse<ResumenDashboard>> call, Response<ApiResponse<ResumenDashboard>> response) {
+                if (!isAdded()) return;
                 if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
                     ResumenDashboard resumen = response.body().getData();
                     tvMontoTotalVentas.setText("S/ " + String.format("%.2f", resumen.getMonto_total_ventas()));
@@ -192,6 +193,7 @@ public class SupervisionFragment extends Fragment {
         apiService.listarMejoresVendedores().enqueue(new Callback<ApiResponse<List<Vendedor>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<Vendedor>>> call, Response<ApiResponse<List<Vendedor>>> response) {
+                if (!isAdded()) return;
                 if (response.isSuccessful() && response.body() != null) {
                     List<Vendedor> listaVendedores = response.body().getData();
 
@@ -205,6 +207,7 @@ public class SupervisionFragment extends Fragment {
 
             @Override
             public void onFailure(Call<ApiResponse<List<Vendedor>>> call, Throwable t) {
+                if (!isAdded()) return;
                 Toast.makeText(getContext(), getString(R.string.error_red_vendedores), Toast.LENGTH_SHORT).show();
             }
         });
@@ -218,6 +221,7 @@ public class SupervisionFragment extends Fragment {
         apiService.listarAlertasSupervision().enqueue(new Callback<ApiResponse<List<Alerta>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<Alerta>>> call, Response<ApiResponse<List<Alerta>>> response) {
+                if (!isAdded()) return;
                 if (response.isSuccessful() && response.body() != null) {
                     List<Alerta> listaAlertas = response.body().getData();
                     AlertaAdapter adapter = new AlertaAdapter(listaAlertas, requireContext());
@@ -229,6 +233,7 @@ public class SupervisionFragment extends Fragment {
 
             @Override
             public void onFailure(Call<ApiResponse<List<Alerta>>> call, Throwable t) {
+                if (!isAdded()) return;
                 Toast.makeText(getContext(), getString(R.string.error_red_alertas), Toast.LENGTH_SHORT).show();
             }
         });
@@ -242,6 +247,7 @@ public class SupervisionFragment extends Fragment {
         apiService.listarPuntosVentaSupervision().enqueue(new Callback<ApiResponse<List<SupervisionPuntoVenta>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<SupervisionPuntoVenta>>> call, Response<ApiResponse<List<SupervisionPuntoVenta>>> response) {
+                if (!isAdded()) return;
                 if (response.isSuccessful() && response.body() != null) {
                     List<SupervisionPuntoVenta> lista = response.body().getData();
                     SupervisionPuntoVentaAdapter adapter = new SupervisionPuntoVentaAdapter(lista, requireContext());
@@ -253,6 +259,7 @@ public class SupervisionFragment extends Fragment {
 
             @Override
             public void onFailure(Call<ApiResponse<List<SupervisionPuntoVenta>>> call, Throwable t) {
+                if (!isAdded()) return;
                 Toast.makeText(getContext(), getString(R.string.error_red_pdvs), Toast.LENGTH_SHORT).show();
             }
         });

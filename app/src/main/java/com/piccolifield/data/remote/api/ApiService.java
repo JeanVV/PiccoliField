@@ -4,6 +4,10 @@ import java.util.List;
 
 import com.piccolifield.data.model.AlertaDetalle;
 import com.piccolifield.data.model.AsistenciaResumen;
+import com.piccolifield.data.model.Impulsador;
+import com.piccolifield.data.model.PuntoVentaDetalle;
+import com.piccolifield.data.model.PuntoVentaHistorial;
+import com.piccolifield.data.model.ReasignarImpulsadorResponse;
 import com.piccolifield.data.model.RegistroAsistencia;
 import com.piccolifield.data.model.ResumenDashboard;
 import com.piccolifield.data.model.TurnoHistorial;
@@ -11,9 +15,10 @@ import com.piccolifield.data.model.Usuario;
 import com.piccolifield.data.model.VendedorDetalle;
 import com.piccolifield.data.remote.dto.FcmTokenRequest;
 import com.piccolifield.data.remote.dto.request.LoginRequest;
+import com.piccolifield.data.remote.dto.request.ReasignarImpulsadorRequest;
 import com.piccolifield.data.remote.dto.response.ApiResponse;
 import com.piccolifield.model.Alerta;
-import com.piccolifield.model.PuntoVenta;
+import com.piccolifield.model.PuntoDistribucion;
 import com.piccolifield.model.Vendedor;
 
 import okhttp3.ResponseBody;
@@ -49,7 +54,7 @@ public interface ApiService {
     // 1. PUNTOS DE DISTRIBUCIÓN
     // =============================================================
     @GET("puntos-venta")
-    Call<ApiResponse<List<PuntoVenta>>> listarPuntosVenta(
+    Call<ApiResponse<List<PuntoDistribucion>>> listarPuntosVenta(
             @Query("search") String search,
             @Query("categoria") String categoria,
             @Query("distrito") Integer distrito,
@@ -99,4 +104,32 @@ public interface ApiService {
 
     @GET("supervision/puntos-venta")
     Call<ApiResponse<List<com.piccolifield.model.SupervisionPuntoVenta>>> listarPuntosVentaSupervision();
+
+    @GET("supervision/impulsadores")
+    Call<ApiResponse<List<Impulsador>>> listarImpulsadores();
+
+    @GET("supervision/impulsadores/{id}/foto")
+    Call<ResponseBody> obtenerFotoImpulsador(
+            @Path("id") int idUsuario
+    );
+
+    @GET("supervision/puntos-venta/{id}")
+    Call<ApiResponse<PuntoVentaDetalle>> obtenerDetallePuntoVentaSupervision(
+            @Path("id") int idPuntosVenta
+    );
+
+    @GET("supervision/puntos-venta/{id}/historial")
+    Call<ApiResponse<List<PuntoVentaHistorial>>> obtenerHistorialPuntoVenta(
+            @Path("id") int idPuntosVenta
+    );
+
+    @POST("supervision/reasignar-impulsador")
+    Call<ApiResponse<ReasignarImpulsadorResponse>> reasignarImpulsador(
+            @Body ReasignarImpulsadorRequest request
+    );
+
+    @GET("supervision/productos/{id}/foto")
+    Call<ResponseBody> obtenerFotoProducto(
+            @Path("id") int idProducto
+    );
 }
