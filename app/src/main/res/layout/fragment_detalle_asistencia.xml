@@ -348,7 +348,191 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- 4. Sección: "Historial de Turnos" -->
+            <!-- 4. Sección: Justificación de Inasistencia (vista por Admin) -->
+            <TextView
+                android:id="@+id/tvJustificacionHeader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:fontFamily="serif"
+                android:text="Justificación de Inasistencia"
+                android:textColor="@color/cafe_profundo"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardJustificacionAdmin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="#FFF8E7"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/dorado_premium"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:src="@drawable/ic_warning_alert"
+                            app:tint="@color/caramelo"
+                            tools:ignore="ContentDescription" />
+
+                        <TextView
+                            android:id="@+id/tvMotivoJustificacionAdmin"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_weight="1"
+                            android:textColor="@color/cafe_profundo"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            tools:text="Motivo: Cita Médica / Salud" />
+
+                        <TextView
+                            android:id="@+id/tvEstadoJustificacionBadgeAdmin"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_badge_permission"
+                            android:paddingHorizontal="8dp"
+                            android:paddingVertical="3dp"
+                            android:text="ENVIADA"
+                            android:textColor="@color/status_permission_text"
+                            android:textSize="10sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tvDetalleJustificacionAdmin"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:textColor="@color/chocolate"
+                        android:textSize="13sp"
+                        tools:text="Detalle: El colaborador presentó cita en ESSALUD." />
+
+                    <!-- IMAGEN / COMPROBANTE DE SUSTENTO -->
+                    <LinearLayout
+                        android:id="@+id/layoutFotoSustentoAdmin"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:orientation="vertical"
+                        android:visibility="gone"
+                        tools:visibility="visible">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="6dp"
+                            android:text="Certificado / Documento de Sustento:"
+                            android:textColor="@color/cafe_profundo"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:layout_width="match_parent"
+                            android:layout_height="200dp"
+                            app:cardCornerRadius="12dp"
+                            app:cardElevation="0dp"
+                            app:strokeColor="@color/stroke_color"
+                            app:strokeWidth="1dp">
+
+                            <ImageView
+                                android:id="@+id/ivFotoSustentoAdmin"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:clickable="true"
+                                android:focusable="true"
+                                android:foreground="?attr/selectableItemBackground"
+                                android:scaleType="centerCrop"
+                                tools:ignore="ContentDescription"
+                                tools:src="@drawable/bg_badge_permission" />
+                        </com.google.android.material.card.MaterialCardView>
+                    </LinearLayout>
+
+                    <!-- CONTROLES DE REVISIÓN / APROBACIÓN POR ADMIN -->
+                    <LinearLayout
+                        android:id="@+id/layoutControlesRevisionAdmin"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:orientation="vertical">
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginBottom="12dp"
+                            android:background="@color/stroke_color" />
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/tilComentarioRevision"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Comentario de revisión del Admin (opcional)"
+                            app:boxStrokeColor="@color/cafe_profundo">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etComentarioRevisionAdmin"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="text"
+                                android:textColor="@color/cafe_profundo"
+                                android:textSize="13sp" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:orientation="horizontal">
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnAprobarJustificacion"
+                                style="@style/Widget.Piccoli.Button.Primary"
+                                android:layout_width="0dp"
+                                android:layout_height="48dp"
+                                android:layout_marginEnd="6dp"
+                                android:layout_weight="1"
+                                android:backgroundTint="#2E7D32"
+                                android:text="Aprobar"
+                                android:textColor="@color/white"
+                                app:icon="@drawable/ic_check_circle_green"
+                                app:iconTint="@color/white" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnRechazarJustificacion"
+                                style="@style/Widget.Piccoli.Button.Outlined"
+                                android:layout_width="0dp"
+                                android:layout_height="48dp"
+                                android:layout_marginStart="6dp"
+                                android:layout_weight="1"
+                                android:strokeColor="#C62828"
+                                android:text="Rechazar"
+                                android:textColor="#C62828"
+                                app:icon="@drawable/ic_warning_alert"
+                                app:iconTint="#C62828" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 5. Sección: Historial de Turnos -->
             <TextView
                 android:id="@+id/tvShiftHistoryHeader"
                 android:layout_width="wrap_content"

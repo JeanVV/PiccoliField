@@ -107,6 +107,26 @@ public class LoginActivity extends AppCompatActivity {
                                 SplashStorage.guardarToken(LoginActivity.this, token);
                             }
 
+                            // Intentar guardar datos de usuario si vienen en la respuesta
+                            if (json.has("user") || json.has("usuario") || json.has("data")) {
+                                JSONObject userObj = json.optJSONObject("user");
+                                if (userObj == null) userObj = json.optJSONObject("usuario");
+                                if (userObj == null && json.opt("data") instanceof JSONObject) {
+                                    userObj = json.optJSONObject("data");
+                                }
+                                if (userObj != null) {
+                                    String rol = userObj.optString("rol", userObj.optString("role", ""));
+                                    int idUsuario = userObj.optInt("idUsuario", userObj.optInt("id_usuario", userObj.optInt("id", 0)));
+                                    String nombre = userObj.optString("nombres", userObj.optString("nombre", ""));
+                                    String correo = userObj.optString("correo", userObj.optString("email", ""));
+
+                                    SplashStorage.guardarRol(LoginActivity.this, rol);
+                                    SplashStorage.guardarUsuarioId(LoginActivity.this, idUsuario);
+                                    SplashStorage.guardarNombreUsuario(LoginActivity.this, nombre);
+                                    SplashStorage.guardarCorreoUsuario(LoginActivity.this, correo);
+                                }
+                            }
+
                             SplashStorage.registrarSesionActiva(LoginActivity.this);
 
                             Toast.makeText(LoginActivity.this, "¡Bienvenido a Piccoli!", Toast.LENGTH_SHORT).show();

@@ -1,15 +1,21 @@
 package com.piccolifield.ui.asistencia;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.piccolifield.data.remote.dto.request.RevisionJustificacionRequest;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -118,7 +124,166 @@ public class DetalleAsistenciaFragment extends Fragment {
             binding.tvTardanzaMinutes.setText(minTardanza > 0 ? minTardanza + " min" : "Sin tardanza");
 
             configurarBadge(binding.tvUserStatusBadge, registro.getEstado());
+            cargarJustificacionAdmin();
+            configurarControlesRevisionAdmin();
             cargarHistorialTurnos(registro.getIdUsuario());
+        }
+    }
+
+    private void configurarControlesRevisionAdmin() {
+        if (binding == null || registro == null) return;
+
+        String rol = SplashStorage.obtenerRol(requireContext());
+        if ("ADMINISTRADOR".equalsIgnoreCase(rol)) {
+            binding.layoutControlesRevisionAdmin.setVisibility(View.VISIBLE);
+
+            binding.btnAprobarJustificacion.setOnClickListener(v -> procesarRevision("APROBADA"));
+            binding.btnRechazarJustificacion.setOnClickListener(v -> procesarRevision("RECHAZADA"));
+        } else {
+            binding.layoutControlesRevisionAdmin.setVisibility(View.GONE);
+        }
+    }
+
+    private void procesarRevision(String estadoNuevo) {
+        if (binding == null || registro == null) return;
+
+        String comentario = binding.etComentarioRevisionAdmin.getText() != null ?
+                binding.etComentarioRevisionAdmin.getText().toString().trim() : "";
+
+        int idRevisor = SplashStorage.obtenerUsuarioId(requireContext());
+        int idUsuarioColaborador = registro.getIdUsuario();
+
+        RevisionJustificacionRequest request = new RevisionJustificacionRequest(
+                idUsuarioColaborador, idRevisor, estadoNuevo, comentario
+        );
+
+        binding.btnAprobarJustificacion.setEnabled(false);
+        binding.btnRechazarJustificacion.setEnabled(false);
+
+        actualizarEstadoBadgeJustificacion(estadoNuevo);
+
+        if (apiService != null) {
+            apiService.revisarJustificacion(request).enqueue(new Callback<ApiResponse<Object>>() {
+                @Override
+                public void onResponse(@NonNull Call<ApiResponse<Object>> call, @NonNull Response<ApiResponse<Object>> response) {
+                    if (!isAdded() || binding == null) return;
+                    binding.btnAprobarJustificacion.setEnabled(true);
+                    binding.btnRechazarJustificacion.setEnabled(true);
+
+                    String msj = "APROBADA".equalsIgnoreCase(estadoNuevo) ? "Justificación Aprobada" : "Justificación Rechazada";
+                    Toast.makeText(getContext(), msj + " exitosamente", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<ApiResponse<Object>> call, @NonNull Throwable t) {
+                    if (!isAdded() || binding == null) return;
+                    binding.btnAprobarJustificacion.setEnabled(true);
+                    binding.btnRechazarJustificacion.setEnabled(true);
+
+                    String msj = "APROBADA".equalsIgnoreCase(estadoNuevo) ? "Justificación Aprobada localmente" : "Justificación Rechazada localmente";
+                    Toast.makeText(getContext(), msj, Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    }
+
+    private void actualizarEstadoBadgeJustificacion(String estadoNuevo) {
+        if (binding == null) return;
+        binding.tvEstadoJustificacionBadgeAdmin.setText(estadoNuevo);
+        if ("APROBADA".equalsIgnoreCase(estadoNuevo)) {
+            binding.tvEstadoJustificacionBadgeAdmin.setBackgroundResource(R.drawable.bg_badge_on_time);
+            binding.tvEstadoJustificacionBadgeAdmin.setTextColor(requireContext().getColor(R.color.status_on_time_text));
+        } else if ("RECHAZADA".equalsIgnoreCase(estadoNuevo)) {
+            binding.tvEstadoJustificacionBadgeAdmin.setBackgroundResource(R.drawable.bg_badge_absent);
+            binding.tvEstadoJustificacionBadgeAdmin.setTextColor(requireContext().getColor(R.color.status_absent_text));
+        }
+    }
+
+    private void cargarJustificacionAdmin() {
+        if (registro == null || binding == null) return;
+
+        // Si el objeto ya tiene la información de la justificación
+        if (registro.getJustificacion() != null && !registro.getJustificacion().isEmpty()) {
+            binding.cardJustificacionAdmin.setVisibility(View.VISIBLE);
+            binding.tvMotivoJustificacionAdmin.setText("Motivo: " + (registro.getMotivoJustificacion() != null ? registro.getMotivoJustificacion() : "Inasistencia"));
+            binding.tvDetalleJustificacionAdmin.setText("Detalle: " + registro.getJustificacion());
+            mostrarFotoSustento(registro.getRutaSustento());
+            return;
+        }
+
+        // Si no está cargada pero hay un ID de usuario, la solicitamos a la API
+        if (apiService != null && registro.getIdUsuario() > 0) {
+            apiService.obtenerJustificacionUsuario(registro.getIdUsuario()).enqueue(new Callback<ApiResponse<RegistroAsistencia>>() {
+                @Override
+                public void onResponse(@NonNull Call<ApiResponse<RegistroAsistencia>> call, @NonNull Response<ApiResponse<RegistroAsistencia>> response) {
+                    if (!isAdded() || binding == null) return;
+
+                    if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                        RegistroAsistencia resJust = response.body().getData();
+                        if (resJust.getJustificacion() != null && !resJust.getJustificacion().isEmpty()) {
+                            binding.cardJustificacionAdmin.setVisibility(View.VISIBLE);
+                            binding.tvMotivoJustificacionAdmin.setText("Motivo: " + (resJust.getMotivoJustificacion() != null ? resJust.getMotivoJustificacion() : "Inasistencia"));
+                            binding.tvDetalleJustificacionAdmin.setText("Detalle: " + resJust.getJustificacion());
+                            mostrarFotoSustento(resJust.getRutaSustento());
+                        } else {
+                            mostrarJustificacionPorDefectoOEstado();
+                        }
+                    } else {
+                        mostrarJustificacionPorDefectoOEstado();
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<ApiResponse<RegistroAsistencia>> call, @NonNull Throwable t) {
+                    if (!isAdded() || binding == null) return;
+                    mostrarJustificacionPorDefectoOEstado();
+                }
+            });
+        } else {
+            mostrarJustificacionPorDefectoOEstado();
+        }
+    }
+
+    private void mostrarFotoSustento(String rutaSustento) {
+        if (binding == null) return;
+        if (rutaSustento == null || rutaSustento.trim().isEmpty()) {
+            binding.layoutFotoSustentoAdmin.setVisibility(View.GONE);
+            return;
+        }
+
+        binding.layoutFotoSustentoAdmin.setVisibility(View.VISIBLE);
+
+        try {
+            if (rutaSustento.startsWith("content://") || rutaSustento.startsWith("file://")) {
+                binding.ivFotoSustentoAdmin.setImageURI(Uri.parse(rutaSustento));
+            } else {
+                byte[] decodedBytes = Base64.decode(rutaSustento, Base64.DEFAULT);
+                Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+                if (bitmap != null) {
+                    binding.ivFotoSustentoAdmin.setImageBitmap(bitmap);
+                } else {
+                    binding.layoutFotoSustentoAdmin.setVisibility(View.GONE);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            binding.layoutFotoSustentoAdmin.setVisibility(View.GONE);
+        }
+    }
+
+    private void mostrarJustificacionPorDefectoOEstado() {
+        if (registro == null || binding == null) return;
+
+        // Si el estado es FALTA o TARDANZA, mostrar aviso de justificación pendiente o sin registro
+        String estado = registro.getEstado();
+        if ("FALTA".equalsIgnoreCase(estado) || "PERMISO".equalsIgnoreCase(estado)) {
+            binding.cardJustificacionAdmin.setVisibility(View.VISIBLE);
+            binding.tvMotivoJustificacionAdmin.setText("Motivo: Justificación no registrada");
+            binding.tvDetalleJustificacionAdmin.setText("El colaborador aún no ha enviado una justificación formal para esta falta.");
+            binding.tvEstadoJustificacionBadgeAdmin.setText("SIN REGISTRO");
+            binding.layoutFotoSustentoAdmin.setVisibility(View.GONE);
+        } else {
+            binding.cardJustificacionAdmin.setVisibility(View.GONE);
         }
     }
 

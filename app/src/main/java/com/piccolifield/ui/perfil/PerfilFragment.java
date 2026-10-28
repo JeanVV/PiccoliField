@@ -69,6 +69,12 @@ public class PerfilFragment extends Fragment {
                         String apellidos = usuario.getApellidos() != null ? usuario.getApellidos() : "";
                         String nombreCompleto = (nombres + " " + apellidos).trim();
 
+                        // Guardar datos en SplashStorage para uso en la app
+                        SplashStorage.guardarRol(requireContext(), usuario.getRol());
+                        SplashStorage.guardarUsuarioId(requireContext(), usuario.getIdUsuario());
+                        SplashStorage.guardarNombreUsuario(requireContext(), nombreCompleto.isEmpty() ? usuario.getNombres() : nombreCompleto);
+                        SplashStorage.guardarCorreoUsuario(requireContext(), usuario.getEmail());
+
                         binding.tvNombre.setText(nombreCompleto.isEmpty() ? "Usuario Registrado" : nombreCompleto);
                         binding.tvEmail.setText(usuario.getEmail() != null ? usuario.getEmail() : "Sin correo");
                         binding.tvRol.setText("Rol: " + (usuario.getRol() != null ? usuario.getRol() : "CLIENTE"));

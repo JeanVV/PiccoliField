@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.ViewGroup;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -12,11 +13,21 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
 
+import com.piccolifield.data.model.Usuario;
+import com.piccolifield.data.remote.api.ApiService;
+import com.piccolifield.data.remote.dto.RetrofitClient;
+import com.piccolifield.data.remote.dto.response.ApiResponse;
 import com.piccolifield.databinding.ActivityMenuBinding;
+import com.piccolifield.sharedpreferences.SplashStorage;
 import com.piccolifield.ui.asistencia.AsistenciaHomeFragment;
+import com.piccolifield.ui.asistencias.AsistenciasFragment;
 import com.piccolifield.ui.despacho.PuntosDespachoFragment;
 import com.piccolifield.ui.perfil.PerfilFragment;
 import com.piccolifield.ui.supervisionPdv.SupervisionFragment;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MenuActivity extends AppCompatActivity {
 
@@ -47,6 +58,11 @@ public class MenuActivity extends AppCompatActivity {
             return insets;
         });
 
+        // Asegurar la precarga del perfil si aún no hay rol en SharedPreferences
+        if (SplashStorage.obtenerRol(this).isEmpty()) {
+            precargarPerfil();
+        }
+
         // Cargar por defecto la primera pantalla (Inicio)
         if (savedInstanceState == null) {
             cargarFragmento(new PerfilFragment());
@@ -59,19 +75,89 @@ public class MenuActivity extends AppCompatActivity {
                     cargarFragmento(new PerfilFragment());
                     break;
                 case 1:
-                    // Favoritos
-                    cargarFragmento(new AsistenciaHomeFragment());
+                    // Asistencias (Validación según Rol)
+                    cargarFragmentoAsistenciaSegunRol();
                     break;
                 case 2:
-                    // Buscar
+                    // Supervisión
                     cargarFragmento(new SupervisionFragment());
                     break;
                 case 3:
-                    // Perfil
+                    // Puntos de Despacho
                     cargarFragmento(new PuntosDespachoFragment());
                     break;
             }
         });
+    }
+
+    private void precargarPerfil() {
+        if (RetrofitClient.API_TOKEN == null || RetrofitClient.API_TOKEN.isEmpty()) {
+            RetrofitClient.API_TOKEN = SplashStorage.obtenerToken(this);
+        }
+
+        ApiService apiService = RetrofitClient.createService();
+        apiService.obtenerPerfil().enqueue(new Callback<ApiResponse<Usuario>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<Usuario>> call, @NonNull Response<ApiResponse<Usuario>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                    Usuario usuario = response.body().getData();
+                    SplashStorage.guardarRol(MenuActivity.this, usuario.getRol());
+                    SplashStorage.guardarUsuarioId(MenuActivity.this, usuario.getIdUsuario());
+                    SplashStorage.guardarNombreUsuario(MenuActivity.this, usuario.getNombreCompleto());
+                    SplashStorage.guardarCorreoUsuario(MenuActivity.this, usuario.getEmail());
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<Usuario>> call, @NonNull Throwable t) {
+                // Se intentará nuevamente cuando el usuario navegue
+            }
+        });
+    }
+
+    private void cargarFragmentoAsistenciaSegunRol() {
+        String rol = SplashStorage.obtenerRol(this);
+
+        if (rol.isEmpty()) {
+            if (RetrofitClient.API_TOKEN == null || RetrofitClient.API_TOKEN.isEmpty()) {
+                RetrofitClient.API_TOKEN = SplashStorage.obtenerToken(this);
+            }
+
+            ApiService apiService = RetrofitClient.createService();
+            apiService.obtenerPerfil().enqueue(new Callback<ApiResponse<Usuario>>() {
+                @Override
+                public void onResponse(@NonNull Call<ApiResponse<Usuario>> call, @NonNull Response<ApiResponse<Usuario>> response) {
+                    if (isFinishing() || binding == null) return;
+
+                    if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                        Usuario usuario = response.body().getData();
+                        String r = usuario.getRol();
+                        SplashStorage.guardarRol(MenuActivity.this, r);
+                        SplashStorage.guardarUsuarioId(MenuActivity.this, usuario.getIdUsuario());
+                        SplashStorage.guardarNombreUsuario(MenuActivity.this, usuario.getNombreCompleto());
+                        SplashStorage.guardarCorreoUsuario(MenuActivity.this, usuario.getEmail());
+
+                        if ("ADMINISTRADOR".equalsIgnoreCase(r)) {
+                            cargarFragmento(new AsistenciaHomeFragment());
+                        } else {
+                            cargarFragmento(new AsistenciasFragment());
+                        }
+                    } else {
+                        cargarFragmento(new AsistenciasFragment());
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<ApiResponse<Usuario>> call, @NonNull Throwable t) {
+                    if (isFinishing() || binding == null) return;
+                    cargarFragmento(new AsistenciasFragment());
+                }
+            });
+        } else if ("ADMINISTRADOR".equalsIgnoreCase(rol)) {
+            cargarFragmento(new AsistenciaHomeFragment());
+        } else {
+            cargarFragmento(new AsistenciasFragment());
+        }
     }
 
     private void cargarFragmento(Fragment fragment) {

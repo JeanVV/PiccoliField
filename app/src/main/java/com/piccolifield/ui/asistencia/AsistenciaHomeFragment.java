@@ -185,29 +185,31 @@ public class AsistenciaHomeFragment extends Fragment {
             public void onResponse(@NonNull Call<ApiResponse<List<RegistroAsistencia>>> call, @NonNull Response<ApiResponse<List<RegistroAsistencia>>> response) {
                 if (!isAdded() || binding == null) return;
 
+                List<RegistroAsistencia> listaRemote = null;
                 if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
-                    List<RegistroAsistencia> lista = response.body().getData();
-                    if (lista.isEmpty()) {
-                        binding.layoutEmptyRecentState.setVisibility(View.VISIBLE);
-                        binding.rvRecentPersonnel.setVisibility(View.GONE);
-                    } else {
-                        binding.layoutEmptyRecentState.setVisibility(View.GONE);
-                        binding.rvRecentPersonnel.setVisibility(View.VISIBLE);
-                        binding.rvRecentPersonnel.setLayoutManager(new LinearLayoutManager(getContext()));
+                    listaRemote = response.body().getData();
+                }
 
-                        adapter = new RecentPersonnelAdapter(lista);
-                        adapter.setOnItemClickListener(item -> {
-                            DetalleAsistenciaFragment fragment = DetalleAsistenciaFragment.newInstance(item);
-                            getParentFragmentManager().beginTransaction()
-                                    .replace(R.id.fragmentContainer, fragment)
-                                    .addToBackStack(null)
-                                    .commit();
-                        });
-                        binding.rvRecentPersonnel.setAdapter(adapter);
-                    }
-                } else {
-                    Log.e("AsistenciaHome", "Error en respuesta personal: " + response.code());
+                List<RegistroAsistencia> listaCombinada = combinarConLocales(listaRemote);
+                verificarJustificacionesPendientes(listaCombinada);
+
+                if (listaCombinada.isEmpty()) {
                     binding.layoutEmptyRecentState.setVisibility(View.VISIBLE);
+                    binding.rvRecentPersonnel.setVisibility(View.GONE);
+                } else {
+                    binding.layoutEmptyRecentState.setVisibility(View.GONE);
+                    binding.rvRecentPersonnel.setVisibility(View.VISIBLE);
+                    binding.rvRecentPersonnel.setLayoutManager(new LinearLayoutManager(getContext()));
+
+                    adapter = new RecentPersonnelAdapter(listaCombinada);
+                    adapter.setOnItemClickListener(item -> {
+                        DetalleAsistenciaFragment fragment = DetalleAsistenciaFragment.newInstance(item);
+                        getParentFragmentManager().beginTransaction()
+                                .replace(R.id.fragmentContainer, fragment)
+                                .addToBackStack(null)
+                                .commit();
+                    });
+                    binding.rvRecentPersonnel.setAdapter(adapter);
                 }
             }
 
@@ -215,9 +217,82 @@ public class AsistenciaHomeFragment extends Fragment {
             public void onFailure(@NonNull Call<ApiResponse<List<RegistroAsistencia>>> call, @NonNull Throwable t) {
                 if (!isAdded() || binding == null) return;
                 Log.e("AsistenciaHome", "Fallo red personal: " + t.getMessage());
-                binding.layoutEmptyRecentState.setVisibility(View.VISIBLE);
+
+                List<RegistroAsistencia> listaLocales = combinarConLocales(null);
+                verificarJustificacionesPendientes(listaLocales);
+
+                if (!listaLocales.isEmpty()) {
+                    binding.layoutEmptyRecentState.setVisibility(View.GONE);
+                    binding.rvRecentPersonnel.setVisibility(View.VISIBLE);
+                    binding.rvRecentPersonnel.setLayoutManager(new LinearLayoutManager(getContext()));
+
+                    adapter = new RecentPersonnelAdapter(listaLocales);
+                    adapter.setOnItemClickListener(item -> {
+                        DetalleAsistenciaFragment fragment = DetalleAsistenciaFragment.newInstance(item);
+                        getParentFragmentManager().beginTransaction()
+                                .replace(R.id.fragmentContainer, fragment)
+                                .addToBackStack(null)
+                                .commit();
+                    });
+                    binding.rvRecentPersonnel.setAdapter(adapter);
+                } else {
+                    binding.layoutEmptyRecentState.setVisibility(View.VISIBLE);
+                }
             }
         });
+    }
+
+    private java.util.List<RegistroAsistencia> combinarConLocales(java.util.List<RegistroAsistencia> listaRemote) {
+        java.util.List<RegistroAsistencia> combinada = new java.util.ArrayList<>();
+        if (listaRemote != null) {
+            combinada.addAll(listaRemote);
+        }
+
+        java.util.List<RegistroAsistencia> locales = SplashStorage.obtenerRegistrosAsistenciaLocales(getContext());
+        if (locales != null && !locales.isEmpty()) {
+            for (RegistroAsistencia loc : locales) {
+                boolean existe = false;
+                for (RegistroAsistencia rem : combinada) {
+                    if (rem.getIdUsuario() == loc.getIdUsuario()) {
+                        if (loc.getJustificacion() != null && !loc.getJustificacion().isEmpty()) {
+                            rem.setJustificacion(loc.getJustificacion());
+                            rem.setMotivoJustificacion(loc.getMotivoJustificacion());
+                        }
+                        existe = true;
+                        break;
+                    }
+                }
+                if (!existe) {
+                    combinada.add(0, loc);
+                }
+            }
+        }
+        return combinada;
+    }
+
+    private void verificarJustificacionesPendientes(List<RegistroAsistencia> lista) {
+        if (binding == null) return;
+        int countPendientes = 0;
+
+        if (lista != null) {
+            for (RegistroAsistencia item : lista) {
+                if (item.getJustificacion() != null && !item.getJustificacion().isEmpty()) {
+                    countPendientes++;
+                }
+            }
+        }
+
+        if (countPendientes > 0) {
+            binding.cardPendingJustificationsBanner.setVisibility(View.VISIBLE);
+            binding.tvPendingJustificationsCount.setText("Tienes " + countPendientes + " colaborador(es) con justificación de falta por revisar.");
+            binding.btnFiltrarPendientes.setOnClickListener(v -> {
+                if (adapter != null) {
+                    adapter.filtrar("", "FALTA");
+                }
+            });
+        } else {
+            binding.cardPendingJustificationsBanner.setVisibility(View.GONE);
+        }
     }
 
     @Override

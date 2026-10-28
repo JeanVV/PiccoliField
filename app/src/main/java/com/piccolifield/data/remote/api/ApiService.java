@@ -10,7 +10,10 @@ import com.piccolifield.data.model.TurnoHistorial;
 import com.piccolifield.data.model.Usuario;
 import com.piccolifield.data.model.VendedorDetalle;
 import com.piccolifield.data.remote.dto.FcmTokenRequest;
+import com.piccolifield.data.remote.dto.request.JustificationRequest;
 import com.piccolifield.data.remote.dto.request.LoginRequest;
+import com.piccolifield.data.remote.dto.request.MarcarAsistenciaRequest;
+import com.piccolifield.data.remote.dto.request.RevisionJustificacionRequest;
 import com.piccolifield.data.remote.dto.response.ApiResponse;
 import com.piccolifield.model.Alerta;
 import com.piccolifield.model.PuntoVenta;
@@ -73,6 +76,18 @@ public interface ApiService {
 
     @GET("asistencias/historial/{idUsuario}")
     Call<ApiResponse<List<TurnoHistorial>>> obtenerHistorialTurnos(@Path("idUsuario") int idUsuario);
+
+    @POST("asistencias/marcar")
+    Call<ApiResponse<Object>> registrarAsistencia(@Body MarcarAsistenciaRequest request);
+
+    @POST("asistencias/justificar")
+    Call<ApiResponse<Object>> registrarJustificacion(@Body JustificationRequest request);
+
+    @GET("asistencias/justificacion/{idUsuario}")
+    Call<ApiResponse<RegistroAsistencia>> obtenerJustificacionUsuario(@Path("idUsuario") int idUsuario);
+
+    @POST("asistencias/justificacion/revisar")
+    Call<ApiResponse<Object>> revisarJustificacion(@Body RevisionJustificacionRequest request);
 
 
     // -------------------------------------------------------------
