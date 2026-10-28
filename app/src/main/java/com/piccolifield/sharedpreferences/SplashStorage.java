@@ -86,11 +86,11 @@ public class SplashStorage {
 
     public static String obtenerRol(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        String rol = sharedPreferences.getString("user_role", "");
-        if (rol.isEmpty()) {
-            rol = sharedPreferences.getString("user_rol", "");
+        String rolRole = sharedPreferences.getString("user_role", "");
+        if (!rolRole.isEmpty()) {
+            return rolRole;
         }
-        return rol;
+        return sharedPreferences.getString("user_rol", "");
     }
 
     public static void guardarUsuarioId(Context context, int idUsuario) {
@@ -159,7 +159,7 @@ public class SplashStorage {
         if (context == null) return new ArrayList<>();
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         String json = sharedPreferences.getString("registros_asistencia_locales", "");
-        if (json == null || json.isEmpty()) {
+        if (json.isEmpty()) {
             return new ArrayList<>();
         }
         try {
