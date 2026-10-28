@@ -37,7 +37,8 @@ public class SplashStorage {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean("sesion_iniciada", true);
-        editor.putString("user_rol", rol);
+        editor.putString("user_rol", rol != null ? rol : "");
+        editor.putString("user_role", rol != null ? rol : "");
         editor.apply();
     }
 
@@ -45,9 +46,9 @@ public class SplashStorage {
         registrarSesionActiva(context, "SUPERVISOR");
     }
 
-    public static String obtenerRol(Context context) {
+    public static boolean consultarSesionActiva(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        return sharedPreferences.getString("user_rol", "SUPERVISOR");
+        return sharedPreferences.getBoolean("sesion_iniciada", false);
     }
 
     public static void limpiarSesionActiva(Context context) {
@@ -56,15 +57,11 @@ public class SplashStorage {
         editor.putBoolean("sesion_iniciada", false);
         editor.remove("auth_token");
         editor.remove("user_role");
+        editor.remove("user_rol");
         editor.remove("user_id");
         editor.remove("user_name");
         editor.remove("user_email");
         editor.apply();
-    }
-
-    public static boolean consultarSesionActiva(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        return sharedPreferences.getBoolean("sesion_iniciada", false);
     }
 
     public static void guardarToken(Context context, String token) {
@@ -83,12 +80,17 @@ public class SplashStorage {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("user_role", rol != null ? rol : "");
+        editor.putString("user_rol", rol != null ? rol : "");
         editor.apply();
     }
 
     public static String obtenerRol(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        return sharedPreferences.getString("user_role", "");
+        String rol = sharedPreferences.getString("user_role", "");
+        if (rol.isEmpty()) {
+            rol = sharedPreferences.getString("user_rol", "");
+        }
+        return rol;
     }
 
     public static void guardarUsuarioId(Context context, int idUsuario) {
