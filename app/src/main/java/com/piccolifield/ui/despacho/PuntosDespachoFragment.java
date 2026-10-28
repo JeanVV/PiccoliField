@@ -16,14 +16,14 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.piccolifield.DetallePuntoVentaActivity;
+import com.piccolifield.DetallePuntoDistribucionActivity;
 import com.piccolifield.R;
-import com.piccolifield.adapter.PuntoVentaAdapter;
+import com.piccolifield.adapter.PuntoDistribucionAdapter;
 import com.piccolifield.data.remote.api.ApiService;
 import com.piccolifield.data.remote.dto.RetrofitClient;
 import com.piccolifield.data.remote.dto.response.ApiResponse;
 import com.piccolifield.databinding.FragmentPuntosDespachoBinding;
-import com.piccolifield.model.PuntoVenta;
+import com.piccolifield.model.PuntoDistribucion;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,9 +35,9 @@ import retrofit2.Response;
 public class PuntosDespachoFragment extends Fragment {
 
     private FragmentPuntosDespachoBinding binding;
-    private PuntoVentaAdapter adapter;
-    private final List<PuntoVenta> listaPuntosOriginal = new ArrayList<>();
-    private final List<PuntoVenta> listaPuntosFiltrada = new ArrayList<>();
+    private PuntoDistribucionAdapter adapter;
+    private final List<PuntoDistribucion> listaPuntosOriginal = new ArrayList<>();
+    private final List<PuntoDistribucion> listaPuntosFiltrada = new ArrayList<>();
 
     public PuntosDespachoFragment() {
         // Required empty public constructor
@@ -62,9 +62,9 @@ public class PuntosDespachoFragment extends Fragment {
 
     private void setupRecyclerView() {
         binding.rvListaPuntos.setLayoutManager(new LinearLayoutManager(requireContext()));
-        adapter = new PuntoVentaAdapter(listaPuntosFiltrada, requireActivity(), pdv -> {
+        adapter = new PuntoDistribucionAdapter(listaPuntosFiltrada, requireActivity(), pdv -> {
             if (pdv == null) return;
-            Intent intent = new Intent(requireActivity(), DetallePuntoVentaActivity.class);
+            Intent intent = new Intent(requireActivity(), DetallePuntoDistribucionActivity.class);
             intent.putExtra("ID_PDV", pdv.getId());
             intent.putExtra("NOMBRE_PDV", pdv.getNombre());
             intent.putExtra("DIRECCION", pdv.getDireccion());
@@ -79,9 +79,9 @@ public class PuntosDespachoFragment extends Fragment {
 
     private void cargarDatosDesdeApi() {
         ApiService apiService = RetrofitClient.createService();
-        apiService.listarPuntosVenta(null, null, null, null).enqueue(new Callback<ApiResponse<List<PuntoVenta>>>() {
+        apiService.listarPuntosVenta(null, null, null, null).enqueue(new Callback<ApiResponse<List<PuntoDistribucion>>>() {
             @Override
-            public void onResponse(@NonNull Call<ApiResponse<List<PuntoVenta>>> call, @NonNull Response<ApiResponse<List<PuntoVenta>>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<List<PuntoDistribucion>>> call, @NonNull Response<ApiResponse<List<PuntoDistribucion>>> response) {
                 if (!isAdded() || binding == null) return;
 
                 if (response.isSuccessful() && response.body() != null && response.body().getData() != null && !response.body().getData().isEmpty()) {
@@ -94,7 +94,7 @@ public class PuntosDespachoFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(@NonNull Call<ApiResponse<List<PuntoVenta>>> call, @NonNull Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<List<PuntoDistribucion>>> call, @NonNull Throwable t) {
                 if (!isAdded() || binding == null) return;
                 cargarDatosSimulados();
             }
@@ -103,11 +103,11 @@ public class PuntosDespachoFragment extends Fragment {
 
     private void cargarDatosSimulados() {
         listaPuntosOriginal.clear();
-        listaPuntosOriginal.add(new PuntoVenta(1, "Licorería El Buen Sabor", "Av. Principal 123, Lima", "0245", "En preparación", "12"));
-        listaPuntosOriginal.add(new PuntoVenta(2, "Supermercado Plaza Vea", "Av. Los Olivos 456, Lima", "0244", "En camino", "8"));
-        listaPuntosOriginal.add(new PuntoVenta(3, "Bar La Cava", "Calle Las Flores 789, Lima", "0243", "Pendiente", "5"));
-        listaPuntosOriginal.add(new PuntoVenta(4, "Tienda Don José", "Av. Universitaria 321, Lima", "0242", "En preparación", "14"));
-        listaPuntosOriginal.add(new PuntoVenta(5, "Wong", "Av. Javier Prado 654, Lima", "0241", "En camino", "7"));
+        listaPuntosOriginal.add(new PuntoDistribucion(1, "Licorería El Buen Sabor", "Av. Principal 123, Lima", "0245", "En preparación", "12"));
+        listaPuntosOriginal.add(new PuntoDistribucion(2, "Supermercado Plaza Vea", "Av. Los Olivos 456, Lima", "0244", "En camino", "8"));
+        listaPuntosOriginal.add(new PuntoDistribucion(3, "Bar La Cava", "Calle Las Flores 789, Lima", "0243", "Pendiente", "5"));
+        listaPuntosOriginal.add(new PuntoDistribucion(4, "Tienda Don José", "Av. Universitaria 321, Lima", "0242", "En preparación", "14"));
+        listaPuntosOriginal.add(new PuntoDistribucion(5, "Wong", "Av. Javier Prado 654, Lima", "0241", "En camino", "7"));
 
         actualizarUI();
     }
@@ -123,9 +123,9 @@ public class PuntosDespachoFragment extends Fragment {
         adapter.notifyDataSetChanged();
     }
 
-    private int contarActivos(List<PuntoVenta> lista) {
+    private int contarActivos(List<PuntoDistribucion> lista) {
         int count = 0;
-        for (PuntoVenta p : lista) {
+        for (PuntoDistribucion p : lista) {
             if ("ACTIVO".equalsIgnoreCase(p.getEstado())) {
                 count++;
             }
@@ -167,7 +167,7 @@ public class PuntosDespachoFragment extends Fragment {
 
     private void setupListeners() {
         binding.cardTooltipStore.setOnClickListener(v -> {
-            Intent intent = new Intent(requireActivity(), DetallePuntoVentaActivity.class);
+            Intent intent = new Intent(requireActivity(), DetallePuntoDistribucionActivity.class);
             intent.putExtra("ID_PDV", 1);
             intent.putExtra("NOMBRE_PDV", "Licorería El Buen Sabor");
             startActivity(intent);
@@ -207,7 +207,7 @@ public class PuntosDespachoFragment extends Fragment {
             listaPuntosFiltrada.addAll(listaPuntosOriginal);
         } else {
             String q = query.toLowerCase();
-            for (PuntoVenta p : listaPuntosOriginal) {
+            for (PuntoDistribucion p : listaPuntosOriginal) {
                 if ((p.getNombre() != null && p.getNombre().toLowerCase().contains(q)) ||
                     (p.getDireccion() != null && p.getDireccion().toLowerCase().contains(q)) ||
                     (p.getNumeroPedido() != null && p.getNumeroPedido().toLowerCase().contains(q)) ||

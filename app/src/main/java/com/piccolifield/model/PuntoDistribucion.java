@@ -2,7 +2,7 @@ package com.piccolifield.model;
 
 import com.google.gson.annotations.SerializedName;
 
-public class PuntoVenta {
+public class PuntoDistribucion {
 
     @SerializedName(value = "idPuntosVenta", alternate = {"id", "idPdv", "id_puntos_venta"})
     private int idPuntosVenta;
@@ -39,21 +39,21 @@ public class PuntoVenta {
     private String estadoDespacho;
     private String badgeNumero;
 
-    public PuntoVenta() {}
+    public PuntoDistribucion() {}
 
-    public PuntoVenta(int idPuntosVenta, String puntosVenta, String direccion, String estado) {
+    public PuntoDistribucion(int idPuntosVenta, String puntosVenta, String direccion, String estado) {
         this(idPuntosVenta, "PDV-" + idPuntosVenta, puntosVenta, "Tienda", direccion, "0.8 km", estado, -12.046374, -77.042793, 1, 1, 0, "0245", "En preparación", String.valueOf(idPuntosVenta));
     }
 
-    public PuntoVenta(int idPuntosVenta, String puntosVenta, String direccion, String numeroPedido, String estadoDespacho, String badgeNumero) {
+    public PuntoDistribucion(int idPuntosVenta, String puntosVenta, String direccion, String numeroPedido, String estadoDespacho, String badgeNumero) {
         this(idPuntosVenta, "PDV-" + idPuntosVenta, puntosVenta, "Tienda", direccion, "0.8 km", "ACTIVO", -12.046374, -77.042793, 1, 1, 0, numeroPedido, estadoDespacho, badgeNumero);
     }
 
-    public PuntoVenta(int idPuntosVenta, String puntosVenta, String tipo, String direccion, String distancia, String estado, int imagenResId) {
+    public PuntoDistribucion(int idPuntosVenta, String puntosVenta, String tipo, String direccion, String distancia, String estado, int imagenResId) {
         this(idPuntosVenta, "PDV-" + idPuntosVenta, puntosVenta, tipo, direccion, distancia, estado, -12.046374, -77.042793, 1, 1, imagenResId, "0245", "En preparación", String.valueOf(idPuntosVenta));
     }
 
-    public PuntoVenta(int idPuntosVenta, String codigo, String puntosVenta, String tipo, String direccion, String distancia, String estado, double latitud, double longitud, int idDistrito, int idUsuario, int imagenResId, String numeroPedido, String estadoDespacho, String badgeNumero) {
+    public PuntoDistribucion(int idPuntosVenta, String codigo, String puntosVenta, String tipo, String direccion, String distancia, String estado, double latitud, double longitud, int idDistrito, int idUsuario, int imagenResId, String numeroPedido, String estadoDespacho, String badgeNumero) {
         this.idPuntosVenta = idPuntosVenta;
         this.codigo = codigo;
         this.puntosVenta = puntosVenta;

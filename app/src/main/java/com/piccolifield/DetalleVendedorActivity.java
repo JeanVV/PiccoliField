@@ -3,10 +3,14 @@ package com.piccolifield; // Asegúrate de que el paquete sea el correcto
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import okhttp3.ResponseBody;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -22,9 +26,10 @@ import retrofit2.Response;
 
 public class DetalleVendedorActivity extends AppCompatActivity {
 
-    private ImageView btnBack;
+    private ImageView btnBack, ivPerfilVendedor;
     private TextView tvNombreVendedor, tvPuntoVenta, tvMontoTotal, tvProgresoAsignacion, tvCantidades;
-    private ProgressBar progressBarAsignacion;
+    private ProgressBar progressBarAsignacion, pbLoading;
+    private androidx.core.widget.NestedScrollView scrollView;
 
     private int idUsuarioSeleccionado;
 
@@ -35,6 +40,7 @@ public class DetalleVendedorActivity extends AppCompatActivity {
 
         // 1. Vincular los IDs EXACTOS de tu XML
         btnBack = findViewById(R.id.btnBack);
+        ivPerfilVendedor = findViewById(R.id.ivPerfilVendedor);
         tvNombreVendedor = findViewById(R.id.tvNombreVendedor);
         tvPuntoVenta = findViewById(R.id.tvPuntoVenta);
         tvMontoTotal = findViewById(R.id.tvMontoTotal);
@@ -43,6 +49,8 @@ public class DetalleVendedorActivity extends AppCompatActivity {
         tvProgresoAsignacion = findViewById(R.id.tvPorcentaje);
         progressBarAsignacion = findViewById(R.id.pbVentas);
         tvCantidades = findViewById(R.id.tvCantidades);
+        pbLoading = findViewById(R.id.pbLoading);
+        scrollView = findViewById(R.id.scrollView);
 
         btnBack.setOnClickListener(v -> finish());
         idUsuarioSeleccionado = getIntent().getIntExtra("ID_VENDEDOR", -1);
@@ -56,6 +64,8 @@ public class DetalleVendedorActivity extends AppCompatActivity {
     }
 
     private void cargarDatosVendedor() {
+        if (pbLoading != null) pbLoading.setVisibility(View.VISIBLE);
+        if (scrollView != null) scrollView.setVisibility(View.GONE);
         SharedPreferences prefs = getSharedPreferences("MisPreferencias", Context.MODE_PRIVATE);
         String token = SplashStorage.obtenerToken(this);
 
@@ -71,6 +81,8 @@ public class DetalleVendedorActivity extends AppCompatActivity {
         apiService.obtenerDetalleVendedor(idUsuarioSeleccionado).enqueue(new Callback<ApiResponse<VendedorDetalle>>() {
             @Override
             public void onResponse(Call<ApiResponse<VendedorDetalle>> call, Response<ApiResponse<VendedorDetalle>> response) {
+                if (pbLoading != null) pbLoading.setVisibility(View.GONE);
+                if (scrollView != null) scrollView.setVisibility(View.VISIBLE);
 
                 if (response.isSuccessful() && response.body() != null) {
 
@@ -104,6 +116,22 @@ public class DetalleVendedorActivity extends AppCompatActivity {
                         tvProgresoAsignacion.setText(porcentajeInt + "%");
                         progressBarAsignacion.setProgress(porcentajeInt);
                         tvCantidades.setText(getString(R.string.label_vendidos, cantidadVendida, meta));
+                        
+                        apiService.obtenerFotoImpulsador(idUsuarioSeleccionado).enqueue(new Callback<ResponseBody>() {
+                            @Override
+                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                if (response.isSuccessful() && response.body() != null) {
+                                    Bitmap bmp = BitmapFactory.decodeStream(response.body().byteStream());
+                                    ivPerfilVendedor.post(() -> ivPerfilVendedor.setImageBitmap(bmp));
+                                } else {
+                                    ivPerfilVendedor.setImageResource(R.drawable.ic_avatar_placeholder);
+                                }
+                            }
+                            @Override
+                            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                ivPerfilVendedor.setImageResource(R.drawable.ic_avatar_placeholder);
+                            }
+                        });
                     }
 
                 } else {
@@ -113,6 +141,7 @@ public class DetalleVendedorActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<ApiResponse<VendedorDetalle>> call, Throwable t) {
+                if (pbLoading != null) pbLoading.setVisibility(View.GONE);
                 Toast.makeText(DetalleVendedorActivity.this, getString(R.string.error_falla_red, t.getMessage()), Toast.LENGTH_SHORT).show();
             }
         });

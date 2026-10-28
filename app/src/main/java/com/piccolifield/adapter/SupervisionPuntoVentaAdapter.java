@@ -1,6 +1,7 @@
 package com.piccolifield.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +10,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.piccolifield.DetallePuntoVentaSupervisionActivity;
 import com.piccolifield.R;
 import com.piccolifield.model.SupervisionPuntoVenta;
 
@@ -39,6 +41,12 @@ public class SupervisionPuntoVentaAdapter extends RecyclerView.Adapter<Supervisi
         holder.tvDireccionPdv.setText(pdv.getDireccion());
         holder.tvEstadoPdv.setText(pdv.getEstado());
         holder.tvEstadoPdv.setTextColor(Color.WHITE);
+
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, DetallePuntoVentaSupervisionActivity.class);
+            intent.putExtra("ID_PDV", pdv.getId());
+            context.startActivity(intent);
+        });
     }
 
     @Override

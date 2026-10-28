@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -50,6 +51,7 @@ public class SupervisionFragment extends Fragment {
     private RecyclerView rvPuntosVenta;
     private View layoutDashboard; // Para ocultar/mostrar las tarjetas de resumen
     private TextView tvTituloLista;
+    private ProgressBar pbLoadingListas;
 
     public SupervisionFragment() {}
 
@@ -70,6 +72,7 @@ public class SupervisionFragment extends Fragment {
         tvTabPuntos = view.findViewById(R.id.tvTabPuntos);
         tvTabAlertas = view.findViewById(R.id.tvTabAlertas);
         tvTituloLista = view.findViewById(R.id.tvTituloLista);
+        pbLoadingListas = view.findViewById(R.id.pbLoadingListas);
 
         // El RecyclerView de Vendedores
         rvVendedores = view.findViewById(R.id.rvVendedores);
@@ -120,9 +123,9 @@ public class SupervisionFragment extends Fragment {
                 tvTabInicio.setTextColor(Color.WHITE); // Blanco para que contraste con el chocolate
                 tvTabInicio.setTypeface(null, Typeface.BOLD);
 
-                tvTituloLista.setText(getString(R.string.label_mejores_vendedores));
+                tvTituloLista.setText(getString(R.string.label_mejores_impulsadores));
                 if (layoutDashboard != null) layoutDashboard.setVisibility(View.VISIBLE);
-                rvVendedores.setVisibility(View.VISIBLE);
+                rvVendedores.setVisibility(View.GONE);
                 if (rvAlertas != null) rvAlertas.setVisibility(View.GONE);
                 if (rvPuntosVenta != null) rvPuntosVenta.setVisibility(View.GONE);
 
@@ -139,7 +142,7 @@ public class SupervisionFragment extends Fragment {
                 if (layoutDashboard != null) layoutDashboard.setVisibility(View.GONE);
                 rvVendedores.setVisibility(View.GONE);
                 if (rvAlertas != null) rvAlertas.setVisibility(View.GONE);
-                if (rvPuntosVenta != null) rvPuntosVenta.setVisibility(View.VISIBLE);
+                if (rvPuntosVenta != null) rvPuntosVenta.setVisibility(View.GONE);
                 
                 cargarPuntosVenta();
                 break;
@@ -153,7 +156,7 @@ public class SupervisionFragment extends Fragment {
                 if (layoutDashboard != null) layoutDashboard.setVisibility(View.GONE);
                 rvVendedores.setVisibility(View.GONE);
                 if (rvPuntosVenta != null) rvPuntosVenta.setVisibility(View.GONE);
-                if (rvAlertas != null) rvAlertas.setVisibility(View.VISIBLE);
+                if (rvAlertas != null) rvAlertas.setVisibility(View.GONE);
                 
                 cargarAlertas();
                 break;
@@ -173,6 +176,7 @@ public class SupervisionFragment extends Fragment {
         apiService.obtenerResumenDashboard().enqueue(new Callback<ApiResponse<ResumenDashboard>>() {
             @Override
             public void onResponse(Call<ApiResponse<ResumenDashboard>> call, Response<ApiResponse<ResumenDashboard>> response) {
+                if (!isAdded()) return;
                 if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
                     ResumenDashboard resumen = response.body().getData();
                     tvMontoTotalVentas.setText("S/ " + String.format("%.2f", resumen.getMonto_total_ventas()));
@@ -185,6 +189,7 @@ public class SupervisionFragment extends Fragment {
     }
 
     private void cargarMejoresVendedores() {
+        if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.VISIBLE);
         String token = SplashStorage.obtenerToken(requireContext());
         if (token == null || token.isEmpty()) return;
 
@@ -192,12 +197,15 @@ public class SupervisionFragment extends Fragment {
         apiService.listarMejoresVendedores().enqueue(new Callback<ApiResponse<List<Vendedor>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<Vendedor>>> call, Response<ApiResponse<List<Vendedor>>> response) {
+                if (!isAdded()) return;
+                if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.GONE);
                 if (response.isSuccessful() && response.body() != null) {
                     List<Vendedor> listaVendedores = response.body().getData();
 
                     // Conectar la lista real con tu adaptador
                     VendedorAdapter adapter = new VendedorAdapter(listaVendedores, requireContext());
                     rvVendedores.setAdapter(adapter);
+                    rvVendedores.setVisibility(View.VISIBLE);
                 } else {
                     Toast.makeText(getContext(), getString(R.string.error_cargar_vendedores), Toast.LENGTH_SHORT).show();
                 }
@@ -205,12 +213,15 @@ public class SupervisionFragment extends Fragment {
 
             @Override
             public void onFailure(Call<ApiResponse<List<Vendedor>>> call, Throwable t) {
+                if (!isAdded()) return;
+                if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.GONE);
                 Toast.makeText(getContext(), getString(R.string.error_red_vendedores), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void cargarAlertas() {
+        if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.VISIBLE);
         String token = SplashStorage.obtenerToken(requireContext());
         if (token == null || token.isEmpty()) return;
 
@@ -218,10 +229,13 @@ public class SupervisionFragment extends Fragment {
         apiService.listarAlertasSupervision().enqueue(new Callback<ApiResponse<List<Alerta>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<Alerta>>> call, Response<ApiResponse<List<Alerta>>> response) {
+                if (!isAdded()) return;
+                if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.GONE);
                 if (response.isSuccessful() && response.body() != null) {
                     List<Alerta> listaAlertas = response.body().getData();
                     AlertaAdapter adapter = new AlertaAdapter(listaAlertas, requireContext());
                     rvAlertas.setAdapter(adapter);
+                    if (rvAlertas != null) rvAlertas.setVisibility(View.VISIBLE);
                 } else {
                     Toast.makeText(getContext(), getString(R.string.error_cargar_alertas), Toast.LENGTH_SHORT).show();
                 }
@@ -229,12 +243,15 @@ public class SupervisionFragment extends Fragment {
 
             @Override
             public void onFailure(Call<ApiResponse<List<Alerta>>> call, Throwable t) {
+                if (!isAdded()) return;
+                if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.GONE);
                 Toast.makeText(getContext(), getString(R.string.error_red_alertas), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void cargarPuntosVenta() {
+        if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.VISIBLE);
         String token = SplashStorage.obtenerToken(requireContext());
         if (token == null || token.isEmpty()) return;
 
@@ -242,10 +259,13 @@ public class SupervisionFragment extends Fragment {
         apiService.listarPuntosVentaSupervision().enqueue(new Callback<ApiResponse<List<SupervisionPuntoVenta>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<SupervisionPuntoVenta>>> call, Response<ApiResponse<List<SupervisionPuntoVenta>>> response) {
+                if (!isAdded()) return;
+                if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.GONE);
                 if (response.isSuccessful() && response.body() != null) {
                     List<SupervisionPuntoVenta> lista = response.body().getData();
                     SupervisionPuntoVentaAdapter adapter = new SupervisionPuntoVentaAdapter(lista, requireContext());
                     rvPuntosVenta.setAdapter(adapter);
+                    if (rvPuntosVenta != null) rvPuntosVenta.setVisibility(View.VISIBLE);
                 } else {
                     Toast.makeText(getContext(), getString(R.string.error_cargar_pdvs), Toast.LENGTH_SHORT).show();
                 }
@@ -253,6 +273,8 @@ public class SupervisionFragment extends Fragment {
 
             @Override
             public void onFailure(Call<ApiResponse<List<SupervisionPuntoVenta>>> call, Throwable t) {
+                if (!isAdded()) return;
+                if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.GONE);
                 Toast.makeText(getContext(), getString(R.string.error_red_pdvs), Toast.LENGTH_SHORT).show();
             }
         });

@@ -1,9 +1,14 @@
 package com.piccolifield;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import okhttp3.ResponseBody;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -19,10 +24,12 @@ import retrofit2.Response;
 
 public class DetalleAlertaActivity extends AppCompatActivity {
 
-    private ImageView btnBack;
+    private ImageView btnBack, ivProducto, ivResponsable;
     private TextView tvEstadoAlerta, tvNombreLocal, tvDireccionLocal;
     private TextView tvNivelAlerta, tvProductoNombre, tvStockActual, tvStockMinimo;
     private TextView tvResponsableNombre, tvResponsableRol;
+    private ProgressBar pbLoading;
+    private androidx.core.widget.NestedScrollView scrollView;
 
     private int idAlertaSeleccionada;
 
@@ -33,6 +40,8 @@ public class DetalleAlertaActivity extends AppCompatActivity {
 
         // 1. Vincular los IDs (Revisa que estos sean los mismos de tu diseño XML)
         btnBack = findViewById(R.id.btnBack);
+        ivProducto = findViewById(R.id.ivProductoAlerta);
+        ivResponsable = findViewById(R.id.ivResponsable);
         tvEstadoAlerta = findViewById(R.id.tvEstadoAlerta);
         tvNombreLocal = findViewById(R.id.tvNombreLocal);
         tvDireccionLocal = findViewById(R.id.tvDireccionLocal);
@@ -42,6 +51,8 @@ public class DetalleAlertaActivity extends AppCompatActivity {
         tvStockMinimo = findViewById(R.id.tvStockMinimo);
         tvResponsableNombre = findViewById(R.id.tvResponsableNombre);
         tvResponsableRol = findViewById(R.id.tvResponsableRol);
+        pbLoading = findViewById(R.id.pbLoading);
+        scrollView = findViewById(R.id.scrollView);
 
         // Botón de retroceso
         btnBack.setOnClickListener(v -> finish());
@@ -60,6 +71,8 @@ public class DetalleAlertaActivity extends AppCompatActivity {
     }
 
     private void cargarDatosAlerta() {
+        if (pbLoading != null) pbLoading.setVisibility(View.VISIBLE);
+        if (scrollView != null) scrollView.setVisibility(View.GONE);
         String token = SplashStorage.obtenerToken(this);
 
         if (token == null || token.isEmpty()) {
@@ -74,6 +87,8 @@ public class DetalleAlertaActivity extends AppCompatActivity {
         apiService.obtenerDetalleAlerta(idAlertaSeleccionada).enqueue(new Callback<ApiResponse<AlertaDetalle>>() {
             @Override
             public void onResponse(Call<ApiResponse<AlertaDetalle>> call, Response<ApiResponse<AlertaDetalle>> response) {
+                if (pbLoading != null) pbLoading.setVisibility(View.GONE);
+                if (scrollView != null) scrollView.setVisibility(View.VISIBLE);
 
                 if (response.isSuccessful() && response.body() != null) {
                     AlertaDetalle alerta = response.body().getData();
@@ -98,6 +113,42 @@ public class DetalleAlertaActivity extends AppCompatActivity {
 
                         if (tvResponsableNombre != null) tvResponsableNombre.setText(getString(R.string.label_responsable_alerta, alerta.getResponsableNombre()));
                         if (tvResponsableRol != null) tvResponsableRol.setText(getString(R.string.label_rol_alerta, alerta.getResponsableRol()));
+
+                        if (alerta.getIdProductos() > 0 && ivProducto != null) {
+                            apiService.obtenerFotoProducto(alerta.getIdProductos()).enqueue(new Callback<ResponseBody>() {
+                                @Override
+                                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                    if (response.isSuccessful() && response.body() != null) {
+                                        Bitmap bmp = BitmapFactory.decodeStream(response.body().byteStream());
+                                        ivProducto.post(() -> ivProducto.setImageBitmap(bmp));
+                                    } else {
+                                        ivProducto.setImageResource(R.drawable.ic_avatar_placeholder);
+                                    }
+                                }
+                                @Override
+                                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                    ivProducto.setImageResource(R.drawable.ic_avatar_placeholder);
+                                }
+                            });
+                        }
+
+                        if (alerta.getResponsableId() > 0 && ivResponsable != null) {
+                            apiService.obtenerFotoImpulsador(alerta.getResponsableId()).enqueue(new Callback<ResponseBody>() {
+                                @Override
+                                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                    if (response.isSuccessful() && response.body() != null) {
+                                        Bitmap bmp = BitmapFactory.decodeStream(response.body().byteStream());
+                                        ivResponsable.post(() -> ivResponsable.setImageBitmap(bmp));
+                                    } else {
+                                        ivResponsable.setImageResource(R.drawable.ic_avatar_placeholder);
+                                    }
+                                }
+                                @Override
+                                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                    ivResponsable.setImageResource(R.drawable.ic_avatar_placeholder);
+                                }
+                            });
+                        }
                     }
                 } else {
                     Toast.makeText(DetalleAlertaActivity.this, getString(R.string.error_cargar_alerta), Toast.LENGTH_SHORT).show();
@@ -106,6 +157,7 @@ public class DetalleAlertaActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<ApiResponse<AlertaDetalle>> call, Throwable t) {
+                if (pbLoading != null) pbLoading.setVisibility(View.GONE);
                 Toast.makeText(DetalleAlertaActivity.this, getString(R.string.error_falla_red, t.getMessage()), Toast.LENGTH_SHORT).show();
             }
         });

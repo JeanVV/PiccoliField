@@ -107,6 +107,9 @@ public class LoginActivity extends AppCompatActivity {
                                 SplashStorage.guardarToken(LoginActivity.this, token);
                             }
 
+                            // Obtener el perfil para saber exactamente el ROL antes de ir al Menú
+                            obtenerPerfilYRol();
+
                             // Intentar guardar datos de usuario si vienen en la respuesta
                             if (json.has("user") || json.has("usuario") || json.has("data")) {
                                 JSONObject userObj = json.optJSONObject("user");
@@ -137,6 +140,7 @@ public class LoginActivity extends AppCompatActivity {
                             return;
                         }
 
+                        binding.btnIniciarSesion.setEnabled(true);
                         String msg = json.optString("message", json.optString("msg", "Error al iniciar sesión"));
                         Toast.makeText(LoginActivity.this, msg, Toast.LENGTH_LONG).show();
 
@@ -179,6 +183,41 @@ public class LoginActivity extends AppCompatActivity {
                 }
 
                 Toast.makeText(LoginActivity.this, errorText, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void obtenerPerfilYRol() {
+        ApiService apiService = RetrofitClient.createService();
+        apiService.obtenerPerfil().enqueue(new Callback<com.piccolifield.data.remote.dto.response.ApiResponse<com.piccolifield.data.model.Usuario>>() {
+            @Override
+            public void onResponse(@NonNull Call<com.piccolifield.data.remote.dto.response.ApiResponse<com.piccolifield.data.model.Usuario>> call, @NonNull Response<com.piccolifield.data.remote.dto.response.ApiResponse<com.piccolifield.data.model.Usuario>> response) {
+                binding.btnIniciarSesion.setEnabled(true);
+
+                String rol = "SUPERVISOR"; // Default por seguridad
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                    rol = response.body().getData().getRol();
+                }
+
+                Log.d("LoginActivity", "Rol guardado en memoria: " + rol);
+
+                SplashStorage.registrarSesionActiva(LoginActivity.this, rol);
+                Toast.makeText(LoginActivity.this, "¡Bienvenido a Piccoli!", Toast.LENGTH_SHORT).show();
+
+                Intent intent = new Intent(LoginActivity.this, MenuActivity.class);
+                startActivity(intent);
+                finish();
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<com.piccolifield.data.remote.dto.response.ApiResponse<com.piccolifield.data.model.Usuario>> call, @NonNull Throwable t) {
+                binding.btnIniciarSesion.setEnabled(true);
+                // Aún si falla el perfil, dejamos pasar con el rol por defecto
+                Log.e("LoginActivity", "Fallo al obtener perfil", t);
+                SplashStorage.registrarSesionActiva(LoginActivity.this, "SUPERVISOR");
+                Intent intent = new Intent(LoginActivity.this, MenuActivity.class);
+                startActivity(intent);
+                finish();
             }
         });
     }

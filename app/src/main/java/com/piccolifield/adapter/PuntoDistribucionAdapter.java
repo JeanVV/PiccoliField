@@ -16,27 +16,27 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.card.MaterialCardView;
-import com.piccolifield.DetallePuntoVentaActivity;
+import com.piccolifield.DetallePuntoDistribucionActivity;
 import com.piccolifield.R;
-import com.piccolifield.model.PuntoVenta;
+import com.piccolifield.model.PuntoDistribucion;
 
 import java.util.List;
 
-public class PuntoVentaAdapter extends RecyclerView.Adapter<PuntoVentaAdapter.ViewHolder> {
+public class PuntoDistribucionAdapter extends RecyclerView.Adapter<PuntoDistribucionAdapter.ViewHolder> {
 
-    public interface OnPuntoVentaClickListener {
-        void onPuntoVentaClick(PuntoVenta pdv);
+    public interface OnPuntoDistribucionClickListener {
+        void onPuntoDistribucionClick(PuntoDistribucion pdv);
     }
 
-    private List<PuntoVenta> listaPuntos;
+    private List<PuntoDistribucion> listaPuntos;
     private Context context;
-    private OnPuntoVentaClickListener listener;
+    private OnPuntoDistribucionClickListener listener;
 
-    public PuntoVentaAdapter(List<PuntoVenta> listaPuntos, Context context) {
+    public PuntoDistribucionAdapter(List<PuntoDistribucion> listaPuntos, Context context) {
         this(listaPuntos, context, null);
     }
 
-    public PuntoVentaAdapter(List<PuntoVenta> listaPuntos, Context context, OnPuntoVentaClickListener listener) {
+    public PuntoDistribucionAdapter(List<PuntoDistribucion> listaPuntos, Context context, OnPuntoDistribucionClickListener listener) {
         this.listaPuntos = listaPuntos;
         this.context = context;
         this.listener = listener;
@@ -45,16 +45,16 @@ public class PuntoVentaAdapter extends RecyclerView.Adapter<PuntoVentaAdapter.Vi
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_punto_venta, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_punto_distribucion, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        PuntoVenta pdv = listaPuntos.get(position);
+        PuntoDistribucion pdv = listaPuntos.get(position);
         if (pdv == null) return;
 
-        holder.tvNombrePdv.setText(pdv.getNombre() != null ? pdv.getNombre() : "Punto de Venta");
+        holder.tvNombrePdv.setText(pdv.getNombre() != null ? pdv.getNombre() : "Punto de Distribución");
         holder.tvDireccionPdv.setText(pdv.getDireccion() != null ? pdv.getDireccion() : "Sin dirección");
         
         String numPed = pdv.getNumeroPedido();
@@ -87,18 +87,18 @@ public class PuntoVentaAdapter extends RecyclerView.Adapter<PuntoVentaAdapter.Vi
                 holder.tvEstadoDespacho.setTextColor(Color.parseColor("#2E7D32"));
             }
         } catch (Exception e) {
-            Log.e("PuntoVentaAdapter", "Error aplicando colores: " + e.getMessage());
+            Log.e("PuntoDistribucionAdapter", "Error aplicando colores: " + e.getMessage());
         }
 
         View.OnClickListener clickListener = v -> {
             if (listener != null) {
-                listener.onPuntoVentaClick(pdv);
+                listener.onPuntoDistribucionClick(pdv);
             } else {
                 try {
                     Context ctx = v.getContext();
                     if (ctx == null) ctx = context;
 
-                    Intent intent = new Intent(ctx, DetallePuntoVentaActivity.class);
+                    Intent intent = new Intent(ctx, DetallePuntoDistribucionActivity.class);
                     if (!(ctx instanceof Activity)) {
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     }
@@ -111,13 +111,13 @@ public class PuntoVentaAdapter extends RecyclerView.Adapter<PuntoVentaAdapter.Vi
                     intent.putExtra("BADGE_NUMERO", pdv.getBadgeNumero());
                     ctx.startActivity(intent);
                 } catch (Exception e) {
-                    Log.e("PuntoVentaAdapter", "Error al abrir DetallePuntoVentaActivity: " + e.getMessage(), e);
+                    Log.e("PuntoDistribucionAdapter", "Error al abrir DetallePuntoDistribucionActivity: " + e.getMessage(), e);
                 }
             }
         };
 
-        if (holder.cardPuntoVenta != null) {
-            holder.cardPuntoVenta.setOnClickListener(clickListener);
+        if (holder.cardPuntoDistribucion != null) {
+            holder.cardPuntoDistribucion.setOnClickListener(clickListener);
         }
         if (holder.containerContentLayout != null) {
             holder.containerContentLayout.setOnClickListener(clickListener);
@@ -132,14 +132,14 @@ public class PuntoVentaAdapter extends RecyclerView.Adapter<PuntoVentaAdapter.Vi
     public int getItemCount() { return listaPuntos.size(); }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        MaterialCardView cardPuntoVenta;
+        MaterialCardView cardPuntoDistribucion;
         View containerContentLayout;
         ImageView ivChevron;
         TextView tvBadgeNumero, tvNombrePdv, tvDireccionPdv, tvNumeroPedido, tvEstadoDespacho;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            cardPuntoVenta = itemView.findViewById(R.id.cardPuntoVenta);
+            cardPuntoDistribucion = itemView.findViewById(R.id.cardPuntoDistribucion);
             containerContentLayout = itemView.findViewById(R.id.containerContentLayout);
             ivChevron = itemView.findViewById(R.id.ivChevron);
             tvBadgeNumero = itemView.findViewById(R.id.tvBadgeNumero);

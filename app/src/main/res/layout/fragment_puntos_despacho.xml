@@ -153,7 +153,7 @@
                             android:layout_height="match_parent"
                             android:layout_marginStart="8dp"
                             android:background="@null"
-                            android:hint="Buscar punto de venta..."
+                            android:hint="Buscar punto de distribución..."
                             android:importantForAutofill="no"
                             android:inputType="text"
                             android:textColor="@color/cafe_profundo"
@@ -693,7 +693,7 @@
                     android:layout_height="wrap_content"
                     android:nestedScrollingEnabled="false"
                     android:visibility="visible"
-                    tools:listitem="@layout/item_punto_venta" />
+                    tools:listitem="@layout/item_punto_distribucion" />
 
             </FrameLayout>
 

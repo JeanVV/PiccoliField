@@ -18,7 +18,7 @@ import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.google.android.material.button.MaterialButton;
 
-public class DetallePuntoVentaActivity extends AppCompatActivity {
+public class DetallePuntoDistribucionActivity extends AppCompatActivity {
 
     private ImageView btnBack;
     private TextView tvBadgeNumero, tvNombreTienda, tvEstadoBadge, tvDireccionVal, tvDistanciaVal, tvPedidoNumVal, tvRepartidorVal, btnVerTodosProductos;
@@ -33,7 +33,7 @@ public class DetallePuntoVentaActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_detalle_punto_venta);
+        setContentView(R.layout.activity_detalle_punto_distribucion);
 
         getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.color_fondo));
         getWindow().setNavigationBarColor(ContextCompat.getColor(this, R.color.color_fondo));
@@ -104,7 +104,7 @@ public class DetallePuntoVentaActivity extends AppCompatActivity {
         // 4. Listener Ver Todos / Productos -> Abre Detalle del Pedido
         View.OnClickListener abrirDetallePedido = v -> {
             try {
-                Intent intent = new Intent(DetallePuntoVentaActivity.this, DetallePedidoActivity.class);
+                Intent intent = new Intent(DetallePuntoDistribucionActivity.this, DetallePedidoActivity.class);
                 intent.putExtra("ID_PEDIDO", idPuntoVenta);
                 intent.putExtra("NOMBRE_TIENDA", tvNombreTienda != null ? tvNombreTienda.getText().toString() : "Licorería El Buen Sabor");
                 intent.putExtra("NUMERO_PEDIDO", numeroPedido);
