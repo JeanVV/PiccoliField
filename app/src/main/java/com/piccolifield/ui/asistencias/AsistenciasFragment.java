@@ -196,6 +196,9 @@ public class AsistenciasFragment extends Fragment {
 
     private void setupListeners() {
         binding.btnMarcarEntrada.setOnClickListener(v -> registrarMarca("INGRESO"));
+        if (binding.btnMarcarRefrigerio != null) {
+            binding.btnMarcarRefrigerio.setOnClickListener(v -> registrarMarca("REFRIGERIO"));
+        }
         binding.btnMarcarSalida.setOnClickListener(v -> registrarMarca("SALIDA"));
         binding.btnTomarFotoSustento.setOnClickListener(v -> solicitarPermisoYTomarFoto());
         binding.btnEliminarFotoSustento.setOnClickListener(v -> quitarFotoSustento());
@@ -282,6 +285,7 @@ public class AsistenciasFragment extends Fragment {
         );
 
         binding.btnMarcarEntrada.setEnabled(false);
+        if (binding.btnMarcarRefrigerio != null) binding.btnMarcarRefrigerio.setEnabled(false);
         binding.btnMarcarSalida.setEnabled(false);
 
         // Guardar registro local para disponibilizar inmediatamente al Administrador
@@ -293,9 +297,10 @@ public class AsistenciasFragment extends Fragment {
                 public void onResponse(@NonNull Call<ApiResponse<Object>> call, @NonNull Response<ApiResponse<Object>> response) {
                     if (!isAdded() || binding == null) return;
                     binding.btnMarcarEntrada.setEnabled(true);
+                    if (binding.btnMarcarRefrigerio != null) binding.btnMarcarRefrigerio.setEnabled(true);
                     binding.btnMarcarSalida.setEnabled(true);
 
-                    String tipoTexto = "INGRESO".equalsIgnoreCase(tipo) ? "Entrada" : "Salida";
+                    String tipoTexto = "INGRESO".equalsIgnoreCase(tipo) ? "Entrada" : ("REFRIGERIO".equalsIgnoreCase(tipo) ? "Refrigerio" : "Salida");
                     binding.tvEstadoHoy.setText("Última marca: " + tipoTexto + " a las " + horaCorta + " (Lima)");
 
                     Toast.makeText(getContext(), "¡" + tipoTexto + " registrada a las " + horaCorta + " (Zona Lima, Perú)!", Toast.LENGTH_LONG).show();
@@ -305,9 +310,10 @@ public class AsistenciasFragment extends Fragment {
                 public void onFailure(@NonNull Call<ApiResponse<Object>> call, @NonNull Throwable t) {
                     if (!isAdded() || binding == null) return;
                     binding.btnMarcarEntrada.setEnabled(true);
+                    if (binding.btnMarcarRefrigerio != null) binding.btnMarcarRefrigerio.setEnabled(true);
                     binding.btnMarcarSalida.setEnabled(true);
 
-                    String tipoTexto = "INGRESO".equalsIgnoreCase(tipo) ? "Entrada" : "Salida";
+                    String tipoTexto = "INGRESO".equalsIgnoreCase(tipo) ? "Entrada" : ("REFRIGERIO".equalsIgnoreCase(tipo) ? "Refrigerio" : "Salida");
                     binding.tvEstadoHoy.setText("Última marca: " + tipoTexto + " a las " + horaCorta + " (Lima)");
                     Toast.makeText(getContext(), tipoTexto + " registrada a las " + horaCorta + " (Zona Lima)", Toast.LENGTH_LONG).show();
                 }

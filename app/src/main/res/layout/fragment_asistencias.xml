@@ -240,18 +240,29 @@
                         style="@style/Widget.Piccoli.Button.Primary"
                         android:layout_width="0dp"
                         android:layout_height="52dp"
-                        android:layout_marginEnd="6dp"
+                        android:layout_marginEnd="4dp"
                         android:layout_weight="1"
                         android:text="Entrada"
                         app:icon="@drawable/ic_clock"
                         app:iconTint="@color/marfil_suave" />
 
                     <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnMarcarRefrigerio"
+                        style="@style/Widget.Piccoli.Button.Outlined"
+                        android:layout_width="0dp"
+                        android:layout_height="52dp"
+                        android:layout_marginHorizontal="4dp"
+                        android:layout_weight="1"
+                        android:text="Refrigerio"
+                        app:icon="@drawable/ic_clock"
+                        app:iconTint="@color/cafe_profundo" />
+
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnMarcarSalida"
                         style="@style/Widget.Piccoli.Button.Accent"
                         android:layout_width="0dp"
                         android:layout_height="52dp"
-                        android:layout_marginStart="6dp"
+                        android:layout_marginStart="4dp"
                         android:layout_weight="1"
                         android:text="Salida"
                         app:icon="@drawable/ic_clock"
