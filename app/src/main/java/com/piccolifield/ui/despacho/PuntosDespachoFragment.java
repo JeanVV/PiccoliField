@@ -32,12 +32,21 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class PuntosDespachoFragment extends Fragment {
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+public class PuntosDespachoFragment extends Fragment implements OnMapReadyCallback {
 
     private FragmentPuntosDespachoBinding binding;
     private PuntoDistribucionAdapter adapter;
     private final List<PuntoDistribucion> listaPuntosOriginal = new ArrayList<>();
     private final List<PuntoDistribucion> listaPuntosFiltrada = new ArrayList<>();
+    
+    private GoogleMap googleMap;
 
     public PuntosDespachoFragment() {
         // Required empty public constructor
@@ -58,6 +67,38 @@ public class PuntosDespachoFragment extends Fragment {
         cargarDatosDesdeApi();
         setupToggleViews();
         setupListeners();
+        
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager()
+                .findFragmentById(R.id.map);
+        if (mapFragment != null) {
+            mapFragment.getMapAsync(this);
+        }
+    }
+    
+    @Override
+    public void onMapReady(@NonNull GoogleMap map) {
+        this.googleMap = map;
+        actualizarPinesMapa();
+    }
+    
+    private void actualizarPinesMapa() {
+        if (googleMap == null) return;
+        googleMap.clear();
+        
+        if (listaPuntosOriginal.isEmpty()) return;
+        
+        for (PuntoDistribucion p : listaPuntosOriginal) {
+            LatLng posicion = new LatLng(p.getLatitud(), p.getLongitud());
+            googleMap.addMarker(new MarkerOptions()
+                    .position(posicion)
+                    .title(p.getNombre())
+                    .snippet(p.getDireccion()));
+        }
+        
+        // Centrar mapa en el primer punto si existe
+        PuntoDistribucion primero = listaPuntosOriginal.get(0);
+        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                new LatLng(primero.getLatitud(), primero.getLongitud()), 12f));
     }
 
     private void setupRecyclerView() {
@@ -79,37 +120,27 @@ public class PuntosDespachoFragment extends Fragment {
 
     private void cargarDatosDesdeApi() {
         ApiService apiService = RetrofitClient.createService();
-        apiService.listarPuntosVenta(null, null, null, null).enqueue(new Callback<ApiResponse<List<PuntoDistribucion>>>() {
+        // Filtrar por DISTRIBUCION o manejarlo en el backend, aquí lo pediremos
+        apiService.listarPuntosVenta(null, "DISTRIBUCION", null, null).enqueue(new Callback<ApiResponse<List<PuntoDistribucion>>>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse<List<PuntoDistribucion>>> call, @NonNull Response<ApiResponse<List<PuntoDistribucion>>> response) {
                 if (!isAdded() || binding == null) return;
 
-                if (response.isSuccessful() && response.body() != null && response.body().getData() != null && !response.body().getData().isEmpty()) {
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
                     listaPuntosOriginal.clear();
                     listaPuntosOriginal.addAll(response.body().getData());
                     actualizarUI();
                 } else {
-                    cargarDatosSimulados();
+                    Toast.makeText(requireContext(), "No se encontraron puntos de distribución", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<ApiResponse<List<PuntoDistribucion>>> call, @NonNull Throwable t) {
                 if (!isAdded() || binding == null) return;
-                cargarDatosSimulados();
+                Toast.makeText(requireContext(), "Error al cargar los datos: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    private void cargarDatosSimulados() {
-        listaPuntosOriginal.clear();
-        listaPuntosOriginal.add(new PuntoDistribucion(1, "Licorería El Buen Sabor", "Av. Principal 123, Lima", "0245", "En preparación", "12"));
-        listaPuntosOriginal.add(new PuntoDistribucion(2, "Supermercado Plaza Vea", "Av. Los Olivos 456, Lima", "0244", "En camino", "8"));
-        listaPuntosOriginal.add(new PuntoDistribucion(3, "Bar La Cava", "Calle Las Flores 789, Lima", "0243", "Pendiente", "5"));
-        listaPuntosOriginal.add(new PuntoDistribucion(4, "Tienda Don José", "Av. Universitaria 321, Lima", "0242", "En preparación", "14"));
-        listaPuntosOriginal.add(new PuntoDistribucion(5, "Wong", "Av. Javier Prado 654, Lima", "0241", "En camino", "7"));
-
-        actualizarUI();
     }
 
     private void actualizarUI() {
@@ -118,9 +149,11 @@ public class PuntosDespachoFragment extends Fragment {
 
         binding.tvTotalPuntos.setText(String.valueOf(listaPuntosOriginal.size()));
         binding.tvActivosCount.setText(String.valueOf(contarActivos(listaPuntosOriginal)));
-        binding.tvCiudadesCount.setText("12");
+        // TODO: Agrupar por distrito si el backend devuelve un idDistrito, por ahora mock:
+        binding.tvCiudadesCount.setText("1");
 
         adapter.notifyDataSetChanged();
+        actualizarPinesMapa();
     }
 
     private int contarActivos(List<PuntoDistribucion> lista) {
@@ -166,22 +199,21 @@ public class PuntosDespachoFragment extends Fragment {
     }
 
     private void setupListeners() {
-        binding.cardTooltipStore.setOnClickListener(v -> {
-            Intent intent = new Intent(requireActivity(), DetallePuntoDistribucionActivity.class);
-            intent.putExtra("ID_PDV", 1);
-            intent.putExtra("NOMBRE_PDV", "Licorería El Buen Sabor");
-            startActivity(intent);
-        });
-
         binding.btnMenu.setOnClickListener(v -> {
             if (getActivity() != null) {
                 getActivity().onBackPressed();
             }
         });
 
-        binding.fabMyLocation.setOnClickListener(v -> 
-            Toast.makeText(requireContext(), "Centrando en ubicación actual", Toast.LENGTH_SHORT).show()
-        );
+        binding.fabMyLocation.setOnClickListener(v -> {
+            if (googleMap != null && !listaPuntosOriginal.isEmpty()) {
+                PuntoDistribucion primero = listaPuntosOriginal.get(0);
+                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                        new LatLng(primero.getLatitud(), primero.getLongitud()), 12f));
+            } else {
+                Toast.makeText(requireContext(), "Centrando en ubicación actual", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         binding.btnFiltrosContainer.setOnClickListener(v -> 
             Toast.makeText(requireContext(), "Filtros de búsqueda", Toast.LENGTH_SHORT).show()

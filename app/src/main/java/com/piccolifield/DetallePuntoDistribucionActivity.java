@@ -8,6 +8,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
@@ -15,19 +16,42 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
+import com.piccolifield.adapter.PedidoAdapter;
+import com.piccolifield.data.remote.api.ApiService;
+import com.piccolifield.data.remote.dto.RetrofitClient;
+import com.piccolifield.data.remote.dto.response.ApiResponse;
+import com.piccolifield.model.Pedido;
+import com.piccolifield.model.PuntoDistribucion;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+import com.piccolifield.ui.despacho.EstadoPedidoBottomSheet;
+import com.piccolifield.ui.despacho.NuevoPedidoBottomSheet;
 
 public class DetallePuntoDistribucionActivity extends AppCompatActivity {
 
     private ImageView btnBack;
-    private TextView tvBadgeNumero, tvNombreTienda, tvEstadoBadge, tvDireccionVal, tvDistanciaVal, tvPedidoNumVal, tvRepartidorVal, btnVerTodosProductos;
+    private TextView tvBadgeNumero, tvNombreTienda, tvEstadoBadge, tvDireccionVal, tvDistanciaVal, tvPedidoNumVal, tvRepartidorVal, btnNuevoPedido, tvPedidosSub;
     private MaterialButton btnVerRuta;
+    private RecyclerView rvPedidos;
+    
+    private PedidoAdapter pedidoAdapter;
+    private List<Pedido> listaPedidos = new ArrayList<>();
 
     private int idPuntoVenta;
     private String nombrePuntoVenta;
     private String numeroPedido = "0245";
     private String estadoDespacho = "En preparación";
+    private PuntoDistribucion puntoDistribucionInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,76 +83,103 @@ public class DetallePuntoDistribucionActivity extends AppCompatActivity {
         tvDistanciaVal = findViewById(R.id.tvDistanciaVal);
         tvPedidoNumVal = findViewById(R.id.tvPedidoNumVal);
         tvRepartidorVal = findViewById(R.id.tvRepartidorVal);
-        btnVerTodosProductos = findViewById(R.id.btnVerTodosProductos);
+        btnNuevoPedido = findViewById(R.id.btnNuevoPedido);
+        tvPedidosSub = findViewById(R.id.tvPedidosSub);
         btnVerRuta = findViewById(R.id.btnVerRuta);
+        rvPedidos = findViewById(R.id.rvPedidos);
 
-        // 2. Recibir los datos enviados por PuntoVentaAdapter
+        rvPedidos.setLayoutManager(new LinearLayoutManager(this));
+        pedidoAdapter = new PedidoAdapter(listaPedidos, pedido -> {
+            EstadoPedidoBottomSheet bottomSheet = new EstadoPedidoBottomSheet(pedido, () -> {
+                cargarPedidos(idPuntoVenta); // Recargar la lista para mostrar el nuevo estado
+            });
+            bottomSheet.show(getSupportFragmentManager(), "EstadoPedido");
+        });
+        rvPedidos.setAdapter(pedidoAdapter);
+
+        // 2. Recibir los datos enviados por Intent (Solo el ID en el flujo real)
         if (getIntent() != null) {
             idPuntoVenta = getIntent().getIntExtra("ID_PDV", -1);
             nombrePuntoVenta = getIntent().getStringExtra("NOMBRE_PDV");
-            String direccion = getIntent().getStringExtra("DIRECCION");
-            String distancia = getIntent().getStringExtra("DISTANCIA");
-            String numPed = getIntent().getStringExtra("NUMERO_PEDIDO");
-            String estadoDisp = getIntent().getStringExtra("ESTADO_DESPACHO");
-            String badgeNum = getIntent().getStringExtra("BADGE_NUMERO");
-
-            if (nombrePuntoVenta != null && !nombrePuntoVenta.isEmpty()) {
-                tvNombreTienda.setText(nombrePuntoVenta);
-            }
-            if (badgeNum != null && !badgeNum.isEmpty() && tvBadgeNumero != null) {
-                tvBadgeNumero.setText(badgeNum);
-            }
-            if (direccion != null && !direccion.isEmpty() && tvDireccionVal != null) {
-                tvDireccionVal.setText(direccion);
-            }
-            if (distancia != null && !distancia.isEmpty() && tvDistanciaVal != null) {
-                tvDistanciaVal.setText(distancia);
-            }
-            if (numPed != null && !numPed.isEmpty()) {
-                numeroPedido = numPed;
-                if (tvPedidoNumVal != null) {
-                    tvPedidoNumVal.setText(numPed);
-                }
-            }
-            if (estadoDisp != null && !estadoDisp.isEmpty()) {
-                estadoDespacho = estadoDisp;
-                if (tvEstadoBadge != null) {
-                    tvEstadoBadge.setText(estadoDisp);
-                }
-            }
+            
+            // Cargar de red (Descomentar para usar Data real)
+            cargarDetallePunto(idPuntoVenta);
+            cargarPedidos(idPuntoVenta);
         }
 
         // 3. Listener del botón atrás
         btnBack.setOnClickListener(v -> finish());
 
-        // 4. Listener Ver Todos / Productos -> Abre Detalle del Pedido
-        View.OnClickListener abrirDetallePedido = v -> {
-            try {
-                Intent intent = new Intent(DetallePuntoDistribucionActivity.this, DetallePedidoActivity.class);
-                intent.putExtra("ID_PEDIDO", idPuntoVenta);
-                intent.putExtra("NOMBRE_TIENDA", tvNombreTienda != null ? tvNombreTienda.getText().toString() : "Licorería El Buen Sabor");
-                intent.putExtra("NUMERO_PEDIDO", numeroPedido);
-                intent.putExtra("ESTADO_PEDIDO", estadoDespacho);
-                startActivity(intent);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        };
-
-        if (btnVerTodosProductos != null) {
-            btnVerTodosProductos.setOnClickListener(abrirDetallePedido);
-        }
-
-        View layoutProductosHeader = findViewById(R.id.layoutProductosHeader);
-        if (layoutProductosHeader != null) {
-            layoutProductosHeader.setOnClickListener(abrirDetallePedido);
+        // 4. Listener Nuevo Pedido
+        if (btnNuevoPedido != null) {
+            btnNuevoPedido.setOnClickListener(v -> {
+                NuevoPedidoBottomSheet bottomSheet = new NuevoPedidoBottomSheet(idPuntoVenta, () -> {
+                    cargarPedidos(idPuntoVenta);
+                });
+                bottomSheet.show(getSupportFragmentManager(), "NuevoPedido");
+            });
         }
 
         // 5. Listener Ver Ruta de Entrega
         if (btnVerRuta != null) {
             btnVerRuta.setOnClickListener(v -> 
-                Toast.makeText(this, "Navegando a ruta de entrega para: " + tvNombreTienda.getText(), Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Navegando a ruta de entrega", Toast.LENGTH_SHORT).show()
             );
         }
+    }
+    
+    private void cargarDetallePunto(int id) {
+        ApiService apiService = RetrofitClient.createService();
+        apiService.obtenerDetallePunto(id).enqueue(new Callback<ApiResponse<PuntoDistribucion>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<PuntoDistribucion>> call, @NonNull Response<ApiResponse<PuntoDistribucion>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                    puntoDistribucionInfo = response.body().getData();
+                    tvNombreTienda.setText(puntoDistribucionInfo.getNombre());
+                    tvBadgeNumero.setText(String.valueOf(puntoDistribucionInfo.getId()));
+                    tvDireccionVal.setText(puntoDistribucionInfo.getDireccion());
+                    tvEstadoBadge.setText(puntoDistribucionInfo.getEstado());
+                } else {
+                    // Fallback
+                    tvNombreTienda.setText(nombrePuntoVenta != null ? nombrePuntoVenta : "Punto Desconocido");
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<PuntoDistribucion>> call, @NonNull Throwable t) {
+                tvNombreTienda.setText(nombrePuntoVenta != null ? nombrePuntoVenta : "Punto Desconocido");
+            }
+        });
+    }
+
+    private void cargarPedidos(int idPdv) {
+        ApiService apiService = RetrofitClient.createService();
+        apiService.obtenerPedidosPorPdv(idPdv).enqueue(new Callback<ApiResponse<List<Pedido>>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<List<Pedido>>> call, @NonNull Response<ApiResponse<List<Pedido>>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                    listaPedidos.clear();
+                    listaPedidos.addAll(response.body().getData());
+                    pedidoAdapter.notifyDataSetChanged();
+                    tvPedidosSub.setText(listaPedidos.size() + " pedidos registrados");
+                } else {
+                    // Cargar mock si el backend falla
+                    cargarPedidosMock();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<List<Pedido>>> call, @NonNull Throwable t) {
+                cargarPedidosMock();
+            }
+        });
+    }
+
+    private void cargarPedidosMock() {
+        listaPedidos.clear();
+        listaPedidos.add(new Pedido(1001, 10, "12 Oct 2023", idPuntoVenta, 1));
+        listaPedidos.add(new Pedido(1002, 5, "10 Oct 2023", idPuntoVenta, 2));
+        pedidoAdapter.notifyDataSetChanged();
+        tvPedidosSub.setText(listaPedidos.size() + " pedidos registrados (Mock)");
     }
 }

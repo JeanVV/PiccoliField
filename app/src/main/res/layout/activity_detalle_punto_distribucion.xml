@@ -359,13 +359,13 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
                     android:fontFamily="serif"
-                    android:text="Productos solicitados"
+                    android:text="Pedidos del punto"
                     android:textColor="@color/cafe_profundo"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/btnVerTodosProductos"
+                    android:id="@+id/btnNuevoPedido"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
@@ -374,221 +374,30 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:padding="6dp"
-                    android:text="Ver todos >"
+                    android:text="+ Nuevo Pedido"
                     android:textColor="@color/caramelo"
-                    android:textSize="13sp"
+                    android:textSize="14sp"
                     android:textStyle="bold" />
             </RelativeLayout>
 
-            <!-- Subtítulo con resumen de productos -->
+            <!-- Subtítulo con resumen de pedidos -->
             <TextView
-                android:id="@+id/tvProductosSub"
+                android:id="@+id/tvPedidosSub"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:text="📍 12 productos · 32 unidades"
+                android:text="0 pedidos registrados"
                 android:textColor="@color/color_text_muted"
                 android:textSize="12sp" />
 
-            <!-- Lista Vertical de Productos Solicitados -->
-            <LinearLayout
+            <!-- Lista de Pedidos (Reemplaza la lista estática) -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvPedidos"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
-                android:orientation="vertical">
-
-                <!-- Ítem 1: Pisco Italia 750 ml -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingVertical="8dp">
-
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="56dp"
-                        android:layout_height="56dp"
-                        app:cardBackgroundColor="#F8F1E5"
-                        app:cardCornerRadius="12dp"
-                        app:cardElevation="0dp"
-                        app:strokeWidth="0dp">
-
-                        <ImageView
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:contentDescription="@null"
-                            android:padding="6dp"
-                            android:scaleType="fitCenter"
-                            android:src="@drawable/botellasinicio" />
-                    </com.google.android.material.card.MaterialCardView>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="14dp"
-                        android:layout_weight="1"
-                        android:text="Pisco Italia 750 ml"
-                        android:textColor="@color/cafe_profundo"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="10 und."
-                        android:textColor="@color/color_text_muted"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#E8DCC8" />
-
-                <!-- Ítem 2: Chocolate Piccoli 750 ml -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingVertical="8dp">
-
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="56dp"
-                        android:layout_height="56dp"
-                        app:cardBackgroundColor="#F8F1E5"
-                        app:cardCornerRadius="12dp"
-                        app:cardElevation="0dp"
-                        app:strokeWidth="0dp">
-
-                        <ImageView
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:contentDescription="@null"
-                            android:padding="6dp"
-                            android:scaleType="fitCenter"
-                            android:src="@drawable/botellasinicio" />
-                    </com.google.android.material.card.MaterialCardView>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="14dp"
-                        android:layout_weight="1"
-                        android:text="Chocolate Piccoli 750 ml"
-                        android:textColor="@color/cafe_profundo"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="8 und."
-                        android:textColor="@color/color_text_muted"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#E8DCC8" />
-
-                <!-- Ítem 3: Cacao Piccoli 750 ml -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingVertical="8dp">
-
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="56dp"
-                        android:layout_height="56dp"
-                        app:cardBackgroundColor="#F8F1E5"
-                        app:cardCornerRadius="12dp"
-                        app:cardElevation="0dp"
-                        app:strokeWidth="0dp">
-
-                        <ImageView
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:contentDescription="@null"
-                            android:padding="6dp"
-                            android:scaleType="fitCenter"
-                            android:src="@drawable/botellasinicio" />
-                    </com.google.android.material.card.MaterialCardView>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="14dp"
-                        android:layout_weight="1"
-                        android:text="Cacao Piccoli 750 ml"
-                        android:textColor="@color/cafe_profundo"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="6 und."
-                        android:textColor="@color/color_text_muted"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#E8DCC8" />
-
-                <!-- Ítem 4: Crema de Vainilla 750 ml -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingVertical="8dp">
-
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="56dp"
-                        android:layout_height="56dp"
-                        app:cardBackgroundColor="#F8F1E5"
-                        app:cardCornerRadius="12dp"
-                        app:cardElevation="0dp"
-                        app:strokeWidth="0dp">
-
-                        <ImageView
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:contentDescription="@null"
-                            android:padding="6dp"
-                            android:scaleType="fitCenter"
-                            android:src="@drawable/botellasinicio" />
-                    </com.google.android.material.card.MaterialCardView>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="14dp"
-                        android:layout_weight="1"
-                        android:text="Crema de Vainilla 750 ml"
-                        android:textColor="@color/cafe_profundo"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="4 und."
-                        android:textColor="@color/color_text_muted"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-            </LinearLayout>
+                android:nestedScrollingEnabled="false"
+                tools:listitem="@layout/item_pedido" />
 
             <!-- 5. Botón de Acción "Ver ruta de entrega" -->
             <com.google.android.material.button.MaterialButton

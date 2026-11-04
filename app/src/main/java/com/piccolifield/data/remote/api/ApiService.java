@@ -39,6 +39,9 @@ import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
+import com.piccolifield.model.Prospecto;
+import com.piccolifield.model.Seguimiento;
+
 public interface ApiService {
 
     // =============================================================
@@ -67,7 +70,27 @@ public interface ApiService {
             @Query("distrito") Integer distrito,
             @Query("estado") String estado
     );
+    
+    @GET("puntos-venta/{id}")
+    Call<ApiResponse<PuntoDistribucion>> obtenerDetallePunto(
+            @Path("id") int id
+    );
 
+    @GET("pedidos")
+    Call<ApiResponse<List<com.piccolifield.model.Pedido>>> obtenerPedidosPorPdv(
+            @Query("idPdv") int idPdv
+    );
+
+    @POST("pedidos")
+    Call<ApiResponse<Object>> registrarPedido(
+            @Body com.piccolifield.model.Pedido pedido
+    );
+
+    @PUT("pedidos/{id}/estado")
+    Call<ApiResponse<Object>> actualizarEstadoPedido(
+            @Path("id") int idPedido,
+            @Body com.piccolifield.data.remote.dto.EstadoRequest request
+    );
 
     // -------------------------------------------------------------
     // ASISTENCIAS Y STOCK (Módulos adicionales)
@@ -150,6 +173,45 @@ public interface ApiService {
     @GET("supervision/productos/{id}/foto")
     Call<ResponseBody> obtenerFotoProducto(
             @Path("id") int idProducto
+    );
+
+    // =============================================================
+    // 2. PROSPECTOS
+    // =============================================================
+    @GET("prospectos")
+    Call<ApiResponse<List<Prospecto>>> listarProspectos(
+            @Query("estado") String estado,
+            @Query("zona") String zona,
+            @Query("tipo") String tipo
+    );
+
+    @GET("prospectos/{id}")
+    Call<ApiResponse<Prospecto>> obtenerProspecto(@Path("id") int id);
+
+    @POST("prospectos")
+    Call<ApiResponse<Prospecto>> registrarProspecto(@Body Prospecto prospecto);
+
+    @PUT("prospectos/{id}/estado")
+    Call<ApiResponse<Object>> actualizarEstadoProspecto(
+            @Path("id") int id,
+            @Body com.piccolifield.data.remote.dto.EstadoRequest request
+    );
+
+    @PUT("prospectos/{id}/asignar")
+    Call<ApiResponse<Object>> asignarProspecto(
+            @Path("id") int id,
+            @Body com.piccolifield.data.remote.dto.request.ReasignarImpulsadorRequest request
+    );
+
+    @GET("prospectos/{id}/seguimientos")
+    Call<ApiResponse<List<Seguimiento>>> listarSeguimientos(
+            @Path("id") int id
+    );
+
+    @POST("prospectos/{id}/seguimientos")
+    Call<ApiResponse<Seguimiento>> registrarSeguimiento(
+            @Path("id") int id,
+            @Body Seguimiento seguimiento
     );
 
     // =============================================================

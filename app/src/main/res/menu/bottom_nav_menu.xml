@@ -19,4 +19,8 @@
         android:id="@+id/nav_reports"
         android:icon="@drawable/ic_nav_reports"
         android:title="@string/nav_reportes" />
+    <item
+        android:id="@+id/nav_prospectos"
+        android:icon="@drawable/ic_person"
+        android:title="Prospectos" />
 </menu>

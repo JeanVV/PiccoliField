@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rootLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/color_fondo"
+    tools:context=".ui.despacho.DetalleProspectoActivity">
+
+    <!-- 1. Cabecera (Atrás - Título) -->
+    <RelativeLayout
+        android:id="@+id/headerDetail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="12dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:src="@drawable/ic_back_arrow"
+            app:tint="@color/cafe_profundo" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:fontFamily="serif"
+            android:text="Detalle del Prospecto"
+            android:textColor="@color/cafe_profundo"
+            android:textSize="17sp"
+            android:textStyle="bold" />
+    </RelativeLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/headerDetail">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="30dp">
+
+            <!-- 2. Información General -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    app:cardBackgroundColor="#F8F1E5"
+                    app:cardCornerRadius="30dp"
+                    app:cardElevation="0dp">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="16dp"
+                        android:src="@drawable/ic_person"
+                        app:tint="@color/cafe_profundo" />
+                </com.google.android.material.card.MaterialCardView>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="14dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvNombreProspecto"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="serif"
+                        android:text="Nombre del Prospecto"
+                        android:textColor="@color/cafe_profundo"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvZonaTipo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Zona · Tipo"
+                        android:textColor="@color/color_text_muted"
+                        android:textSize="13sp" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:background="@drawable/bg_search_rounded"
+                        android:backgroundTint="#FFF3E0"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="3dp">
+
+                        <TextView
+                            android:id="@+id/tvEstadoProspecto"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="ESTADO"
+                            android:textColor="#E65100"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Foto / Ubicación Info (Opcional) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnVerUbicacion"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:text="Ver en el mapa"
+                app:icon="@drawable/ic_location_pin"
+                app:strokeColor="@color/chocolate"
+                android:textColor="@color/chocolate"
+                app:iconTint="@color/chocolate" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#E8DCC8"
+                android:layout_marginBottom="20dp" />
+
+            <!-- 3. Título Seguimientos -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:fontFamily="serif"
+                    android:text="Línea de tiempo"
+                    android:textColor="@color/cafe_profundo"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/btnNuevoSeguimiento"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:padding="6dp"
+                    android:text="+ Seguimiento"
+                    android:textColor="@color/caramelo"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </RelativeLayout>
+
+            <!-- 4. RecyclerView Seguimientos -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvSeguimientos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:nestedScrollingEnabled="false"
+                tools:listitem="@layout/item_seguimiento" />
+
+            <!-- 5. Botón Convertir a Cliente (Solo si está en estado final) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnConvertirPDV"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="Convertir a Punto de Distribución"
+                app:backgroundTint="#388E3C"
+                android:textColor="@android:color/white"
+                app:cornerRadius="28dp"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

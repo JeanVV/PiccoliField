@@ -487,203 +487,24 @@
                     app:strokeColor="#E5D5C0"
                     app:strokeWidth="1dp">
 
-                    <androidx.constraintlayout.widget.ConstraintLayout
+                    <androidx.fragment.app.FragmentContainerView
+                        android:id="@+id/map"
+                        android:name="com.google.android.gms.maps.SupportMapFragment"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:background="#E8F1E5">
+                        android:layout_height="match_parent" />
 
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:background="@drawable/bg_search_box"
-                            android:backgroundTint="#ECE6D8" />
+                    <com.google.android.material.floatingactionbutton.FloatingActionButton
+                        android:id="@+id/fabMyLocation"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom|end"
+                        android:layout_margin="16dp"
+                        android:contentDescription="@string/cd_location_icon"
+                        app:backgroundTint="@color/white"
+                        app:fabSize="mini"
+                        app:srcCompat="@drawable/ic_navigation_directions"
+                        app:tint="@color/cafe_profundo" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="24dp"
-                            android:layout_marginBottom="24dp"
-                            android:text="Lima"
-                            android:textColor="#B2A392"
-                            android:textSize="22sp"
-                            android:textStyle="bold"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintStart_toStartOf="parent" />
-
-                        <FrameLayout
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:layout_marginStart="50dp"
-                            android:layout_marginTop="30dp"
-                            android:background="@drawable/bg_stat_icon_circle"
-                            android:backgroundTint="@color/cafe_profundo"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent">
-
-                            <ImageView
-                                android:layout_width="18dp"
-                                android:layout_height="18dp"
-                                android:layout_gravity="center"
-                                android:contentDescription="@null"
-                                android:src="@drawable/ic_store"
-                                app:tint="@color/crema_vainilla" />
-                        </FrameLayout>
-
-                        <FrameLayout
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:layout_marginTop="28dp"
-                            android:layout_marginEnd="60dp"
-                            android:background="@drawable/bg_stat_icon_circle"
-                            android:backgroundTint="@color/cafe_profundo"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent">
-
-                            <ImageView
-                                android:layout_width="18dp"
-                                android:layout_height="18dp"
-                                android:layout_gravity="center"
-                                android:contentDescription="@null"
-                                android:src="@drawable/ic_store"
-                                app:tint="@color/crema_vainilla" />
-                        </FrameLayout>
-
-                        <FrameLayout
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:layout_marginStart="55dp"
-                            android:layout_marginBottom="60dp"
-                            android:background="@drawable/bg_stat_icon_circle"
-                            android:backgroundTint="@color/cafe_profundo"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintStart_toStartOf="parent">
-
-                            <ImageView
-                                android:layout_width="18dp"
-                                android:layout_height="18dp"
-                                android:layout_gravity="center"
-                                android:contentDescription="@null"
-                                android:src="@drawable/ic_store"
-                                app:tint="@color/crema_vainilla" />
-                        </FrameLayout>
-
-                        <FrameLayout
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:layout_marginEnd="90dp"
-                            android:layout_marginBottom="20dp"
-                            android:background="@drawable/bg_stat_icon_circle"
-                            android:backgroundTint="@color/cafe_profundo"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent">
-
-                            <ImageView
-                                android:layout_width="18dp"
-                                android:layout_height="18dp"
-                                android:layout_gravity="center"
-                                android:contentDescription="@null"
-                                android:src="@drawable/ic_store"
-                                app:tint="@color/crema_vainilla" />
-                        </FrameLayout>
-
-                        <View
-                            android:id="@+id/vPulseCircle"
-                            android:layout_width="90dp"
-                            android:layout_height="90dp"
-                            android:background="@drawable/bg_geofence_ring"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            app:layout_constraintVertical_bias="0.65" />
-
-                        <FrameLayout
-                            android:id="@+id/frameCenterPin"
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
-                            android:background="@drawable/bg_stat_icon_circle"
-                            android:backgroundTint="@color/cafe_profundo"
-                            app:layout_constraintBottom_toBottomOf="@+id/vPulseCircle"
-                            app:layout_constraintEnd_toEndOf="@+id/vPulseCircle"
-                            app:layout_constraintStart_toStartOf="@+id/vPulseCircle"
-                            app:layout_constraintTop_toTopOf="@+id/vPulseCircle">
-
-                            <ImageView
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
-                                android:layout_gravity="center"
-                                android:contentDescription="@null"
-                                android:src="@drawable/ic_location_pin"
-                                app:tint="@color/dorado_premium" />
-                        </FrameLayout>
-
-                        <com.google.android.material.card.MaterialCardView
-                            android:id="@+id/cardTooltipStore"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="10dp"
-                            app:cardBackgroundColor="@color/cafe_profundo"
-                            app:cardCornerRadius="16dp"
-                            app:cardElevation="6dp"
-                            app:layout_constraintBottom_toTopOf="@+id/frameCenterPin"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent">
-
-                            <LinearLayout
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:gravity="center_vertical"
-                                android:orientation="horizontal"
-                                android:paddingHorizontal="14dp"
-                                android:paddingVertical="8dp">
-
-                                <LinearLayout
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:orientation="vertical">
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="Licorería El Buen Sabor"
-                                        android:textColor="@color/white"
-                                        android:textSize="13sp"
-                                        android:textStyle="bold" />
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:layout_marginTop="2dp"
-                                        android:text="🟢 0,8 km"
-                                        android:textColor="#C99A32"
-                                        android:textSize="11sp" />
-                                </LinearLayout>
-
-                                <ImageView
-                                    android:layout_width="16dp"
-                                    android:layout_height="16dp"
-                                    android:layout_marginStart="12dp"
-                                    android:contentDescription="@null"
-                                    android:src="@drawable/ic_arrow_forward"
-                                    app:tint="@color/white" />
-                            </LinearLayout>
-                        </com.google.android.material.card.MaterialCardView>
-
-                        <com.google.android.material.floatingactionbutton.FloatingActionButton
-                            android:id="@+id/fabMyLocation"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="16dp"
-                            android:layout_marginBottom="16dp"
-                            android:contentDescription="@string/cd_location_icon"
-                            app:backgroundTint="@color/white"
-                            app:fabSize="mini"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:srcCompat="@drawable/ic_navigation_directions"
-                            app:tint="@color/cafe_profundo" />
-
-                    </androidx.constraintlayout.widget.ConstraintLayout>
                 </com.google.android.material.card.MaterialCardView>
 
                 <!-- VISTA LISTA -->

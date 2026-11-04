@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/color_fondo"
+    android:padding="20dp">
+
+    <View
+        android:layout_width="40dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="16dp"
+        android:background="#CCCCCC" />
+
+    <TextView
+        android:id="@+id/tvTituloEstado"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Cambiar Estado del Pedido"
+        android:textColor="@color/cafe_profundo"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Seleccione el nuevo estado:"
+        android:textColor="#757575"
+        android:textSize="14sp"
+        android:layout_marginBottom="16dp" />
+
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/toggleEstados"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        app:singleSelection="true"
+        app:selectionRequired="true">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnRegistrado"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Registrado"
+            android:textSize="12sp"
+            app:strokeColor="@color/chocolate"
+            android:textColor="@color/chocolate" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPreparacion"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="En Prep."
+            android:textSize="12sp"
+            app:strokeColor="@color/chocolate"
+            android:textColor="@color/chocolate" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnEntregado"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Entregado"
+            android:textSize="12sp"
+            app:strokeColor="@color/chocolate"
+            android:textColor="@color/chocolate" />
+
+    </com.google.android.material.button.MaterialButtonToggleGroup>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnConfirmarEstado"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:text="Actualizar Estado"
+        app:backgroundTint="@color/chocolate"
+        android:textColor="@android:color/white"
+        app:cornerRadius="12dp" />
+
+</LinearLayout>

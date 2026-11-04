@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/color_fondo"
+    android:padding="20dp">
+
+    <View
+        android:layout_width="40dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="16dp"
+        android:background="#CCCCCC" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Nuevo Pedido"
+        android:textColor="@color/cafe_profundo"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp" />
+
+    <LinearLayout
+        android:id="@+id/layoutProductoDetails"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="visible">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Producto:"
+            android:textColor="#333333"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="6dp" />
+
+        <TextView
+            android:id="@+id/tvProductoNombre"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Pisco Italia 750 ml"
+            android:textColor="@color/chocolate"
+            android:textSize="16sp"
+            android:layout_marginBottom="24dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Cantidad a solicitar:"
+            android:textColor="#333333"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="6dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="24dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRestar"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:text="-"
+                android:textSize="20sp"
+                app:cornerRadius="8dp"
+                app:strokeColor="@color/chocolate"
+                android:textColor="@color/chocolate" />
+
+            <TextView
+                android:id="@+id/tvCantidadPedido"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textAlignment="center"
+                android:textColor="#333333" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSumar"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:text="+"
+                android:textSize="20sp"
+                app:cornerRadius="8dp"
+                app:strokeColor="@color/chocolate"
+                android:textColor="@color/chocolate" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvErrorCantidad"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="La cantidad debe ser mayor a 0"
+            android:textColor="@color/design_default_color_error"
+            android:textSize="12sp"
+            android:visibility="gone"
+            android:layout_marginBottom="12dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnConfirmarPedido"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="Registrar Pedido"
+            app:backgroundTint="@color/chocolate"
+            android:textColor="@android:color/white"
+            app:cornerRadius="12dp" />
+
+    </LinearLayout>
+</LinearLayout>

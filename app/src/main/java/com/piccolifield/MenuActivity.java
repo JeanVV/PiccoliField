@@ -22,6 +22,7 @@ import com.piccolifield.sharedpreferences.SplashStorage;
 import com.piccolifield.ui.asistencia.AsistenciaHomeFragment;
 import com.piccolifield.ui.asistencias.AsistenciasFragment;
 import com.piccolifield.ui.despacho.PuntosDespachoFragment;
+import com.piccolifield.ui.despacho.ProspectosFragment;
 import com.piccolifield.ui.perfil.PerfilFragment;
 import com.piccolifield.ui.supervisionPdv.SupervisionFragment;
 
@@ -85,6 +86,10 @@ public class MenuActivity extends AppCompatActivity {
                 case 3:
                     // Puntos de Despacho
                     cargarFragmento(new PuntosDespachoFragment());
+                    break;
+                case 4:
+                    // Prospectos
+                    cargarFragmento(new ProspectosFragment());
                     break;
             }
         });
