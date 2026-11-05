@@ -20,7 +20,7 @@ import com.piccolifield.adapter.RecentPersonnelAdapter;
 import com.piccolifield.data.model.AsistenciaResumen;
 import com.piccolifield.data.model.RegistroAsistencia;
 import com.piccolifield.data.remote.api.ApiService;
-import com.piccolifield.data.remote.dto.RetrofitClient;
+import com.piccolifield.data.remote.RetrofitClient;
 import com.piccolifield.data.remote.dto.response.ApiResponse;
 import com.piccolifield.databinding.FragmentAsistenciaInicioBinding;
 import com.piccolifield.sharedpreferences.SplashStorage;

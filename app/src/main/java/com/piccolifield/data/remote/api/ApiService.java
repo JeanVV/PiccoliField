@@ -13,7 +13,8 @@ import com.piccolifield.data.model.ResumenDashboard;
 import com.piccolifield.data.model.TurnoHistorial;
 import com.piccolifield.data.model.Usuario;
 import com.piccolifield.data.model.VendedorDetalle;
-import com.piccolifield.data.remote.dto.FcmTokenRequest;
+import com.piccolifield.data.remote.dto.request.DispositivoRequest;
+import com.piccolifield.data.remote.dto.request.FcmTokenRequest;
 import com.piccolifield.data.remote.dto.request.JustificationRequest;
 import com.piccolifield.data.remote.dto.request.LoginRequest;
 import com.piccolifield.data.remote.dto.request.ReasignarImpulsadorRequest;
@@ -89,7 +90,7 @@ public interface ApiService {
     @PUT("pedidos/{id}/estado")
     Call<ApiResponse<Object>> actualizarEstadoPedido(
             @Path("id") int idPedido,
-            @Body com.piccolifield.data.remote.dto.EstadoRequest request
+            @Body com.piccolifield.data.remote.dto.request.EstadoRequest request
     );
 
     // -------------------------------------------------------------
@@ -194,7 +195,7 @@ public interface ApiService {
     @PUT("prospectos/{id}/estado")
     Call<ApiResponse<Object>> actualizarEstadoProspecto(
             @Path("id") int id,
-            @Body com.piccolifield.data.remote.dto.EstadoRequest request
+            @Body com.piccolifield.data.remote.dto.request.EstadoRequest request
     );
 
     @PUT("prospectos/{id}/asignar")
@@ -237,4 +238,7 @@ public interface ApiService {
     Call<ApiResponse<Object>> reportarIncidencia(
             @Body IncidenciaRequest request
     );
+
+    @PUT("dispositivo")
+    Call<ApiResponse<Object>> actualizarDispositivo(@Body DispositivoRequest request);
 }

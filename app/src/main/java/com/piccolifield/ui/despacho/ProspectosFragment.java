@@ -20,7 +20,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.piccolifield.R;
 import com.piccolifield.adapter.ProspectoAdapter;
 import com.piccolifield.data.remote.api.ApiService;
-import com.piccolifield.data.remote.dto.RetrofitClient;
+import com.piccolifield.data.remote.RetrofitClient;
 import com.piccolifield.data.remote.dto.response.ApiResponse;
 import com.piccolifield.model.Prospecto;
 

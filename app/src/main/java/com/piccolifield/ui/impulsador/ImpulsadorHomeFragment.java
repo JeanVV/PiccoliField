@@ -1,7 +1,6 @@
 package com.piccolifield.ui.impulsador;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -26,7 +25,7 @@ import com.piccolifield.R;
 import com.piccolifield.data.model.ImpulsadorDashboard;
 import com.piccolifield.data.model.ProductoBuscado;
 import com.piccolifield.data.remote.api.ApiService;
-import com.piccolifield.data.remote.dto.RetrofitClient;
+import com.piccolifield.data.remote.RetrofitClient;
 import com.piccolifield.data.remote.dto.request.RegistrarVentaRequest;
 import com.piccolifield.data.remote.dto.response.ApiResponse;
 import com.piccolifield.sharedpreferences.SplashStorage;

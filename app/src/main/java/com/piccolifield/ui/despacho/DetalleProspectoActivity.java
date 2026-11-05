@@ -24,7 +24,7 @@ import com.google.android.material.button.MaterialButton;
 import com.piccolifield.R;
 import com.piccolifield.adapter.SeguimientoAdapter;
 import com.piccolifield.data.remote.api.ApiService;
-import com.piccolifield.data.remote.dto.RetrofitClient;
+import com.piccolifield.data.remote.RetrofitClient;
 import com.piccolifield.data.remote.dto.response.ApiResponse;
 import com.piccolifield.model.Prospecto;
 import com.piccolifield.model.Seguimiento;
@@ -202,7 +202,7 @@ public class DetalleProspectoActivity extends AppCompatActivity {
         // Llamaremos a PUT /prospectos/{id}/estado con estado = CONVERTIDO
         
         ApiService apiService = RetrofitClient.createService();
-        com.piccolifield.data.remote.dto.EstadoRequest request = new com.piccolifield.data.remote.dto.EstadoRequest();
+        com.piccolifield.data.remote.dto.request.EstadoRequest request = new com.piccolifield.data.remote.dto.request.EstadoRequest();
         request.setEstado("CONVERTIDO");
         
         apiService.actualizarEstadoProspecto(idProspecto, request).enqueue(new Callback<ApiResponse<Object>>() {

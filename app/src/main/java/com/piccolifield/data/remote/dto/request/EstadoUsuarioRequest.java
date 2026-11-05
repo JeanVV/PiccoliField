@@ -1,4 +1,4 @@
-package com.piccolifield.data.remote.dto;
+package com.piccolifield.data.remote.dto.request;
 
 public class EstadoUsuarioRequest {
     private String estado;

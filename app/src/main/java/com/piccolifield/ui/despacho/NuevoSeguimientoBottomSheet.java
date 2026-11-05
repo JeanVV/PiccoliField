@@ -15,7 +15,7 @@ import androidx.annotation.Nullable;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.piccolifield.R;
 import com.piccolifield.data.remote.api.ApiService;
-import com.piccolifield.data.remote.dto.RetrofitClient;
+import com.piccolifield.data.remote.RetrofitClient;
 import com.piccolifield.data.remote.dto.response.ApiResponse;
 import com.piccolifield.model.Prospecto;
 import com.piccolifield.model.Seguimiento;

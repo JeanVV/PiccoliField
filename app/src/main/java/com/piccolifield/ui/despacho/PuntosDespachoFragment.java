@@ -20,7 +20,7 @@ import com.piccolifield.DetallePuntoDistribucionActivity;
 import com.piccolifield.R;
 import com.piccolifield.adapter.PuntoDistribucionAdapter;
 import com.piccolifield.data.remote.api.ApiService;
-import com.piccolifield.data.remote.dto.RetrofitClient;
+import com.piccolifield.data.remote.RetrofitClient;
 import com.piccolifield.data.remote.dto.response.ApiResponse;
 import com.piccolifield.databinding.FragmentPuntosDespachoBinding;
 import com.piccolifield.model.PuntoDistribucion;

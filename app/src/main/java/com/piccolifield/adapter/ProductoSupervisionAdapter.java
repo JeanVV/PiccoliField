@@ -17,6 +17,8 @@ import retrofit2.Response;
 
 import com.piccolifield.R;
 import com.piccolifield.data.model.PuntoVentaProducto;
+import com.piccolifield.data.remote.RetrofitClient;
+
 import java.util.List;
 
 public class ProductoSupervisionAdapter extends RecyclerView.Adapter<ProductoSupervisionAdapter.ViewHolder> {
@@ -44,7 +46,7 @@ public class ProductoSupervisionAdapter extends RecyclerView.Adapter<ProductoSup
         holder.tvStockMinimo.setText("Stock Mínimo: " + producto.getStockMinimo());
 
         if (producto.getIdProductos() > 0) {
-            com.piccolifield.data.remote.api.ApiService apiService = com.piccolifield.data.remote.dto.RetrofitClient.createService();
+            com.piccolifield.data.remote.api.ApiService apiService = RetrofitClient.createService();
             apiService.obtenerFotoProducto(producto.getIdProductos()).enqueue(new Callback<ResponseBody>() {
                 @Override
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {

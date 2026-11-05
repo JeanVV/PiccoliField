@@ -15,7 +15,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.piccolifield.data.remote.api.ApiService;
-import com.piccolifield.data.remote.dto.RetrofitClient;
+import com.piccolifield.data.remote.RetrofitClient;
 import com.piccolifield.data.remote.dto.request.LoginRequest;
 import com.piccolifield.databinding.ActivityLoginBinding;
 import com.piccolifield.sharedpreferences.SplashStorage;

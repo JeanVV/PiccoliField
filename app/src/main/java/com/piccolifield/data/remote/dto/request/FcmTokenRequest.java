@@ -1,4 +1,4 @@
-package com.piccolifield.data.remote.dto;
+package com.piccolifield.data.remote.dto.request;
 
 import com.google.gson.annotations.SerializedName;
 

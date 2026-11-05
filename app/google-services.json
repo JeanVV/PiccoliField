@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "547694915086",
+    "project_id": "piccolifield",
+    "storage_bucket": "piccolifield.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:547694915086:android:f04798b4d74950430e565f",
+        "android_client_info": {
+          "package_name": "com.piccolifield"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyArmcYtRBGV1Zb_NmrNaxouaEeat6Aqar4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

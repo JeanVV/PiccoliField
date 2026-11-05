@@ -18,7 +18,7 @@ import com.piccolifield.R;
 import com.piccolifield.adapter.ColaboradorAdapter;
 import com.piccolifield.data.model.RegistroAsistencia;
 import com.piccolifield.data.remote.api.ApiService;
-import com.piccolifield.data.remote.dto.RetrofitClient;
+import com.piccolifield.data.remote.RetrofitClient;
 import com.piccolifield.data.remote.dto.response.ApiResponse;
 import com.piccolifield.databinding.FragmentColaboradoresBinding;
 import com.piccolifield.sharedpreferences.SplashStorage;

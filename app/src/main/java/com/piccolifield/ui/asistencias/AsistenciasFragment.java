@@ -27,7 +27,7 @@ import com.piccolifield.R;
 
 import com.piccolifield.data.model.RegistroAsistencia;
 import com.piccolifield.data.remote.api.ApiService;
-import com.piccolifield.data.remote.dto.RetrofitClient;
+import com.piccolifield.data.remote.RetrofitClient;
 import com.piccolifield.data.remote.dto.request.JustificationRequest;
 import com.piccolifield.data.remote.dto.request.MarcarAsistenciaRequest;
 import com.piccolifield.data.remote.dto.response.ApiResponse;

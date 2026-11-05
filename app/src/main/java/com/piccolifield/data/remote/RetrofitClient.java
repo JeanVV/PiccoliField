@@ -1,4 +1,4 @@
-package com.piccolifield.data.remote.dto;
+package com.piccolifield.data.remote;
 
 import android.util.Log;
 

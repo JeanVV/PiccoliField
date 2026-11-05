@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.piccolifield.DetalleVendedorActivity;
 import com.piccolifield.R;
 import com.piccolifield.data.remote.api.ApiService;
-import com.piccolifield.data.remote.dto.RetrofitClient;
+import com.piccolifield.data.remote.RetrofitClient;
 import com.piccolifield.model.Vendedor;
 
 import java.util.List;

@@ -15,7 +15,7 @@ import androidx.fragment.app.Fragment;
 
 import com.piccolifield.data.model.Usuario;
 import com.piccolifield.data.remote.api.ApiService;
-import com.piccolifield.data.remote.dto.RetrofitClient;
+import com.piccolifield.data.remote.RetrofitClient;
 import com.piccolifield.data.remote.dto.response.ApiResponse;
 import com.piccolifield.databinding.ActivityMenuBinding;
 import com.piccolifield.sharedpreferences.SplashStorage;

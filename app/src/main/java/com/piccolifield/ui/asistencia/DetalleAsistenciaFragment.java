@@ -35,7 +35,7 @@ import com.piccolifield.adapter.TurnoHistorialAdapter;
 import com.piccolifield.data.model.RegistroAsistencia;
 import com.piccolifield.data.model.TurnoHistorial;
 import com.piccolifield.data.remote.api.ApiService;
-import com.piccolifield.data.remote.dto.RetrofitClient;
+import com.piccolifield.data.remote.RetrofitClient;
 import com.piccolifield.data.remote.dto.response.ApiResponse;
 import com.piccolifield.databinding.FragmentDetalleAsistenciaBinding;
 import com.piccolifield.sharedpreferences.SplashStorage;

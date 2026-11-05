@@ -17,7 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.piccolifield.data.model.VendedorDetalle;
 import com.piccolifield.data.remote.api.ApiService;
 import com.piccolifield.data.remote.dto.response.ApiResponse;
-import com.piccolifield.data.remote.dto.RetrofitClient; // Cambia esto si tu RetrofitClient está en otra carpeta
+import com.piccolifield.data.remote.RetrofitClient; // Cambia esto si tu RetrofitClient está en otra carpeta
 import com.piccolifield.sharedpreferences.SplashStorage;
 
 import retrofit2.Call;
