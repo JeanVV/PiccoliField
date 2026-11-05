@@ -4,6 +4,8 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Address;
+import android.location.Geocoder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,28 +21,37 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
 import com.piccolifield.R;
-
 import com.piccolifield.data.model.RegistroAsistencia;
-import com.piccolifield.data.remote.api.ApiService;
 import com.piccolifield.data.remote.RetrofitClient;
+import com.piccolifield.data.remote.api.ApiService;
 import com.piccolifield.data.remote.dto.request.JustificationRequest;
 import com.piccolifield.data.remote.dto.request.MarcarAsistenciaRequest;
 import com.piccolifield.data.remote.dto.response.ApiResponse;
 import com.piccolifield.databinding.FragmentAsistenciasBinding;
 import com.piccolifield.sharedpreferences.SplashStorage;
+import com.piccolifield.ui.asistencia.AsistenciaUiState;
+import com.piccolifield.ui.asistencia.AsistenciaViewModel;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -50,11 +61,25 @@ public class AsistenciasFragment extends Fragment {
 
     private FragmentAsistenciasBinding binding;
     private ApiService apiService;
+    private AsistenciaViewModel viewModel;
     private final Handler timeHandler = new Handler(Looper.getMainLooper());
     private Runnable timeRunnable;
 
     private Uri currentPhotoUri;
     private String fotoSustentoBase64;
+    private String tipoMarcaActual = "INGRESO";
+    private String tipoMarcaPendiente;
+
+    private final ActivityResultLauncher<String> requestLocationPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    if (tipoMarcaPendiente != null) {
+                        obtenerUbicacionYMarcarAsistencia(tipoMarcaPendiente);
+                    }
+                } else {
+                    Toast.makeText(getContext(), "Permiso de ubicación denegado", Toast.LENGTH_SHORT).show();
+                }
+            });
 
     private final ActivityResultLauncher<String> requestCameraPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
@@ -98,6 +123,10 @@ public class AsistenciasFragment extends Fragment {
         }
         apiService = RetrofitClient.createService();
 
+        // Inicializar ViewModel
+        viewModel = new ViewModelProvider(requireActivity()).get(AsistenciaViewModel.class);
+        observarUiState();
+
         // 1. Mostrar información del usuario
         mostrarInfoUsuario();
 
@@ -109,6 +138,33 @@ public class AsistenciasFragment extends Fragment {
 
         // 4. Configurar listeners de botones
         setupListeners();
+    }
+
+    private void observarUiState() {
+        viewModel.getUiState().observe(getViewLifecycleOwner(), state -> {
+            if (state == null || binding == null) return;
+            switch (state.getEstado()) {
+                case LOADING:
+                    setBotonesEstado(false, "Guardando...");
+                    break;
+                case SUCCESS:
+                    String msgSuccess = state.getMensaje() != null ? state.getMensaje() : "Asistencia registrada correctamente";
+                    Toast.makeText(getContext(), msgSuccess, Toast.LENGTH_SHORT).show();
+                    setBotonesEstado(true, null);
+                    actualizarTextoUltimaMarca(tipoMarcaActual);
+                    viewModel.resetUiState();
+                    break;
+                case ERROR:
+                    String msgError = state.getMensaje() != null ? state.getMensaje() : "Error al registrar asistencia";
+                    Toast.makeText(getContext(), msgError, Toast.LENGTH_LONG).show();
+                    setBotonesEstado(true, null);
+                    viewModel.resetUiState();
+                    break;
+                case IDLE:
+                default:
+                    break;
+            }
+        });
     }
 
     private void mostrarInfoUsuario() {
@@ -195,14 +251,164 @@ public class AsistenciasFragment extends Fragment {
     }
 
     private void setupListeners() {
-        binding.btnMarcarEntrada.setOnClickListener(v -> registrarMarca("INGRESO"));
+        binding.btnMarcarEntrada.setOnClickListener(v -> solicitarMarcaConUbicacion("INGRESO"));
         if (binding.btnMarcarRefrigerio != null) {
-            binding.btnMarcarRefrigerio.setOnClickListener(v -> registrarMarca("REFRIGERIO"));
+            binding.btnMarcarRefrigerio.setOnClickListener(v -> solicitarMarcaConUbicacion("REFRIGERIO"));
         }
-        binding.btnMarcarSalida.setOnClickListener(v -> registrarMarca("SALIDA"));
+        binding.btnMarcarSalida.setOnClickListener(v -> solicitarMarcaConUbicacion("SALIDA"));
         binding.btnTomarFotoSustento.setOnClickListener(v -> solicitarPermisoYTomarFoto());
         binding.btnEliminarFotoSustento.setOnClickListener(v -> quitarFotoSustento());
         binding.btnEnviarJustificacion.setOnClickListener(v -> enviarJustificacion());
+    }
+
+    private void solicitarMarcaConUbicacion(String tipo) {
+        this.tipoMarcaActual = tipo;
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            obtenerUbicacionYMarcarAsistencia(tipo);
+        } else {
+            tipoMarcaPendiente = tipo;
+            requestLocationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+    }
+
+    private void obtenerUbicacionYMarcarAsistencia(String tipo) {
+        if (!isAdded() || binding == null) return;
+        setBotonesEstado(false, "Obteniendo ubicación...");
+
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(getContext(), "Permiso de ubicación denegado", Toast.LENGTH_SHORT).show();
+            setBotonesEstado(true, null);
+            return;
+        }
+
+        FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext());
+        fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
+                .addOnSuccessListener(location -> {
+                    if (location == null) {
+                        Toast.makeText(getContext(), "No se pudo obtener la ubicación", Toast.LENGTH_SHORT).show();
+                        setBotonesEstado(true, null);
+                        return;
+                    }
+                    obtenerDireccionYMarcar(location.getLatitude(), location.getLongitude(), tipo);
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "No se pudo obtener la ubicación", Toast.LENGTH_SHORT).show();
+                    setBotonesEstado(true, null);
+                });
+    }
+
+    private void obtenerDireccionYMarcar(double lat, double lng, String tipo) {
+        if (!isAdded() || binding == null) return;
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Handler mainHandler = new Handler(Looper.getMainLooper());
+
+        executor.execute(() -> {
+            String direccionResult = null;
+            try {
+                Geocoder geocoder = new Geocoder(requireContext(), Locale.getDefault());
+                List<Address> addresses = geocoder.getFromLocation(lat, lng, 1);
+                if (addresses != null && !addresses.isEmpty()) {
+                    Address address = addresses.get(0);
+                    if (address.getMaxAddressLineIndex() >= 0) {
+                        direccionResult = address.getAddressLine(0);
+                    } else {
+                        StringBuilder sb = new StringBuilder();
+                        if (address.getThoroughfare() != null) {
+                            sb.append(address.getThoroughfare());
+                            if (address.getSubThoroughfare() != null) {
+                                sb.append(" ").append(address.getSubThoroughfare());
+                            }
+                        }
+                        if (address.getLocality() != null) {
+                            if (sb.length() > 0) sb.append(", ");
+                            sb.append(address.getLocality());
+                        }
+                        direccionResult = sb.length() > 0 ? sb.toString() : null;
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                direccionResult = null;
+            }
+
+            final String finalDireccion = direccionResult;
+            mainHandler.post(() -> {
+                if (!isAdded() || binding == null) return;
+                enviarSolicitudAsistencia(lat, lng, finalDireccion, tipo);
+            });
+        });
+    }
+
+    private void enviarSolicitudAsistencia(double lat, double lng, @Nullable String direccion, String tipo) {
+        int idUsuario = SplashStorage.obtenerUsuarioId(requireContext());
+
+        SimpleDateFormat fullSdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", LOCALE_PERU);
+        fullSdf.setTimeZone(TIME_ZONE_LIMA);
+        String fechaHora = fullSdf.format(new Date());
+
+        String sede = "Sede Chiclayo Principal";
+
+        MarcarAsistenciaRequest request = new MarcarAsistenciaRequest();
+        request.setIdUsuario(idUsuario);
+        request.setTipo(tipo);
+        request.setLatitud(lat);
+        request.setLongitud(lng);
+        request.setDireccion(direccion);
+        request.setSede(sede);
+        request.setFechaHoraDispositivo(fechaHora);
+
+        guardarMarcaEnLocal(idUsuario, tipo, fechaHora, lat, lng, sede);
+
+        viewModel.marcarAsistencia(request);
+    }
+
+    private void setBotonesEstado(boolean enabled, @Nullable String loadingText) {
+        if (binding == null) return;
+        binding.btnMarcarEntrada.setEnabled(enabled);
+        if (binding.btnMarcarRefrigerio != null) binding.btnMarcarRefrigerio.setEnabled(enabled);
+        binding.btnMarcarSalida.setEnabled(enabled);
+
+        if (!enabled && loadingText != null) {
+            if ("INGRESO".equalsIgnoreCase(tipoMarcaActual)) {
+                binding.btnMarcarEntrada.setText(loadingText);
+            } else if ("REFRIGERIO".equalsIgnoreCase(tipoMarcaActual) && binding.btnMarcarRefrigerio != null) {
+                binding.btnMarcarRefrigerio.setText(loadingText);
+            } else if ("SALIDA".equalsIgnoreCase(tipoMarcaActual)) {
+                binding.btnMarcarSalida.setText(loadingText);
+            }
+        } else {
+            binding.btnMarcarEntrada.setText("Marcar Entrada");
+            if (binding.btnMarcarRefrigerio != null) binding.btnMarcarRefrigerio.setText("Marcar Refrigerio");
+            binding.btnMarcarSalida.setText("Marcar Salida");
+        }
+    }
+
+    private void actualizarTextoUltimaMarca(String tipo) {
+        if (binding == null) return;
+        SimpleDateFormat shortSdf = new SimpleDateFormat("hh:mm a", LOCALE_PERU);
+        shortSdf.setTimeZone(TIME_ZONE_LIMA);
+        String horaCorta = shortSdf.format(new Date());
+        String tipoTexto = "INGRESO".equalsIgnoreCase(tipo) ? "Entrada" : ("REFRIGERIO".equalsIgnoreCase(tipo) ? "Refrigerio" : "Salida");
+        binding.tvEstadoHoy.setText("Última marca: " + tipoTexto + " a las " + horaCorta + " (Lima)");
+    }
+
+    private void guardarMarcaEnLocal(int idUsuario, String tipo, String fechaHora, double lat, double lng, String sede) {
+        if (!isAdded()) return;
+        RegistroAsistencia reg = new RegistroAsistencia();
+        reg.setIdUsuario(idUsuario);
+        String nombreCompleto = SplashStorage.obtenerNombreUsuario(requireContext());
+        reg.setNombres(nombreCompleto != null && !nombreCompleto.isEmpty() ? nombreCompleto : "Colaborador " + idUsuario);
+        reg.setTipo(tipo);
+        reg.setSede(sede);
+        reg.setEstado("A_TIEMPO");
+        reg.setHoraMarcado(fechaHora);
+        reg.setFechaHoraServidor(fechaHora);
+        reg.setLatitud(lat);
+        reg.setLongitud(lng);
+
+        SplashStorage.guardarRegistroAsistenciaLocal(requireContext(), reg);
     }
 
     private void solicitarPermisoYTomarFoto() {
@@ -263,79 +469,6 @@ public class AsistenciasFragment extends Fragment {
             e.printStackTrace();
             return null;
         }
-    }
-
-    private void registrarMarca(String tipo) {
-        int idUsuario = SplashStorage.obtenerUsuarioId(requireContext());
-
-        SimpleDateFormat fullSdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", LOCALE_PERU);
-        fullSdf.setTimeZone(TIME_ZONE_LIMA);
-        String fechaHora = fullSdf.format(new Date());
-
-        SimpleDateFormat shortSdf = new SimpleDateFormat("hh:mm a", LOCALE_PERU);
-        shortSdf.setTimeZone(TIME_ZONE_LIMA);
-        String horaCorta = shortSdf.format(new Date());
-
-        double lat = -6.7714;
-        double lng = -79.8409;
-        String sede = "Sede Chiclayo Principal";
-
-        MarcarAsistenciaRequest request = new MarcarAsistenciaRequest(
-                idUsuario, tipo, lat, lng, sede, fechaHora
-        );
-
-        binding.btnMarcarEntrada.setEnabled(false);
-        if (binding.btnMarcarRefrigerio != null) binding.btnMarcarRefrigerio.setEnabled(false);
-        binding.btnMarcarSalida.setEnabled(false);
-
-        // Guardar registro local para disponibilizar inmediatamente al Administrador
-        guardarMarcaEnLocal(idUsuario, tipo, fechaHora, lat, lng, sede);
-
-        if (apiService != null) {
-            apiService.registrarAsistencia(request).enqueue(new Callback<ApiResponse<Object>>() {
-                @Override
-                public void onResponse(@NonNull Call<ApiResponse<Object>> call, @NonNull Response<ApiResponse<Object>> response) {
-                    if (!isAdded() || binding == null) return;
-                    binding.btnMarcarEntrada.setEnabled(true);
-                    if (binding.btnMarcarRefrigerio != null) binding.btnMarcarRefrigerio.setEnabled(true);
-                    binding.btnMarcarSalida.setEnabled(true);
-
-                    String tipoTexto = "INGRESO".equalsIgnoreCase(tipo) ? "Entrada" : ("REFRIGERIO".equalsIgnoreCase(tipo) ? "Refrigerio" : "Salida");
-                    binding.tvEstadoHoy.setText("Última marca: " + tipoTexto + " a las " + horaCorta + " (Lima)");
-
-                    Toast.makeText(getContext(), "¡" + tipoTexto + " registrada a las " + horaCorta + " (Zona Lima, Perú)!", Toast.LENGTH_LONG).show();
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<ApiResponse<Object>> call, @NonNull Throwable t) {
-                    if (!isAdded() || binding == null) return;
-                    binding.btnMarcarEntrada.setEnabled(true);
-                    if (binding.btnMarcarRefrigerio != null) binding.btnMarcarRefrigerio.setEnabled(true);
-                    binding.btnMarcarSalida.setEnabled(true);
-
-                    String tipoTexto = "INGRESO".equalsIgnoreCase(tipo) ? "Entrada" : ("REFRIGERIO".equalsIgnoreCase(tipo) ? "Refrigerio" : "Salida");
-                    binding.tvEstadoHoy.setText("Última marca: " + tipoTexto + " a las " + horaCorta + " (Lima)");
-                    Toast.makeText(getContext(), tipoTexto + " registrada a las " + horaCorta + " (Zona Lima)", Toast.LENGTH_LONG).show();
-                }
-            });
-        }
-    }
-
-    private void guardarMarcaEnLocal(int idUsuario, String tipo, String fechaHora, double lat, double lng, String sede) {
-        if (!isAdded()) return;
-        RegistroAsistencia reg = new RegistroAsistencia();
-        reg.setIdUsuario(idUsuario);
-        String nombreCompleto = SplashStorage.obtenerNombreUsuario(requireContext());
-        reg.setNombres(nombreCompleto != null && !nombreCompleto.isEmpty() ? nombreCompleto : "Colaborador " + idUsuario);
-        reg.setTipo(tipo);
-        reg.setSede(sede);
-        reg.setEstado("A_TIEMPO");
-        reg.setHoraMarcado(fechaHora);
-        reg.setFechaHoraServidor(fechaHora);
-        reg.setLatitud(lat);
-        reg.setLongitud(lng);
-
-        SplashStorage.guardarRegistroAsistenciaLocal(requireContext(), reg);
     }
 
     private void enviarJustificacion() {

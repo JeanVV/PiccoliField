@@ -21,6 +21,7 @@ import com.piccolifield.data.remote.dto.request.ReasignarImpulsadorRequest;
 import com.piccolifield.data.remote.dto.request.MarcarAsistenciaRequest;
 import com.piccolifield.data.remote.dto.request.RevisionJustificacionRequest;
 import com.piccolifield.data.remote.dto.response.ApiResponse;
+import com.piccolifield.data.remote.dto.response.AsistenciaResponse;
 import com.piccolifield.model.Alerta;
 import com.piccolifield.data.model.ImpulsadorDashboard;
 import com.piccolifield.data.model.ProductoBuscado;
@@ -112,6 +113,9 @@ public interface ApiService {
 
     @POST("asistencias/marcar")
     Call<ApiResponse<Object>> registrarAsistencia(@Body MarcarAsistenciaRequest request);
+
+    @GET("asistencias/ultima")
+    Call<ApiResponse<AsistenciaResponse>> obtenerUltimaAsistencia();
 
     @POST("asistencias/justificar")
     Call<ApiResponse<Object>> registrarJustificacion(@Body JustificationRequest request);

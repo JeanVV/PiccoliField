@@ -16,6 +16,9 @@ public class MarcarAsistenciaRequest {
     @SerializedName("longitud")
     private double longitud;
 
+    @SerializedName("direccion")
+    private String direccion;
+
     @SerializedName("sede")
     private String sede;
 
@@ -24,11 +27,27 @@ public class MarcarAsistenciaRequest {
 
     public MarcarAsistenciaRequest() {}
 
+    public MarcarAsistenciaRequest(double latitud, double longitud, String direccion) {
+        this.latitud = latitud;
+        this.longitud = longitud;
+        this.direccion = direccion;
+    }
+
     public MarcarAsistenciaRequest(int idUsuario, String tipo, double latitud, double longitud, String sede, String fechaHoraDispositivo) {
         this.idUsuario = idUsuario;
         this.tipo = tipo;
         this.latitud = latitud;
         this.longitud = longitud;
+        this.sede = sede;
+        this.fechaHoraDispositivo = fechaHoraDispositivo;
+    }
+
+    public MarcarAsistenciaRequest(int idUsuario, String tipo, double latitud, double longitud, String direccion, String sede, String fechaHoraDispositivo) {
+        this.idUsuario = idUsuario;
+        this.tipo = tipo;
+        this.latitud = latitud;
+        this.longitud = longitud;
+        this.direccion = direccion;
         this.sede = sede;
         this.fechaHoraDispositivo = fechaHoraDispositivo;
     }
@@ -63,6 +82,14 @@ public class MarcarAsistenciaRequest {
 
     public void setLongitud(double longitud) {
         this.longitud = longitud;
+    }
+
+    public String getDireccion() {
+        return direccion;
+    }
+
+    public void setDireccion(String direccion) {
+        this.direccion = direccion;
     }
 
     public String getSede() {
