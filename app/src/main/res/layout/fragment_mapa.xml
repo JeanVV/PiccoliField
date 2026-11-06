@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Fragmento 2: Monitoreo en Mapa (fragment_mapa.xml) -->
+<!-- Fragmento: Monitoreo en Mapa (fragment_mapa.xml) -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -90,139 +90,90 @@
 
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- Tag superior de Ubicación de Asistencia -->
-    <TextView
-        android:id="@+id/tvAssistanceRangeTag"
+    <!-- Indicador Flotante / Badge de Rango de Geocerca -->
+    <LinearLayout
+        android:id="@+id/layoutBadgeContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:background="@drawable/bg_badge_on_time"
-        android:paddingHorizontal="14dp"
-        android:paddingVertical="6dp"
-        android:text="Ubicación de Asistencia"
-        android:textColor="@color/cafe_profundo"
-        android:textSize="12sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cardToggleViewSelector" />
-
-    <!-- Contenedor Circular con MapView Lite recortado -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/cardCircularMap"
-        android:layout_width="240dp"
-        android:layout_height="240dp"
-        android:layout_marginTop="16dp"
-        android:clipChildren="true"
-        android:clipToPadding="true"
-        app:cardCornerRadius="120dp"
-        app:cardElevation="6dp"
-        app:cardPreventCornerOverlap="false"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvAssistanceRangeTag"
-        app:strokeColor="@color/cafe_profundo"
-        app:strokeWidth="3dp">
-
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipChildren="true"
-            android:clipToPadding="true">
-
-            <com.google.android.gms.maps.MapView
-                android:id="@+id/mapViewLite"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:liteMode="true" />
-
-        </FrameLayout>
-
-    </com.google.android.material.card.MaterialCardView>
-
-    <!-- Card de Dirección de la Asistencia -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/cardDireccionContainer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="16dp"
-        app:cardBackgroundColor="@color/white"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="3dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cardCircularMap"
-        app:strokeColor="#E3CEAA"
-        app:strokeWidth="1dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:orientation="horizontal"
-            android:padding="14dp">
-
-            <ImageView
-                android:id="@+id/ivIconLocation"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginEnd="8dp"
-                android:contentDescription="@null"
-                app:srcCompat="@drawable/ic_location_pin"
-                app:tint="@color/cafe_profundo" />
-
-            <TextView
-                android:id="@+id/tvDireccionAsistencia"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:fontFamily="sans-serif-medium"
-                android:gravity="center_vertical"
-                android:textColor="@color/cafe_profundo"
-                android:textSize="14sp"
-                tools:text="Av. Balta 1234, Chiclayo" />
-
-        </LinearLayout>
-
-    </com.google.android.material.card.MaterialCardView>
-
-    <!-- Estado Vacío: Si no ha marcado asistencia -->
-    <LinearLayout
-        android:id="@+id/layoutEmptyState"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:gravity="center"
-        android:orientation="vertical"
-        android:visibility="gone"
+        android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cardCircularMap">
+        app:layout_constraintTop_toBottomOf="@+id/cardToggleViewSelector">
 
         <TextView
-            android:id="@+id/tvEmptyState"
+            android:id="@+id/tvGeofenceBadge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="serif"
-            android:text="Aún no has marcado asistencia"
+            android:background="@drawable/bg_badge_on_time"
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="6dp"
+            android:text="EN RANGO"
             android:textColor="@color/cafe_profundo"
-            android:textSize="15sp"
+            android:textSize="12sp"
             android:textStyle="bold" />
 
     </LinearLayout>
 
-    <!-- Card Inferior / Botones de Acción -->
+    <!-- Contenedor del Mapa interactivo -->
+    <FrameLayout
+        android:id="@+id/mapContainer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/bottomSheetZoneCollaborators"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layoutBadgeContainer">
+
+        <com.google.android.gms.maps.MapView
+            android:id="@+id/mapView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabMyLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="16dp"
+            android:contentDescription="@string/cd_location_icon"
+            app:backgroundTint="@color/white"
+            app:fabSize="mini"
+            app:srcCompat="@drawable/ic_location_pin"
+            app:tint="@color/cafe_profundo" />
+
+    </FrameLayout>
+
+    <!-- Contenedor Alternativo para Modo Lista -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvCollaboratorsList"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:clipToPadding="false"
+        android:padding="16dp"
+        android:visibility="gone"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintBottom_toTopOf="@+id/bottomSheetZoneCollaborators"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layoutBadgeContainer"
+        tools:listitem="@layout/item_collaborator" />
+
+    <!-- Card Inferior (BottomSheet de Información y Acciones) -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/bottomSheetZoneCollaborators"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="16dp"
         app:cardBackgroundColor="#F5E8D0"
         app:cardCornerRadius="20dp"
-        app:cardElevation="0dp"
+        app:cardElevation="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -232,41 +183,81 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:orientation="vertical"
             android:padding="16dp">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnViewDetails"
-                android:layout_width="0dp"
-                android:layout_height="44dp"
-                android:layout_marginEnd="6dp"
-                android:layout_weight="1.2"
-                android:text="@string/btn_ver_detalles"
-                android:textAllCaps="false"
-                android:textColor="@color/white"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                app:backgroundTint="@color/cafe_profundo"
-                app:cornerRadius="20dp"
-                app:elevation="0dp" />
+            <!-- Título / Nombre de Sede -->
+            <TextView
+                android:id="@+id/tvSedeNombre"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="serif"
+                android:text="Sede Principal Chiclayo - Piccoli Cocktail"
+                android:textColor="@color/cafe_profundo"
+                android:textSize="15sp"
+                android:textStyle="bold" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnHowToGetThere"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="44dp"
-                android:layout_marginStart="6dp"
-                android:layout_weight="1"
-                android:text="@string/btn_como_llegar"
-                android:textAllCaps="false"
+            <!-- Mensaje de Estado / Distancia -->
+            <TextView
+                android:id="@+id/tvStatusMessage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
                 android:textColor="@color/cafe_profundo"
                 android:textSize="13sp"
-                android:textStyle="bold"
-                app:cornerRadius="20dp"
-                app:icon="@drawable/ic_location_pin"
-                app:iconTint="@color/cafe_profundo"
-                app:strokeColor="@color/cafe_profundo"
-                app:strokeWidth="1dp" />
+                tools:text="Estás dentro de la zona de asistencia. Listo para marcar." />
+
+            <!-- Dirección -->
+            <TextView
+                android:id="@+id/tvDireccionAsistencia"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textColor="#7A6855"
+                android:textSize="12sp"
+                tools:text="Av. Balta 123, Chiclayo" />
+
+            <!-- Botones de Acción "Ver detalles" y "Cómo llegar" -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnViewDetails"
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1.2"
+                    android:text="@string/btn_ver_detalles"
+                    android:textAllCaps="false"
+                    android:textColor="@color/white"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    app:backgroundTint="@color/cafe_profundo"
+                    app:cornerRadius="20dp"
+                    app:elevation="0dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnHowToGetThere"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_marginStart="6dp"
+                    android:layout_weight="1"
+                    android:text="@string/btn_como_llegar"
+                    android:textAllCaps="false"
+                    android:textColor="@color/cafe_profundo"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="20dp"
+                    app:icon="@drawable/ic_location_pin"
+                    app:iconTint="@color/cafe_profundo"
+                    app:strokeColor="@color/cafe_profundo"
+                    app:strokeWidth="1dp" />
+
+            </LinearLayout>
 
         </LinearLayout>
 

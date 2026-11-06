@@ -15,6 +15,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -30,6 +32,9 @@ import androidx.lifecycle.ViewModelProvider;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
 import com.piccolifield.R;
 import com.piccolifield.data.model.RegistroAsistencia;
 import com.piccolifield.data.remote.RetrofitClient;
@@ -39,8 +44,8 @@ import com.piccolifield.data.remote.dto.request.MarcarAsistenciaRequest;
 import com.piccolifield.data.remote.dto.response.ApiResponse;
 import com.piccolifield.databinding.FragmentAsistenciasBinding;
 import com.piccolifield.sharedpreferences.SplashStorage;
-import com.piccolifield.ui.asistencia.AsistenciaUiState;
 import com.piccolifield.ui.asistencia.AsistenciaViewModel;
+import com.piccolifield.ui.asistencia.MapaFragment;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -70,6 +75,10 @@ public class AsistenciasFragment extends Fragment {
     private String tipoMarcaActual = "INGRESO";
     private String tipoMarcaPendiente;
 
+    // Referencias para actualizar el preview en la ventana emergente / BottomSheetDialog
+    private ImageView currentDialogIvPreview;
+    private View currentDialogLayoutPreview;
+
     private final ActivityResultLauncher<String> requestLocationPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
                 if (isGranted) {
@@ -93,11 +102,11 @@ public class AsistenciasFragment extends Fragment {
     private final ActivityResultLauncher<Uri> takePictureLauncher =
             registerForActivityResult(new ActivityResultContracts.TakePicture(), success -> {
                 if (success && currentPhotoUri != null) {
-                    if (binding != null) {
-                        binding.layoutPreviewFotoSustento.setVisibility(View.VISIBLE);
-                        binding.ivPreviewFotoSustento.setImageURI(currentPhotoUri);
-                    }
                     fotoSustentoBase64 = convertirUriABase64(currentPhotoUri);
+                    if (currentDialogIvPreview != null && currentDialogLayoutPreview != null) {
+                        currentDialogLayoutPreview.setVisibility(View.VISIBLE);
+                        currentDialogIvPreview.setImageURI(currentPhotoUri);
+                    }
                     Toast.makeText(getContext(), "Foto de sustento capturada", Toast.LENGTH_SHORT).show();
                 }
             });
@@ -133,10 +142,7 @@ public class AsistenciasFragment extends Fragment {
         // 2. Iniciar reloj y fecha
         iniciarReloj();
 
-        // 3. Configurar dropdown de motivos
-        configurarDropdownMotivos();
-
-        // 4. Configurar listeners de botones
+        // 3. Configurar listeners de botones
         setupListeners();
     }
 
@@ -233,7 +239,52 @@ public class AsistenciasFragment extends Fragment {
         }
     }
 
-    private void configurarDropdownMotivos() {
+    private void setupListeners() {
+        // Navegación a la pantalla de Monitoreo en Mapa al pulsar el botón o la tarjeta de geocerca
+        if (binding.btnVerMapaMonitoreo != null) {
+            binding.btnVerMapaMonitoreo.setOnClickListener(v -> abrirPantallaMonitoreoMapa());
+        }
+        if (binding.cardGeofenceInfo != null) {
+            binding.cardGeofenceInfo.setOnClickListener(v -> abrirPantallaMonitoreoMapa());
+        }
+
+        // Botones de marcado de entrada / refrigerio / salida
+        binding.btnMarcarEntrada.setOnClickListener(v -> solicitarMarcaConUbicacion("INGRESO"));
+        if (binding.btnMarcarRefrigerio != null) {
+            binding.btnMarcarRefrigerio.setOnClickListener(v -> solicitarMarcaConUbicacion("REFRIGERIO"));
+        }
+        binding.btnMarcarSalida.setOnClickListener(v -> solicitarMarcaConUbicacion("SALIDA"));
+
+        // Botón para abrir la ventana emergente / BottomSheet de Justificación
+        if (binding.btnAbrirJustificacionBS != null) {
+            binding.btnAbrirJustificacionBS.setOnClickListener(v -> abrirBottomSheetJustificacion());
+        }
+    }
+
+    private void abrirPantallaMonitoreoMapa() {
+        if (!isAdded()) return;
+        getParentFragmentManager().beginTransaction()
+                .replace(R.id.fragmentContainer, new MapaFragment())
+                .addToBackStack(null)
+                .commit();
+    }
+
+    private void abrirBottomSheetJustificacion() {
+        if (getContext() == null || !isAdded()) return;
+
+        BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
+        View view = getLayoutInflater().inflate(R.layout.dialog_bottom_sheet_justificacion, null);
+        dialog.setContentView(view);
+
+        AutoCompleteTextView spMotivo = view.findViewById(R.id.spMotivoJustificacion);
+        TextInputEditText etDetalle = view.findViewById(R.id.etDetalleJustificacion);
+        MaterialButton btnTomarFoto = view.findViewById(R.id.btnTomarFotoSustento);
+        MaterialButton btnEliminarFoto = view.findViewById(R.id.btnEliminarFotoSustento);
+        MaterialButton btnEnviar = view.findViewById(R.id.btnEnviarJustificacion);
+        View layoutPreview = view.findViewById(R.id.layoutPreviewFotoSustento);
+        ImageView ivPreview = view.findViewById(R.id.ivPreviewFotoSustento);
+
+        // Configurar dropdown de motivos dentro del BottomSheet
         String[] opcionesMotivo = new String[]{
                 "Salud / Cita Médica",
                 "Emergencia Familiar",
@@ -241,24 +292,50 @@ public class AsistenciasFragment extends Fragment {
                 "Asunto Personal / Trámite",
                 "Otro Motivo"
         };
-
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 requireContext(),
                 android.R.layout.simple_dropdown_item_1line,
                 opcionesMotivo
         );
-        binding.spMotivoJustificacion.setAdapter(adapter);
-    }
+        spMotivo.setAdapter(adapter);
 
-    private void setupListeners() {
-        binding.btnMarcarEntrada.setOnClickListener(v -> solicitarMarcaConUbicacion("INGRESO"));
-        if (binding.btnMarcarRefrigerio != null) {
-            binding.btnMarcarRefrigerio.setOnClickListener(v -> solicitarMarcaConUbicacion("REFRIGERIO"));
+        // Mostrar preview de foto cargada previamente si existiera
+        if (currentPhotoUri != null && ivPreview != null && layoutPreview != null) {
+            layoutPreview.setVisibility(View.VISIBLE);
+            ivPreview.setImageURI(currentPhotoUri);
         }
-        binding.btnMarcarSalida.setOnClickListener(v -> solicitarMarcaConUbicacion("SALIDA"));
-        binding.btnTomarFotoSustento.setOnClickListener(v -> solicitarPermisoYTomarFoto());
-        binding.btnEliminarFotoSustento.setOnClickListener(v -> quitarFotoSustento());
-        binding.btnEnviarJustificacion.setOnClickListener(v -> enviarJustificacion());
+
+        btnTomarFoto.setOnClickListener(v -> {
+            currentDialogIvPreview = ivPreview;
+            currentDialogLayoutPreview = layoutPreview;
+            solicitarPermisoYTomarFoto();
+        });
+
+        btnEliminarFoto.setOnClickListener(v -> {
+            quitarFotoSustento();
+            if (layoutPreview != null) layoutPreview.setVisibility(View.GONE);
+            if (ivPreview != null) ivPreview.setImageDrawable(null);
+        });
+
+        btnEnviar.setOnClickListener(v -> {
+            String motivo = spMotivo.getText() != null ? spMotivo.getText().toString().trim() : "";
+            String detalle = etDetalle.getText() != null ? etDetalle.getText().toString().trim() : "";
+
+            if (motivo.isEmpty()) {
+                Toast.makeText(getContext(), "Por favor selecciona un motivo de justificación", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (detalle.isEmpty()) {
+                Toast.makeText(getContext(), "Por favor escribe el detalle o explicación de la falta", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            dialog.dismiss();
+            enviarJustificacion(motivo, detalle);
+        });
+
+        dialog.show();
     }
 
     private void solicitarMarcaConUbicacion(String tipo) {
@@ -437,10 +514,8 @@ public class AsistenciasFragment extends Fragment {
     private void quitarFotoSustento() {
         currentPhotoUri = null;
         fotoSustentoBase64 = null;
-        if (binding != null) {
-            binding.layoutPreviewFotoSustento.setVisibility(View.GONE);
-            binding.ivPreviewFotoSustento.setImageDrawable(null);
-        }
+        currentDialogIvPreview = null;
+        currentDialogLayoutPreview = null;
     }
 
     private String convertirUriABase64(Uri uri) {
@@ -471,20 +546,7 @@ public class AsistenciasFragment extends Fragment {
         }
     }
 
-    private void enviarJustificacion() {
-        String motivo = binding.spMotivoJustificacion.getText() != null ? binding.spMotivoJustificacion.getText().toString().trim() : "";
-        String detalle = binding.etDetalleJustificacion.getText() != null ? binding.etDetalleJustificacion.getText().toString().trim() : "";
-
-        if (motivo.isEmpty()) {
-            Toast.makeText(getContext(), "Por favor selecciona un motivo de justificación", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (detalle.isEmpty()) {
-            Toast.makeText(getContext(), "Por favor escribe el detalle o explicación de la falta", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
+    private void enviarJustificacion(String motivo, String detalle) {
         int idUsuario = SplashStorage.obtenerUsuarioId(requireContext());
         SimpleDateFormat dateSdf = new SimpleDateFormat("yyyy-MM-dd", LOCALE_PERU);
         dateSdf.setTimeZone(TIME_ZONE_LIMA);
@@ -492,7 +554,9 @@ public class AsistenciasFragment extends Fragment {
 
         JustificationRequest request = new JustificationRequest(idUsuario, motivo, detalle, fechaHoy, fotoSustentoBase64);
 
-        binding.btnEnviarJustificacion.setEnabled(false);
+        if (binding != null && binding.btnAbrirJustificacionBS != null) {
+            binding.btnAbrirJustificacionBS.setEnabled(false);
+        }
 
         // Guardar justificación localmente para vincular de inmediato
         SplashStorage.guardarJustificacionLocal(requireContext(), idUsuario, motivo, detalle, fotoSustentoBase64);
@@ -502,7 +566,7 @@ public class AsistenciasFragment extends Fragment {
                 @Override
                 public void onResponse(@NonNull Call<ApiResponse<Object>> call, @NonNull Response<ApiResponse<Object>> response) {
                     if (!isAdded() || binding == null) return;
-                    binding.btnEnviarJustificacion.setEnabled(true);
+                    if (binding.btnAbrirJustificacionBS != null) binding.btnAbrirJustificacionBS.setEnabled(true);
 
                     mostrarResumenJustificacion(motivo, detalle);
                     Toast.makeText(getContext(), "Justificación enviada correctamente al administrador", Toast.LENGTH_LONG).show();
@@ -512,7 +576,7 @@ public class AsistenciasFragment extends Fragment {
                 @Override
                 public void onFailure(@NonNull Call<ApiResponse<Object>> call, @NonNull Throwable t) {
                     if (!isAdded() || binding == null) return;
-                    binding.btnEnviarJustificacion.setEnabled(true);
+                    if (binding.btnAbrirJustificacionBS != null) binding.btnAbrirJustificacionBS.setEnabled(true);
 
                     // fallback local para la UI
                     mostrarResumenJustificacion(motivo, detalle);
@@ -532,9 +596,6 @@ public class AsistenciasFragment extends Fragment {
     }
 
     private void limpiarFormularioJustificacion() {
-        if (binding == null) return;
-        binding.spMotivoJustificacion.setText("", false);
-        binding.etDetalleJustificacion.setText("");
         quitarFotoSustento();
     }
 

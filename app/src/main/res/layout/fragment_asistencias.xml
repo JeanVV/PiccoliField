@@ -139,6 +139,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground"
                     app:cardBackgroundColor="#F8F4EC"
                     app:cardCornerRadius="12dp"
                     app:cardElevation="0dp"
@@ -196,6 +199,21 @@
                             android:textStyle="bold" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
+
+                <!-- BOTÓN PROMINENTE PARA ABRIR PANTALLA DE MONITOREO / MAPA -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnVerMapaMonitoreo"
+                    style="@style/Widget.Piccoli.Button.Outlined"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="10dp"
+                    android:text="Ver Monitoreo en Mapa"
+                    android:textColor="@color/cafe_profundo"
+                    app:cornerRadius="12dp"
+                    app:icon="@drawable/ic_location_pin"
+                    app:iconTint="@color/cafe_profundo"
+                    app:strokeColor="@color/cafe_profundo"
+                    app:strokeWidth="1dp" />
 
                 <!-- RELOJ VIVO Y ESTADO ACTUAL -->
                 <LinearLayout
@@ -272,7 +290,7 @@
         </com.google.android.material.card.MaterialCardView>
 
 
-        <!-- SECCIÓN 2: JUSTIFICAR FALTA -->
+        <!-- SECCIÓN 2: BOTÓN Y CARD PARA JUSTIFICAR FALTA (LIMPIO Y ORDENADO) -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -323,125 +341,21 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Envía tu justificación para la revisión del administrador."
+                            android:text="Registra tu justificación con motivo y comprobante."
                             android:textColor="@color/color_text_muted"
                             android:textSize="12sp" />
                     </LinearLayout>
                 </LinearLayout>
 
-                <!-- COMBOBOX / DROPDOWN DE MOTIVO -->
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/tilMotivo"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:hint="Selecciona el motivo"
-                    app:boxStrokeColor="@color/cafe_profundo">
-
-                    <AutoCompleteTextView
-                        android:id="@+id/spMotivoJustificacion"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="none"
-                        android:textColor="@color/cafe_profundo"
-                        android:textSize="14sp" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <!-- INPUT DETALLE / OBSERVACIÓN -->
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/tilDetalle"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:hint="Detalle / Explicación de la falta"
-                    app:boxStrokeColor="@color/cafe_profundo">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etDetalleJustificacion"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="top|start"
-                        android:inputType="textMultiLine"
-                        android:lines="3"
-                        android:textColor="@color/cafe_profundo"
-                        android:textSize="14sp" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <!-- BOTÓN TOMAR FOTO DEL SUSTENTO -->
+                <!-- BOTÓN QUE ABRE EL BOTTOM SHEET DIALOG DE JUSTIFICACIÓN -->
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnTomarFotoSustento"
-                    style="@style/Widget.Piccoli.Button.Outlined"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="12dp"
-                    android:text="Tomar Foto de Certificado / Sustento"
-                    app:icon="@drawable/ic_camera_icon"
-                    app:iconTint="@color/cafe_profundo" />
-
-                <!-- PREVIEW DE LA FOTO TOMADA -->
-                <LinearLayout
-                    android:id="@+id/layoutPreviewFotoSustento"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:orientation="vertical"
-                    android:visibility="gone"
-                    tools:visibility="visible">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="6dp"
-                        android:text="Comprobante / Sustento adjunto:"
-                        android:textColor="@color/cafe_profundo"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="match_parent"
-                        android:layout_height="180dp"
-                        app:cardCornerRadius="12dp"
-                        app:cardElevation="0dp"
-                        app:strokeColor="@color/stroke_color"
-                        app:strokeWidth="1dp">
-
-                        <FrameLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent">
-
-                            <ImageView
-                                android:id="@+id/ivPreviewFotoSustento"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:scaleType="centerCrop"
-                                tools:ignore="ContentDescription"
-                                tools:src="@drawable/bg_badge_permission" />
-
-                            <com.google.android.material.button.MaterialButton
-                                android:id="@+id/btnEliminarFotoSustento"
-                                style="@style/Widget.MaterialComponents.Button.TextButton"
-                                android:layout_width="wrap_content"
-                                android:layout_height="36dp"
-                                android:layout_gravity="top|end"
-                                android:layout_margin="8dp"
-                                android:backgroundTint="#CC2B170F"
-                                android:text="Quitar Foto"
-                                android:textColor="@color/white"
-                                android:textSize="11sp" />
-                        </FrameLayout>
-                    </com.google.android.material.card.MaterialCardView>
-                </LinearLayout>
-
-                <!-- BOTÓN ENVIAR JUSTIFICACIÓN -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnEnviarJustificacion"
+                    android:id="@+id/btnAbrirJustificacionBS"
                     style="@style/Widget.Piccoli.Button.Primary"
                     android:layout_width="match_parent"
-                    android:layout_height="52dp"
+                    android:layout_height="50dp"
                     android:layout_marginTop="16dp"
-                    android:text="Enviar Justificación"
+                    android:text="Registrar Justificación"
+                    app:cornerRadius="12dp"
                     app:icon="@drawable/ic_warning_alert"
                     app:iconTint="@color/marfil_suave" />
 
