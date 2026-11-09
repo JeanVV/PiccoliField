@@ -17,7 +17,7 @@
         android:layout_height="match_parent"
         android:background="#66000000" />
 
-    <!-- Guía central (Falsa transparencia superponiendo otro diseño si es necesario o un borde) -->
+    <!-- Guía central -->
     <View
         android:id="@+id/focusBox"
         android:layout_width="250dp"

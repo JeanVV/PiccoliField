@@ -1,16 +1,24 @@
 package com.piccolifield.ui.supervisionPdv;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,6 +41,7 @@ import com.piccolifield.data.model.ImpulsadorDashboard;
 import com.piccolifield.data.model.ProductoBuscado;
 import com.piccolifield.data.model.ResumenDashboard;
 import com.piccolifield.data.remote.dto.request.RegistrarVentaRequest;
+import com.piccolifield.data.remote.dto.request.ReponerStockRequest;
 import com.piccolifield.model.Alerta;
 import com.piccolifield.model.Vendedor;
 import com.piccolifield.model.SupervisionPuntoVenta;
@@ -42,7 +51,10 @@ import com.piccolifield.data.remote.RetrofitClient;
 import com.piccolifield.sharedpreferences.SplashStorage;
 import com.piccolifield.ui.impulsador.ScannerActivity;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import okhttp3.ResponseBody;
 
@@ -66,15 +78,25 @@ public class SupervisionFragment extends Fragment {
     private TextView tvTituloLista;
     private ProgressBar pbLoadingListas;
 
+    // Filtros de Alertas
+    private View layoutFiltrosAlertas;
+    private AlertaAdapter alertaAdapter;
+    private VendedorAdapter vendedorAdapter;
+    private SupervisionPuntoVentaAdapter puntoVentaAdapter;
+    private EditText etBuscar;
+    private Spinner spFiltroEstadoAlerta, spFiltroNivelAlerta;
+    private int currentTab = 0;
+
     // Layouts por Rol
     private View layoutSupervisor, layoutImpulsador;
 
     // Componentes del Impulsador
     private TextView tvLocalAsignado, tvHorario, tvMetaVentas, tvAvanceVentas;
     private ProgressBar pbVentasImpulsador;
-    private MaterialButton btnEscanear, btnReportarIncidencia;
+    private MaterialButton btnEscanear, btnReportarIncidencia, btnReponerStock;
 
     private ActivityResultLauncher<Intent> scannerLauncher;
+    private boolean isScannerForReposicion = false;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -85,7 +107,11 @@ public class SupervisionFragment extends Fragment {
                     if (result.getResultCode() == AppCompatActivity.RESULT_OK && result.getData() != null) {
                         String barcode = result.getData().getStringExtra("SCAN_RESULT");
                         if (barcode != null) {
-                            buscarProducto(barcode);
+                            if (isScannerForReposicion) {
+                                mostrarBottomSheetReposicion(barcode);
+                            } else {
+                                buscarProducto(barcode);
+                            }
                         }
                     }
                 }
@@ -133,6 +159,65 @@ public class SupervisionFragment extends Fragment {
         layoutSupervisor = view.findViewById(R.id.layoutSupervisor);
         layoutImpulsador = view.findViewById(R.id.layoutImpulsador);
 
+        // Sub-filtros y Buscador
+        layoutFiltrosAlertas = view.findViewById(R.id.layoutFiltrosAlertas);
+        etBuscar = view.findViewById(R.id.etBuscar);
+        spFiltroEstadoAlerta = view.findViewById(R.id.spFiltroEstadoAlerta);
+        spFiltroNivelAlerta = view.findViewById(R.id.spFiltroNivelAlerta);
+
+        // Configurar Spinners de Alertas
+        ArrayAdapter<String> adapterEstado = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, new String[]{"Estado: Todas", "Pendientes", "Atendidas"});
+        adapterEstado.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        if (spFiltroEstadoAlerta != null) {
+            spFiltroEstadoAlerta.setAdapter(adapterEstado);
+            spFiltroEstadoAlerta.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    if (alertaAdapter == null) return;
+                    String estado = "TODOS";
+                    if (position == 1) estado = "PENDIENTE";
+                    else if (position == 2) estado = "ATENDIDA";
+                    alertaAdapter.filtrar(estado);
+                }
+                @Override public void onNothingSelected(AdapterView<?> parent) {}
+            });
+        }
+
+        ArrayAdapter<String> adapterNivel = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, new String[]{"Nivel: Todos", "Stock Bajo", "Producto Agotado"});
+        adapterNivel.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        if (spFiltroNivelAlerta != null) {
+            spFiltroNivelAlerta.setAdapter(adapterNivel);
+            spFiltroNivelAlerta.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    if (alertaAdapter == null) return;
+                    String nivel = "TODOS";
+                    if (position == 1) nivel = "STOCK_BAJO";
+                    else if (position == 2) nivel = "PRODUCTO_AGOTADO";
+                    alertaAdapter.filtrarPorNivel(nivel);
+                }
+                @Override public void onNothingSelected(AdapterView<?> parent) {}
+            });
+        }
+
+        // Configurar Buscador Dinámico según Pestaña
+        if (etBuscar != null) {
+            etBuscar.addTextChangedListener(new TextWatcher() {
+                @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    String query = s != null ? s.toString() : "";
+                    if (currentTab == 0 && vendedorAdapter != null) {
+                        vendedorAdapter.filtrar(query);
+                    } else if (currentTab == 1 && puntoVentaAdapter != null) {
+                        puntoVentaAdapter.filtrar(query);
+                    } else if (currentTab == 2 && alertaAdapter != null) {
+                        alertaAdapter.filtrarPorTexto(query);
+                    }
+                }
+                @Override public void afterTextChanged(Editable s) {}
+            });
+        }
+
         // Bind Impulsador views
         tvLocalAsignado = view.findViewById(R.id.tvLocalAsignado);
         tvHorario = view.findViewById(R.id.tvHorario);
@@ -141,9 +226,11 @@ public class SupervisionFragment extends Fragment {
         pbVentasImpulsador = view.findViewById(R.id.pbVentasImpulsador);
         btnEscanear = view.findViewById(R.id.btnEscanear);
         btnReportarIncidencia = view.findViewById(R.id.btnReportarIncidencia);
+        btnReponerStock = view.findViewById(R.id.btnReponerStock);
 
         if (btnEscanear != null) {
             btnEscanear.setOnClickListener(v -> {
+                isScannerForReposicion = false;
                 Intent intent = new Intent(requireActivity(), ScannerActivity.class);
                 scannerLauncher.launch(intent);
             });
@@ -153,6 +240,14 @@ public class SupervisionFragment extends Fragment {
             btnReportarIncidencia.setOnClickListener(v -> 
                 Toast.makeText(getContext(), "Próximamente: Incidencias", Toast.LENGTH_SHORT).show()
             );
+        }
+
+        if (btnReponerStock != null) {
+            btnReponerStock.setOnClickListener(v -> {
+                isScannerForReposicion = true;
+                Intent intent = new Intent(requireActivity(), ScannerActivity.class);
+                scannerLauncher.launch(intent);
+            });
         }
 
         // 2. Eventos de las Pestañas
@@ -177,6 +272,14 @@ public class SupervisionFragment extends Fragment {
     // LÓGICA DE PESTAÑAS (UI y Cambio de Datos)
     // ==========================================
     private void seleccionarPestana(int indice) {
+        currentTab = indice;
+        if (etBuscar != null) {
+            etBuscar.setText("");
+            if (indice == 0) etBuscar.setHint("Buscar impulsador o local...");
+            else if (indice == 1) etBuscar.setHint("Buscar punto de venta o dirección...");
+            else if (indice == 2) etBuscar.setHint("Buscar alerta por producto o local...");
+        }
+
         // 1. REINICIAR ESTILOS A CHIP APAGADO (Fondo transparente, texto gris)
         tvTabInicio.setBackgroundResource(R.drawable.bg_chip_unselected);
         tvTabInicio.setTextColor(Color.parseColor("#757575"));
@@ -192,6 +295,7 @@ public class SupervisionFragment extends Fragment {
 
         switch (indice) {
             case 0: // INICIO
+                if (layoutFiltrosAlertas != null) layoutFiltrosAlertas.setVisibility(View.GONE);
                 // APLICAR ESTILO AL CHIP SELECCIONADO (Fondo chocolate, texto blanco)
                 tvTabInicio.setBackgroundResource(R.drawable.bg_chip_selected);
                 tvTabInicio.setTextColor(Color.WHITE); // Blanco para que contraste con el chocolate
@@ -208,6 +312,7 @@ public class SupervisionFragment extends Fragment {
                 break;
 
             case 1: // PUNTOS DE VENTA
+                if (layoutFiltrosAlertas != null) layoutFiltrosAlertas.setVisibility(View.GONE);
                 tvTabPuntos.setBackgroundResource(R.drawable.bg_chip_selected);
                 tvTabPuntos.setTextColor(Color.WHITE);
                 tvTabPuntos.setTypeface(null, Typeface.BOLD);
@@ -222,6 +327,7 @@ public class SupervisionFragment extends Fragment {
                 break;
 
             case 2: // ALERTAS
+                if (layoutFiltrosAlertas != null) layoutFiltrosAlertas.setVisibility(View.VISIBLE);
                 tvTabAlertas.setBackgroundResource(R.drawable.bg_chip_selected);
                 tvTabAlertas.setTextColor(Color.WHITE);
                 tvTabAlertas.setTypeface(null, Typeface.BOLD);
@@ -232,6 +338,8 @@ public class SupervisionFragment extends Fragment {
                 if (rvPuntosVenta != null) rvPuntosVenta.setVisibility(View.GONE);
                 if (rvAlertas != null) rvAlertas.setVisibility(View.GONE);
                 
+                if (spFiltroEstadoAlerta != null) spFiltroEstadoAlerta.setSelection(0);
+                if (spFiltroNivelAlerta != null) spFiltroNivelAlerta.setSelection(0);
                 cargarAlertas();
                 break;
         }
@@ -277,8 +385,8 @@ public class SupervisionFragment extends Fragment {
                     List<Vendedor> listaVendedores = response.body().getData();
 
                     // Conectar la lista real con tu adaptador
-                    VendedorAdapter adapter = new VendedorAdapter(listaVendedores, requireContext());
-                    rvVendedores.setAdapter(adapter);
+                    vendedorAdapter = new VendedorAdapter(listaVendedores, requireContext());
+                    rvVendedores.setAdapter(vendedorAdapter);
                     rvVendedores.setVisibility(View.VISIBLE);
                 } else {
                     Toast.makeText(getContext(), getString(R.string.error_cargar_vendedores), Toast.LENGTH_SHORT).show();
@@ -294,6 +402,8 @@ public class SupervisionFragment extends Fragment {
         });
     }
 
+
+
     private void cargarAlertas() {
         if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.VISIBLE);
         String token = SplashStorage.obtenerToken(requireContext());
@@ -305,10 +415,20 @@ public class SupervisionFragment extends Fragment {
             public void onResponse(Call<ApiResponse<List<Alerta>>> call, Response<ApiResponse<List<Alerta>>> response) {
                 if (!isAdded()) return;
                 if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.GONE);
-                if (response.isSuccessful() && response.body() != null) {
-                    List<Alerta> listaAlertas = response.body().getData();
-                    AlertaAdapter adapter = new AlertaAdapter(listaAlertas, requireContext());
-                    rvAlertas.setAdapter(adapter);
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                    List<Alerta> rawList = response.body().getData();
+
+                    // Deduplicar alertas por id para evitar repetición en pantalla
+                    List<Alerta> listaAlertas = new ArrayList<>();
+                    Set<Integer> idsVistos = new HashSet<>();
+                    for (Alerta a : rawList) {
+                        if (a != null && idsVistos.add(a.getId())) {
+                            listaAlertas.add(a);
+                        }
+                    }
+
+                    alertaAdapter = new AlertaAdapter(listaAlertas, requireContext());
+                    rvAlertas.setAdapter(alertaAdapter);
                     if (rvAlertas != null) rvAlertas.setVisibility(View.VISIBLE);
                 } else {
                     Toast.makeText(getContext(), getString(R.string.error_cargar_alertas), Toast.LENGTH_SHORT).show();
@@ -337,8 +457,8 @@ public class SupervisionFragment extends Fragment {
                 if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.GONE);
                 if (response.isSuccessful() && response.body() != null) {
                     List<SupervisionPuntoVenta> lista = response.body().getData();
-                    SupervisionPuntoVentaAdapter adapter = new SupervisionPuntoVentaAdapter(lista, requireContext());
-                    rvPuntosVenta.setAdapter(adapter);
+                    puntoVentaAdapter = new SupervisionPuntoVentaAdapter(lista, requireContext());
+                    rvPuntosVenta.setAdapter(puntoVentaAdapter);
                     if (rvPuntosVenta != null) rvPuntosVenta.setVisibility(View.VISIBLE);
                 } else {
                     Toast.makeText(getContext(), getString(R.string.error_cargar_pdvs), Toast.LENGTH_SHORT).show();
@@ -406,6 +526,62 @@ public class SupervisionFragment extends Fragment {
         });
     }
 
+    private void mostrarBottomSheetReposicion(String barcode) {
+        Context ctx = getContext();
+        if (ctx == null) return;
+
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(ctx);
+        View view = getLayoutInflater().inflate(R.layout.dialog_bottom_sheet_reponer_stock, null);
+        bottomSheetDialog.setContentView(view);
+
+        TextView tvEan = view.findViewById(R.id.tvEanReposicion);
+        EditText etCantidad = view.findViewById(R.id.etCantidadReposicion);
+        EditText etObservacion = view.findViewById(R.id.etObservacionReposicion);
+        MaterialButton btnConfirmar = view.findViewById(R.id.btnConfirmarReposicion);
+
+        if (tvEan != null) tvEan.setText("EAN/UPC: " + barcode);
+
+        if (btnConfirmar != null) {
+            btnConfirmar.setOnClickListener(v -> {
+                String cantStr = etCantidad != null && etCantidad.getText() != null ? etCantidad.getText().toString().trim() : "10";
+                int cantidad = 10;
+                try {
+                    cantidad = Integer.parseInt(cantStr);
+                } catch (NumberFormatException ignored) {}
+
+                String observacion = etObservacion != null && etObservacion.getText() != null ? etObservacion.getText().toString().trim() : "Reposición de stock";
+
+                final int finalCantidad = cantidad;
+                btnConfirmar.setEnabled(false);
+                ApiService apiService = RetrofitClient.createService();
+                ReponerStockRequest request = new ReponerStockRequest(barcode, null, finalCantidad, observacion);
+
+                apiService.reponerStock(request).enqueue(new Callback<ApiResponse<Object>>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ApiResponse<Object>> call, @NonNull Response<ApiResponse<Object>> response) {
+                        if (!isAdded()) return;
+                        btnConfirmar.setEnabled(true);
+                        if (response.isSuccessful()) {
+                            Toast.makeText(getContext(), "Stock repuesto exitosamente (+ " + finalCantidad + " unds)", Toast.LENGTH_SHORT).show();
+                            bottomSheetDialog.dismiss();
+                            cargarDashboardImpulsador();
+                        } else {
+                            Toast.makeText(getContext(), "Error al reponer stock", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ApiResponse<Object>> call, @NonNull Throwable t) {
+                        if (!isAdded()) return;
+                        btnConfirmar.setEnabled(true);
+                        Toast.makeText(getContext(), "Error de red: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            });
+        }
+
+        bottomSheetDialog.show();
+    }
     private void buscarProducto(String codigoBarras) {
         Toast.makeText(getContext(), "Buscando: " + codigoBarras, Toast.LENGTH_SHORT).show();
         ApiService apiService = RetrofitClient.createService();

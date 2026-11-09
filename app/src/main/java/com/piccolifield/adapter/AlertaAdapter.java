@@ -15,16 +15,59 @@ import com.piccolifield.DetalleAlertaActivity;
 import com.piccolifield.R;
 import com.piccolifield.model.Alerta;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AlertaAdapter extends RecyclerView.Adapter<AlertaAdapter.ViewHolder> {
 
-    private List<Alerta> listaAlertas;
+    private List<Alerta> listaOriginal;
+    private List<Alerta> listaFiltrada;
     private Context context;
+    private String filtroEstado = "TODOS";
+    private String filtroNivel = "TODOS";
+    private String textoBusqueda = "";
 
     public AlertaAdapter(List<Alerta> listaAlertas, Context context) {
-        this.listaAlertas = listaAlertas;
+        this.listaOriginal = new ArrayList<>(listaAlertas);
+        this.listaFiltrada = new ArrayList<>(listaAlertas);
         this.context = context;
+    }
+
+    public void filtrarPorTexto(String query) {
+        this.textoBusqueda = query != null ? query.toLowerCase().trim() : "";
+        aplicarFiltros(this.filtroEstado, this.filtroNivel);
+    }
+
+    public void aplicarFiltros(String estadoFiltro, String nivelFiltro) {
+        if (estadoFiltro != null) this.filtroEstado = estadoFiltro;
+        if (nivelFiltro != null) this.filtroNivel = nivelFiltro;
+
+        listaFiltrada.clear();
+        for (Alerta a : listaOriginal) {
+            boolean coincideEstado = "TODOS".equalsIgnoreCase(this.filtroEstado) ||
+                    (a.getEstado() != null && a.getEstado().equalsIgnoreCase(this.filtroEstado));
+
+            boolean coincideNivel = "TODOS".equalsIgnoreCase(this.filtroNivel) ||
+                    (a.getSeveridad() != null && a.getSeveridad().equalsIgnoreCase(this.filtroNivel));
+
+            boolean coincideTexto = this.textoBusqueda.isEmpty() ||
+                    (a.getLocal() != null && a.getLocal().toLowerCase().contains(this.textoBusqueda)) ||
+                    (a.getNombreProducto() != null && a.getNombreProducto().toLowerCase().contains(this.textoBusqueda)) ||
+                    (a.getSeveridad() != null && a.getSeveridad().toLowerCase().contains(this.textoBusqueda));
+
+            if (coincideEstado && coincideNivel && coincideTexto) {
+                listaFiltrada.add(a);
+            }
+        }
+        notifyDataSetChanged();
+    }
+
+    public void filtrar(String estadoFiltro) {
+        aplicarFiltros(estadoFiltro, this.filtroNivel);
+    }
+
+    public void filtrarPorNivel(String nivelFiltro) {
+        aplicarFiltros(this.filtroEstado, nivelFiltro);
     }
 
     @NonNull
@@ -36,31 +79,34 @@ public class AlertaAdapter extends RecyclerView.Adapter<AlertaAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Alerta alerta = listaAlertas.get(position);
+        Alerta alerta = listaFiltrada.get(position);
 
-        holder.tvTituloAlerta.setText(alerta.getTitulo());
+        holder.tvTituloAlerta.setText(alerta.getNivelFormateado());
         holder.tvLocalAlerta.setText(alerta.getLocal());
         holder.tvDetalleAlerta.setText(alerta.getDetalle());
         holder.tvTiempoAlerta.setText(alerta.getTiempo());
-        holder.tvSeveridadAlerta.setText(alerta.getSeveridad());
+        
+        String estado = alerta.getEstado() != null ? alerta.getEstado() : "PENDIENTE";
+        holder.tvSeveridadAlerta.setText(estado);
 
-        // Cambiar color si es Crítica o Pendiente
-        if (alerta.getSeveridad().equalsIgnoreCase("Crítica")) {
-            holder.tvSeveridadAlerta.setTextColor(Color.parseColor("#D32F2F")); // Rojo
+        if ("ATENDIDA".equalsIgnoreCase(estado) || "RESUELTA".equalsIgnoreCase(estado)) {
+            holder.tvSeveridadAlerta.setTextColor(Color.parseColor("#388E3C")); // Verde (Atendida SIEMPRE en verde)
         } else {
-            holder.tvSeveridadAlerta.setTextColor(Color.parseColor("#F57C00")); // Naranja
+            holder.tvSeveridadAlerta.setTextColor(Color.parseColor("#D32F2F")); // Rojo (Pendiente SIEMPRE en rojo)
         }
 
-        // Clic en el botón para ver detalles
-        holder.btnVerDetalleAlerta.setOnClickListener(v -> {
+        View.OnClickListener listener = v -> {
             Intent intent = new Intent(context, DetalleAlertaActivity.class);
             intent.putExtra("ID_ALERTA", alerta.getId());
             context.startActivity(intent);
-        });
+        };
+
+        holder.btnVerDetalleAlerta.setOnClickListener(listener);
+        holder.itemView.setOnClickListener(listener);
     }
 
     @Override
-    public int getItemCount() { return listaAlertas.size(); }
+    public int getItemCount() { return listaFiltrada != null ? listaFiltrada.size() : 0; }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvTituloAlerta, tvLocalAlerta, tvDetalleAlerta, tvTiempoAlerta, tvSeveridadAlerta;

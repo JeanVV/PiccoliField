@@ -50,7 +50,12 @@
     <string name="label_cant_productos">Cant. productos vendidos</string>
 
 
-    <string name="btn_evidencias">Ver evidencias fotográficas</string>
+    <string name="btn_evidencias">Historial de Rendimiento</string>
+    <string name="title_historial_vendedor">Historial de Rendimiento</string>
+    <string name="title_reasignar_vendedor">Reasignar Vendedor a Punto de Venta</string>
+    <string name="label_seleccionar_pdv">Seleccionar Punto de Venta Destino</string>
+    <string name="label_historial_meses">Desempeño Mensual</string>
+    <string name="label_historial_locales">Locales Asignados Anteriormente</string>
     <string name="btn_reasignar">Reasignar a otro punto de venta</string>
     <string name="btn_pdv">Punto de venta</string>
     <string name="btn_alerta">Alerta</string>

@@ -18,6 +18,7 @@ import com.piccolifield.data.remote.api.ApiService;
 import com.piccolifield.data.remote.RetrofitClient;
 import com.piccolifield.model.Vendedor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import okhttp3.ResponseBody;
@@ -27,18 +28,35 @@ import retrofit2.Response;
 
 public class VendedorAdapter extends RecyclerView.Adapter<VendedorAdapter.ViewHolder> {
 
-    private List<Vendedor> listaVendedores;
+    private List<Vendedor> listaOriginal;
+    private List<Vendedor> listaFiltrada;
     private Context context;
 
     public VendedorAdapter(List<Vendedor> listaVendedores, Context context) {
-        this.listaVendedores = listaVendedores;
+        this.listaOriginal = new ArrayList<>(listaVendedores);
+        this.listaFiltrada = new ArrayList<>(listaVendedores);
         this.context = context;
+    }
+
+    public void filtrar(String query) {
+        listaFiltrada.clear();
+        if (query == null || query.trim().isEmpty()) {
+            listaFiltrada.addAll(listaOriginal);
+        } else {
+            String q = query.toLowerCase().trim();
+            for (Vendedor v : listaOriginal) {
+                if ((v.getNombre() != null && v.getNombre().toLowerCase().contains(q)) ||
+                        (v.getLocal() != null && v.getLocal().toLowerCase().contains(q))) {
+                    listaFiltrada.add(v);
+                }
+            }
+        }
+        notifyDataSetChanged();
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // Aquí "inflamos" (cargamos) el diseño XML del item
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_vendedor, parent, false);
         return new ViewHolder(view);
@@ -46,8 +64,8 @@ public class VendedorAdapter extends RecyclerView.Adapter<VendedorAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Vendedor vendedor = listaVendedores.get(position);
-        String textoCombinado = vendedor.getNombre() + " - " + vendedor.getLocal(); // o vendedor.getLocal_pertenece()
+        Vendedor vendedor = listaFiltrada.get(position);
+        String textoCombinado = vendedor.getNombre() + " - " + vendedor.getLocal();
 
         holder.tvPosicion.setText(String.valueOf(vendedor.getPosicion()));
         holder.tvNombreLocal.setText(textoCombinado);
@@ -86,7 +104,7 @@ public class VendedorAdapter extends RecyclerView.Adapter<VendedorAdapter.ViewHo
 
     @Override
     public int getItemCount() {
-        return listaVendedores.size();
+        return listaFiltrada != null ? listaFiltrada.size() : 0;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

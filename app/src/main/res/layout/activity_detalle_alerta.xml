@@ -341,24 +341,59 @@
                     </RelativeLayout>
 
                     <TextView
+                        android:id="@+id/tvMensajeResolucion"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/msg_resolucion_pendiente"
                         android:textColor="@color/color_texto"
                         android:textSize="13sp"
+                        android:layout_marginBottom="12dp"/>
+
+                    <TextView
+                        android:id="@+id/tvComentarioResolucion"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="#555555"
+                        android:textSize="13sp"
+                        android:textStyle="italic"
+                        android:visibility="gone"
                         android:layout_marginBottom="16dp"/>
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnResolverAlerta"
+                    <LinearLayout
+                        android:id="@+id/layoutAccionesResolucion"
                         android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:text="@string/btn_marcar_resuelta"
-                        android:textColor="@color/white"
-                        app:iconTint="@color/white"
-                        app:icon="@drawable/ic_check_circle_green"
-                        app:iconGravity="textStart"
-                        app:backgroundTint="@color/chocolate"
-                        app:cornerRadius="12dp"/>
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:baselineAligned="false">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnResolverAlerta"
+                            android:layout_width="0dp"
+                            android:layout_height="50dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="6dp"
+                            android:text="Atender"
+                            android:textColor="@color/white"
+                            app:iconTint="@color/white"
+                            app:icon="@drawable/ic_check_circle_green"
+                            app:iconGravity="textStart"
+                            app:backgroundTint="#388E3C"
+                            app:cornerRadius="12dp"/>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnIgnorarAlerta"
+                            android:layout_width="0dp"
+                            android:layout_height="50dp"
+                            android:layout_weight="1"
+                            android:layout_marginStart="6dp"
+                            android:text="Ignorar"
+                            android:textColor="@color/white"
+                            app:iconTint="@color/white"
+                            app:icon="@drawable/ic_warning_alert"
+                            app:iconGravity="textStart"
+                            app:backgroundTint="#D32F2F"
+                            app:cornerRadius="12dp"/>
+                    </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
