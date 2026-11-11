@@ -63,6 +63,11 @@ public class ColaboradoresFragment extends Fragment {
     }
 
     private void setupListeners() {
+        // Botón Retroceder (Flecha arriba izquierda)
+        if (binding.btnBack != null) {
+            binding.btnBack.setOnClickListener(v -> getParentFragmentManager().popBackStack());
+        }
+
         // Búsqueda en tiempo real
         if (binding.etSearchCollaborator != null) {
             binding.etSearchCollaborator.addTextChangedListener(new TextWatcher() {

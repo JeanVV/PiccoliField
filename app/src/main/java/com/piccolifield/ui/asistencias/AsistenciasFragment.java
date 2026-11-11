@@ -240,6 +240,11 @@ public class AsistenciasFragment extends Fragment {
     }
 
     private void setupListeners() {
+        // Botón Retroceder (Flecha arriba izquierda)
+        if (binding.btnBack != null) {
+            binding.btnBack.setOnClickListener(v -> getParentFragmentManager().popBackStack());
+        }
+
         // Navegación a la pantalla de Monitoreo en Mapa al pulsar el botón o la tarjeta de geocerca
         if (binding.btnVerMapaMonitoreo != null) {
             binding.btnVerMapaMonitoreo.setOnClickListener(v -> abrirPantallaMonitoreoMapa());

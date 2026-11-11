@@ -67,6 +67,11 @@ public class AsistenciaHomeFragment extends Fragment {
     }
 
     private void setupListeners() {
+        // Botón Retroceder (Flecha arriba izquierda)
+        if (binding.btnBack != null) {
+            binding.btnBack.setOnClickListener(v -> getParentFragmentManager().popBackStack());
+        }
+
         // Botón/Card Ver Mapa
         if (binding.cardGoToMap != null) {
             binding.cardGoToMap.setOnClickListener(v ->

@@ -289,6 +289,11 @@ public class MapaFragment extends Fragment {
     private void setupListeners() {
         if (binding == null) return;
 
+        // Botón Retroceder (Flecha arriba izquierda)
+        if (binding.btnBack != null) {
+            binding.btnBack.setOnClickListener(v -> getParentFragmentManager().popBackStack());
+        }
+
         // Toggle Mapa / Lista
         binding.btnToggleMap.setOnClickListener(v -> mostrarModoMapa());
         binding.btnToggleList.setOnClickListener(v -> mostrarModoLista());

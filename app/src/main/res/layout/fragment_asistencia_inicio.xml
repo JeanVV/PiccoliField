@@ -31,13 +31,18 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="14dp">
 
-                <View
-                    android:id="@+id/vHeaderSpacer"
+                <ImageView
+                    android:id="@+id/btnBack"
                     android:layout_width="28dp"
                     android:layout_height="28dp"
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
-                    android:visibility="invisible" />
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:contentDescription="@string/cd_back"
+                    android:focusable="true"
+                    android:src="@drawable/ic_back_arrow"
+                    app:tint="@color/cafe_profundo" />
 
                 <TextView
                     android:id="@+id/tvToolbarTitle"
