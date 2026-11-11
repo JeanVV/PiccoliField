@@ -82,6 +82,11 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
+            android:name=".ui.impulsador.ScannerActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
             android:name=".ui.despacho.NuevoProspectoActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />

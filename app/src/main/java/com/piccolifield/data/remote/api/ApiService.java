@@ -13,6 +13,9 @@ import com.piccolifield.data.model.ResumenDashboard;
 import com.piccolifield.data.model.TurnoHistorial;
 import com.piccolifield.data.model.Usuario;
 import com.piccolifield.data.model.VendedorDetalle;
+import com.piccolifield.data.model.VendedorRendimientoHistoricoResponse;
+import com.piccolifield.data.remote.dto.request.ReasignarVendedorRequest;
+import com.piccolifield.data.remote.dto.request.ResolverAlertaRequest;
 import com.piccolifield.data.remote.dto.request.DispositivoRequest;
 import com.piccolifield.data.remote.dto.request.FcmTokenRequest;
 import com.piccolifield.data.remote.dto.request.JustificationRequest;
@@ -28,6 +31,7 @@ import com.piccolifield.data.model.ProductoBuscado;
 import com.piccolifield.model.PuntoDistribucion;
 import com.piccolifield.data.remote.dto.request.IncidenciaRequest;
 import com.piccolifield.data.remote.dto.request.RegistrarVentaRequest;
+import com.piccolifield.data.remote.dto.request.ReponerStockRequest;
 import com.piccolifield.model.Vendedor;
 
 import okhttp3.ResponseBody;
@@ -141,9 +145,38 @@ public interface ApiService {
             @Path("id") int idUsuario
     );
 
+    @GET("supervision/vendedores/{id}/rendimiento-historico")
+    Call<ApiResponse<VendedorRendimientoHistoricoResponse>> obtenerRendimientoHistoricoVendedor(
+            @Path("id") int idUsuario,
+            @Query("anio") Integer anio
+    );
+
+    @POST("supervision/vendedores/{id}/reasignar")
+    Call<ApiResponse<Object>> reasignarVendedor(
+            @Path("id") int idUsuario,
+            @Body ReasignarVendedorRequest request
+    );
+
     @GET("supervision/alertas/{id}")
     Call<ApiResponse<AlertaDetalle>> obtenerDetalleAlerta(
             @Path("id") int idAlerta
+    );
+
+    @PUT("supervision/alertas/{id}/atender")
+    Call<ApiResponse<Object>> atenderAlerta(
+            @Path("id") int idAlerta,
+            @Body ResolverAlertaRequest request
+    );
+
+    @PUT("supervision/alertas/{id}/ignorar")
+    Call<ApiResponse<Object>> ignorarAlerta(
+            @Path("id") int idAlerta,
+            @Body ResolverAlertaRequest request
+    );
+
+    @POST("impulsador/stock/reponer")
+    Call<ApiResponse<Object>> reponerStock(
+            @Body ReponerStockRequest request
     );
 
     @GET("supervision/alertas")
@@ -151,6 +184,11 @@ public interface ApiService {
 
     @GET("supervision/puntos-venta")
     Call<ApiResponse<List<com.piccolifield.model.SupervisionPuntoVenta>>> listarPuntosVentaSupervision();
+
+    @GET("supervision/puntos-venta")
+    Call<ApiResponse<List<com.piccolifield.model.SupervisionPuntoVenta>>> listarPuntosVentaSupervision(
+            @Query("estado") String estado
+    );
 
     @GET("supervision/impulsadores")
     Call<ApiResponse<List<Impulsador>>> listarImpulsadores();

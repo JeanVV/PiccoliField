@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 public class Alerta {
 
-    @SerializedName(value = "idAlerta", alternate = {"id", "id_alerta", "idAlertas"})
+    @SerializedName(value = "idAlertas", alternate = {"idAlerta", "id", "id_alerta", "id_alertas"})
     private int idAlerta;
 
     @SerializedName("nivel_alerta")
@@ -27,7 +27,18 @@ public class Alerta {
     public String getDetalle() { return "Producto: " + (nombreProducto != null ? nombreProducto : "Desconocido"); }
     public String getTiempo() { return "Reciente"; }
     public String getSeveridad() { return nivelAlerta != null ? nivelAlerta : "Media"; }
-    public String getEstado() { return estadoResolucion; }
+    public String getNivelFormateado() {
+        if (nivelAlerta == null) return "STOCK BAJO";
+        switch (nivelAlerta.toUpperCase()) {
+            case "PRODUCTO_AGOTADO":
+                return "PRODUCTO AGOTADO";
+            case "STOCK_BAJO":
+                return "STOCK BAJO";
+            default:
+                return nivelAlerta.replace("_", " ").toUpperCase();
+        }
+    }
+    public String getEstado() { return estadoResolucion != null ? estadoResolucion : "PENDIENTE"; }
     public String getNombreProducto() { return nombreProducto; }
 
     public void setIdAlerta(int idAlerta) { this.idAlerta = idAlerta; }
