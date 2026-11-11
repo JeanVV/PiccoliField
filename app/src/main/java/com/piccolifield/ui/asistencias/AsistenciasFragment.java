@@ -372,12 +372,55 @@ public class AsistenciasFragment extends Fragment {
                         setBotonesEstado(true, null);
                         return;
                     }
+
+                    // Validación de Geocerca (Radio máximo 100m)
+                    double latSede = -6.7714;
+                    double lngSede = -79.8409;
+                    float radioMaximoMetros = 100f;
+
+                    float[] results = new float[1];
+                    android.location.Location.distanceBetween(latSede, lngSede, location.getLatitude(), location.getLongitude(), results);
+                    int distanciaMetros = Math.round(results[0]);
+
+                    if (distanciaMetros > radioMaximoMetros) {
+                        mostrarDialogoFueraDeRango(distanciaMetros, Math.round(radioMaximoMetros));
+                        setBotonesEstado(true, null);
+                        return;
+                    }
+
                     obtenerDireccionYMarcar(location.getLatitude(), location.getLongitude(), tipo);
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(getContext(), "No se pudo obtener la ubicación", Toast.LENGTH_SHORT).show();
                     setBotonesEstado(true, null);
                 });
+    }
+
+    private void mostrarDialogoFueraDeRango(int distanciaActual, int radioMaximo) {
+        if (getContext() == null || !isAdded()) return;
+
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_fuera_rango_minimal, null);
+        com.google.android.material.dialog.MaterialAlertDialogBuilder builder =
+                new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                        .setView(dialogView);
+
+        androidx.appcompat.app.AlertDialog dialog = builder.create();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        android.widget.TextView tvMensaje = dialogView.findViewById(R.id.tvMensajeDistancia);
+        com.google.android.material.button.MaterialButton btnEntendido = dialogView.findViewById(R.id.btnEntendido);
+
+        if (tvMensaje != null) {
+            tvMensaje.setText("Te encuentras a " + distanciaActual + " m de la sede. Debes estar dentro del rango (" + radioMaximo + " m) para registrar asistencia.");
+        }
+
+        if (btnEntendido != null) {
+            btnEntendido.setOnClickListener(v -> dialog.dismiss());
+        }
+
+        dialog.show();
     }
 
     private void obtenerDireccionYMarcar(double lat, double lng, String tipo) {
