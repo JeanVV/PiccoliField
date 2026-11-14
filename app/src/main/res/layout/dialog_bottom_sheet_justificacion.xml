@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/color_fondo"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <!-- Indicador de arrastre superior -->
+    <View
+        android:layout_width="40dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="16dp"
+        android:background="#CCCCCC" />
+
+    <!-- Título y Subtítulo -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@drawable/bg_stat_icon_circle"
+            android:backgroundTint="#FDE8E8"
+            android:padding="8dp"
+            android:src="@drawable/ic_warning_alert"
+            app:tint="#B91C1C"
+            tools:ignore="ContentDescription" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Justificar Falta o Tardanza"
+                android:textColor="@color/cafe_profundo"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Envía tu justificación al administrador"
+                android:textColor="@color/color_text_muted"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- COMBOBOX / DROPDOWN DE MOTIVO -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilMotivo"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:hint="Selecciona el motivo"
+        app:boxStrokeColor="@color/cafe_profundo">
+
+        <AutoCompleteTextView
+            android:id="@+id/spMotivoJustificacion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none"
+            android:textColor="@color/cafe_profundo"
+            android:textSize="14sp" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- INPUT DETALLE / OBSERVACIÓN -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilDetalle"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:hint="Detalle / Explicación de la falta"
+        app:boxStrokeColor="@color/cafe_profundo">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etDetalleJustificacion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="top|start"
+            android:inputType="textMultiLine"
+            android:lines="3"
+            android:textColor="@color/cafe_profundo"
+            android:textSize="14sp" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- BOTÓN TOMAR FOTO DEL SUSTENTO -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnTomarFotoSustento"
+        style="@style/Widget.Piccoli.Button.Outlined"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="12dp"
+        android:text="Tomar Foto de Certificado / Sustento"
+        app:icon="@drawable/ic_camera_icon"
+        app:iconTint="@color/cafe_profundo" />
+
+    <!-- PREVIEW DE LA FOTO TOMADA -->
+    <LinearLayout
+        android:id="@+id/layoutPreviewFotoSustento"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:orientation="vertical"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="6dp"
+            android:text="Comprobante / Sustento adjunto:"
+            android:textColor="@color/cafe_profundo"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="160dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/stroke_color"
+            app:strokeWidth="1dp">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/ivPreviewFotoSustento"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    tools:ignore="ContentDescription" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnEliminarFotoSustento"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:layout_gravity="top|end"
+                    android:layout_margin="8dp"
+                    android:backgroundTint="#CC2B170F"
+                    android:text="Quitar Foto"
+                    android:textColor="@color/white"
+                    android:textSize="11sp" />
+            </FrameLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
+
+    <!-- BOTÓN ENVIAR JUSTIFICACIÓN -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnEnviarJustificacion"
+        style="@style/Widget.Piccoli.Button.Primary"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_marginTop="16dp"
+        android:text="Enviar Justificación"
+        app:icon="@drawable/ic_warning_alert"
+        app:iconTint="@color/marfil_suave" />
+
+</LinearLayout>
