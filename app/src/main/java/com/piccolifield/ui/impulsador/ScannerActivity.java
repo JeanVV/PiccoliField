@@ -37,7 +37,6 @@ public class ScannerActivity extends AppCompatActivity {
     private PreviewView viewFinder;
     private ImageView btnBackScanner;
     private ExecutorService cameraExecutor;
-    private boolean isProcessing = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +47,8 @@ public class ScannerActivity extends AppCompatActivity {
         btnBackScanner = findViewById(R.id.btnBackScanner);
 
         btnBackScanner.setOnClickListener(v -> finish());
+
+
 
         if (allPermissionsGranted()) {
             startCamera();
@@ -89,25 +90,31 @@ public class ScannerActivity extends AppCompatActivity {
 
     @androidx.annotation.OptIn(markerClass = androidx.camera.core.ExperimentalGetImage.class)
     private void analyzeImage(ImageProxy imageProxy) {
-        if (isProcessing || imageProxy.getImage() == null) {
+        if (imageProxy.getImage() == null) {
             imageProxy.close();
             return;
         }
-        isProcessing = true;
 
-        InputImage image = InputImage.fromMediaImage(imageProxy.getImage(), imageProxy.getImageInfo().getRotationDegrees());
+        InputImage image = InputImage.fromMediaImage(
+                imageProxy.getImage(),
+                imageProxy.getImageInfo().getRotationDegrees()
+        );
 
+        // Causa A resuelta: Usar FORMAT_ALL_FORMATS para leer EAN-13, QR, Code-128, UPC, etc. sin restricciones
         BarcodeScannerOptions options = new BarcodeScannerOptions.Builder()
-                .setBarcodeFormats(Barcode.FORMAT_EAN_13, Barcode.FORMAT_UPC_A, Barcode.FORMAT_UPC_E)
+                .setBarcodeFormats(Barcode.FORMAT_ALL_FORMATS)
                 .build();
         
         BarcodeScanner scanner = BarcodeScanning.getClient(options);
 
         scanner.process(image)
                 .addOnSuccessListener(barcodes -> {
-                    if (!barcodes.isEmpty()) {
+                    if (!barcodes.isEmpty() && !isFinishing()) {
                         String rawValue = barcodes.get(0).getRawValue();
                         if (rawValue != null) {
+                            Log.d("SCANNER_DEBUG", ">>> ¡CÓDIGO LEÍDO POR LA CÁMARA!: " + rawValue);
+                            runOnUiThread(() -> Toast.makeText(ScannerActivity.this, "Leído: " + rawValue, Toast.LENGTH_SHORT).show());
+
                             Intent resultIntent = new Intent();
                             resultIntent.putExtra("SCAN_RESULT", rawValue);
                             setResult(RESULT_OK, resultIntent);
@@ -115,10 +122,10 @@ public class ScannerActivity extends AppCompatActivity {
                         }
                     }
                 })
-                .addOnFailureListener(e -> Log.e("ScannerActivity", "Error de lectura de código", e))
+                .addOnFailureListener(e -> Log.e("SCANNER_DEBUG", "Error de lectura de código: " + e.getMessage()))
                 .addOnCompleteListener(task -> {
+                    // Causa B resuelta: imageProxy.close() se ejecuta garantizado en cada frame
                     imageProxy.close();
-                    isProcessing = false;
                 });
     }
 
@@ -142,6 +149,8 @@ public class ScannerActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        cameraExecutor.shutdown();
+        if (cameraExecutor != null) {
+            cameraExecutor.shutdown();
+        }
     }
 }
