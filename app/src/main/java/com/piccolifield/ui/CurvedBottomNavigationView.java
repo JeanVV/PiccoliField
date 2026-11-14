@@ -25,12 +25,13 @@ public class CurvedBottomNavigationView extends FrameLayout {
         void onTabSelected(int position);
     }
 
-    private static final int TAB_COUNT = 4;
+    private static final int TAB_COUNT = 5;
     private final int[] TAB_ICONS = new int[]{
-            R.drawable.ic_home,
-            R.drawable.ic_asistencias,
-            R.drawable.ic_puntos_venta,
-            R.drawable.ic_puntos_despacho
+            R.drawable.ic_nav_home,
+            R.drawable.ic_nav_people,
+            R.drawable.ic_supervision,
+            R.drawable.ic_puntos_despacho,
+            R.drawable.ic_person
     };
 
     private Paint mPaint;
@@ -176,7 +177,14 @@ public class CurvedBottomNavigationView extends FrameLayout {
     }
 
     public void selectTab(int index, boolean animate) {
-        if (index < 0 || index >= TAB_COUNT) return;
+        if (index < 0) return;
+        
+        if (index >= TAB_COUNT) {
+            if (mListener != null) {
+                mListener.onTabSelected(index);
+            }
+            return;
+        }
 
         int previousIndex = mSelectedIndex;
         mSelectedIndex = index;

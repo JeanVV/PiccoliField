@@ -383,13 +383,24 @@ public class SupervisionFragment extends Fragment {
                 if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.GONE);
                 if (response.isSuccessful() && response.body() != null) {
                     List<Vendedor> listaVendedores = response.body().getData();
+                    if (listaVendedores == null) {
+                        listaVendedores = new ArrayList<>();
+                    }
 
                     // Conectar la lista real con tu adaptador
                     vendedorAdapter = new VendedorAdapter(listaVendedores, requireContext());
                     rvVendedores.setAdapter(vendedorAdapter);
                     rvVendedores.setVisibility(View.VISIBLE);
                 } else {
-                    Toast.makeText(getContext(), getString(R.string.error_cargar_vendedores), Toast.LENGTH_SHORT).show();
+                    String errorMsg = "Error";
+                    try {
+                        if (response.errorBody() != null) {
+                            errorMsg = response.errorBody().string();
+                        } else if (response.body() != null) {
+                            errorMsg = response.body().getMessage();
+                        }
+                    } catch (Exception ignored) {}
+                    Toast.makeText(getContext(), getString(R.string.error_cargar_vendedores) + ": " + response.code() + " " + errorMsg, Toast.LENGTH_LONG).show();
                 }
             }
 
@@ -397,7 +408,7 @@ public class SupervisionFragment extends Fragment {
             public void onFailure(Call<ApiResponse<List<Vendedor>>> call, Throwable t) {
                 if (!isAdded()) return;
                 if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.GONE);
-                Toast.makeText(getContext(), getString(R.string.error_red_vendedores), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), getString(R.string.error_red_vendedores) + ": " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }

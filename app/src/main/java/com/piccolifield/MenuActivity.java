@@ -43,7 +43,10 @@ public class MenuActivity extends AppCompatActivity {
 
         WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
         controller.setAppearanceLightStatusBars(true);
-        controller.setAppearanceLightNavigationBars(true);
+        // Desactivamos la apariencia clara en los botones de navegación porque ahora el fondo será marrón oscuro
+        controller.setAppearanceLightNavigationBars(false);
+        
+        getWindow().setNavigationBarColor(androidx.core.content.ContextCompat.getColor(this, R.color.cafe_profundo));
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.main, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -52,7 +55,8 @@ public class MenuActivity extends AppCompatActivity {
             // Elevar la barra de navegación curva por encima de los botones/gestos del celular
             if (binding.curvedBottomNav.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
                 ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) binding.curvedBottomNav.getLayoutParams();
-                params.bottomMargin = systemBars.bottom + 12;
+                // Subimos la barra para que la botonera del celular se vea abajo
+                params.bottomMargin = systemBars.bottom;
                 binding.curvedBottomNav.setLayoutParams(params);
             }
 
@@ -88,6 +92,10 @@ public class MenuActivity extends AppCompatActivity {
                     cargarFragmento(new PuntosDespachoFragment());
                     break;
                 case 4:
+                    // Mi Perfil (Configuración/Logout)
+                    cargarFragmento(new com.piccolifield.ui.perfil.MiPerfilFragment());
+                    break;
+                case 5:
                     // Prospectos
                     cargarFragmento(new ProspectosFragment());
                     break;

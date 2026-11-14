@@ -98,6 +98,11 @@ public interface ApiService {
             @Body com.piccolifield.data.remote.dto.request.EstadoRequest request
     );
 
+    @GET("productos")
+    Call<ApiResponse<List<com.piccolifield.model.Producto>>> listarProductos(
+            @Query("estado") String estado
+    );
+
     // -------------------------------------------------------------
     // ASISTENCIAS Y STOCK (Módulos adicionales)
     // -------------------------------------------------------------
