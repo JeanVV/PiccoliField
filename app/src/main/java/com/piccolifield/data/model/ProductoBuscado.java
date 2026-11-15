@@ -3,19 +3,19 @@ package com.piccolifield.data.model;
 import com.google.gson.annotations.SerializedName;
 
 public class ProductoBuscado {
-    @SerializedName("id")
+    @SerializedName(value = "id", alternate = {"idProductos", "id_producto", "idProducto"})
     private int id;
     
-    @SerializedName("nombre")
+    @SerializedName(value = "nombre", alternate = {"producto", "nombre_producto", "descripcion"})
     private String nombre;
     
-    @SerializedName("precio")
+    @SerializedName(value = "precio", alternate = {"precio_unitario", "precio_venta"})
     private double precio;
     
-    @SerializedName("url_foto")
+    @SerializedName(value = "url_foto", alternate = {"urlFoto", "foto"})
     private String urlFoto;
     
-    @SerializedName("stock_actual")
+    @SerializedName(value = "stock_actual", alternate = {"stockActual", "stock"})
     private int stockActual;
 
     public int getId() {

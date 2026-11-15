@@ -3,7 +3,7 @@ package com.piccolifield.data.model;
 import com.google.gson.annotations.SerializedName;
 
 public class PuntoVentaProducto {
-    @SerializedName("idProductos")
+    @SerializedName(value = "idProductos", alternate = {"id_producto", "idProducto"})
     private int idProductos;
 
     @SerializedName("sku")
@@ -12,7 +12,7 @@ public class PuntoVentaProducto {
     @SerializedName("codigo_ean")
     private String codigoEan;
 
-    @SerializedName("producto")
+    @SerializedName(value = "producto", alternate = {"nombre", "nombre_producto"})
     private String producto;
 
     @SerializedName("categoria")
@@ -29,6 +29,9 @@ public class PuntoVentaProducto {
 
     @SerializedName("stock_minimo")
     private int stockMinimo;
+
+    @SerializedName(value = "stock_actual", alternate = {"stockActual", "stock"})
+    private int stockActual;
 
     public int getIdProductos() { return idProductos; }
     public void setIdProductos(int idProductos) { this.idProductos = idProductos; }
@@ -56,4 +59,7 @@ public class PuntoVentaProducto {
 
     public int getStockMinimo() { return stockMinimo; }
     public void setStockMinimo(int stockMinimo) { this.stockMinimo = stockMinimo; }
+
+    public int getStockActual() { return stockActual; }
+    public void setStockActual(int stockActual) { this.stockActual = stockActual; }
 }

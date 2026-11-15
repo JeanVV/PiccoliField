@@ -23,14 +23,56 @@
         android:textStyle="bold"
         android:layout_marginBottom="16dp" />
 
-    <TextView
-        android:id="@+id/tvEanReposicion"
+    <!-- Info del Producto Encontrado -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="EAN: ---"
-        android:textColor="#757575"
-        android:textSize="13sp"
-        android:layout_marginBottom="12dp" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
+
+        <ImageView
+            android:id="@+id/ivProductoReposicion"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:src="@drawable/ic_avatar_placeholder" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="12dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvNombreProductoReposicion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nombre del Producto"
+                android:textColor="#333333"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvEanReposicion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="EAN: ---"
+                android:textColor="#757575"
+                android:textSize="12sp"
+                android:layout_marginTop="2dp" />
+
+            <TextView
+                android:id="@+id/tvStockActualReposicion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Stock actual: 0 unds"
+                android:textColor="@color/chocolate"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+    </LinearLayout>
 
     <TextView
         android:layout_width="match_parent"
@@ -66,7 +108,7 @@
     <EditText
         android:id="@+id/etObservacionReposicion"
         android:layout_width="match_parent"
-        android:layout_height="90dp"
+        android:layout_height="80dp"
         android:background="@drawable/bg_search_box"
         android:gravity="top|start"
         android:hint="Ej. Lote recibido según Guía GR-00412"
@@ -75,7 +117,7 @@
         android:textSize="14sp"
         android:inputType="textMultiLine"
         android:autofillHints="description"
-        android:layout_marginBottom="24dp" />
+        android:layout_marginBottom="20dp" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnConfirmarReposicion"

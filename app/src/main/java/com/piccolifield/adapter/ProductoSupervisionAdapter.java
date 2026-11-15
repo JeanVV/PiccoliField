@@ -43,7 +43,10 @@ public class ProductoSupervisionAdapter extends RecyclerView.Adapter<ProductoSup
         PuntoVentaProducto producto = listaProductos.get(position);
         holder.tvNombreProducto.setText(producto.getProducto());
         holder.tvSkuProducto.setText("SKU: " + producto.getSku());
-        holder.tvStockMinimo.setText("Stock Mínimo: " + producto.getStockMinimo());
+        
+        // Mostrar Stock Actual en lugar de Stock Mínimo
+        int stockActual = producto.getStockActual();
+        holder.tvStockMinimo.setText("Stock Actual: " + stockActual + " unds (Mín: " + producto.getStockMinimo() + ")");
 
         if (producto.getIdProductos() > 0) {
             com.piccolifield.data.remote.api.ApiService apiService = RetrofitClient.createService();

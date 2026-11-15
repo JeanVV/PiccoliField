@@ -5,8 +5,10 @@ import java.util.List;
 import com.piccolifield.data.model.AlertaDetalle;
 import com.piccolifield.data.model.AsistenciaResumen;
 import com.piccolifield.data.model.Impulsador;
+import com.piccolifield.data.model.Incidencia;
 import com.piccolifield.data.model.PuntoVentaDetalle;
 import com.piccolifield.data.model.PuntoVentaHistorial;
+import com.piccolifield.data.model.TiposIncidenciaResponse;
 import com.piccolifield.data.model.ReasignarImpulsadorResponse;
 import com.piccolifield.data.model.RegistroAsistencia;
 import com.piccolifield.data.model.ResumenDashboard;
@@ -15,6 +17,9 @@ import com.piccolifield.data.model.Usuario;
 import com.piccolifield.data.model.VendedorDetalle;
 import com.piccolifield.data.model.VendedorRendimientoHistoricoResponse;
 import com.piccolifield.data.remote.dto.request.ReasignarVendedorRequest;
+import com.piccolifield.data.remote.dto.request.RevisionIncidenciaRequest;
+import com.piccolifield.data.remote.dto.request.AtenderIncidenciaRequest;
+import com.piccolifield.data.remote.dto.request.ReportarIncidenciaRequest;
 import com.piccolifield.data.remote.dto.request.ResolverAlertaRequest;
 import com.piccolifield.data.remote.dto.request.DispositivoRequest;
 import com.piccolifield.data.remote.dto.request.FcmTokenRequest;
@@ -187,6 +192,33 @@ public interface ApiService {
     @GET("supervision/alertas")
     Call<ApiResponse<List<Alerta>>> listarAlertasSupervision();
 
+    @GET("supervision/incidencias")
+    Call<ApiResponse<List<Incidencia>>> listarIncidenciasSupervision(
+            @Query("estado") String estado
+    );
+
+    @PUT("supervision/incidencias/{id}/atender")
+    Call<ApiResponse<Object>> atenderIncidenciaSupervision(
+            @Path("id") int idIncidencia,
+            @Body AtenderIncidenciaRequest request
+    );
+
+    @POST("supervision/incidencias/{id}/revisar")
+    Call<ApiResponse<Object>> revisarIncidencia(
+            @Path("id") int idIncidencia,
+            @Body RevisionIncidenciaRequest request
+    );
+
+    @GET("supervision/incidencias/{id}/foto")
+    Call<ResponseBody> obtenerFotoIncidenciaSupervision(
+            @Path("id") int idIncidencia
+    );
+
+    @GET("impulsador/incidencias/{id}/foto")
+    Call<ResponseBody> obtenerFotoIncidencia(
+            @Path("id") int idIncidencia
+    );
+
     @GET("supervision/puntos-venta")
     Call<ApiResponse<List<com.piccolifield.model.SupervisionPuntoVenta>>> listarPuntosVentaSupervision();
 
@@ -281,9 +313,12 @@ public interface ApiService {
             @Body RegistrarVentaRequest request
     );
 
+    @GET("impulsador/incidencias/tipos")
+    Call<ApiResponse<TiposIncidenciaResponse>> obtenerTiposIncidencia();
+
     @POST("impulsador/incidencias")
     Call<ApiResponse<Object>> reportarIncidencia(
-            @Body IncidenciaRequest request
+            @Body ReportarIncidenciaRequest request
     );
 
     @PUT("dispositivo")

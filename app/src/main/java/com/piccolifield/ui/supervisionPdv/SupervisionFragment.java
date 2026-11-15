@@ -9,6 +9,7 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,14 +35,25 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.piccolifield.R;
+import com.piccolifield.adapter.IncidenciaAdapter;
 import com.piccolifield.adapter.VendedorAdapter;
 import com.piccolifield.adapter.AlertaAdapter;
 import com.piccolifield.adapter.SupervisionPuntoVentaAdapter;
 import com.piccolifield.data.model.ImpulsadorDashboard;
+import com.piccolifield.data.model.Incidencia;
 import com.piccolifield.data.model.ProductoBuscado;
 import com.piccolifield.data.model.ResumenDashboard;
+import com.piccolifield.data.model.TipoIncidenciaDto;
+import com.piccolifield.data.model.TiposIncidenciaResponse;
+import com.piccolifield.data.remote.dto.request.AtenderIncidenciaRequest;
 import com.piccolifield.data.remote.dto.request.RegistrarVentaRequest;
+import com.piccolifield.data.remote.dto.request.ReasignarVendedorRequest;
+import com.piccolifield.data.remote.dto.request.ReportarIncidenciaRequest;
 import com.piccolifield.data.remote.dto.request.ReponerStockRequest;
+import com.piccolifield.data.remote.dto.request.RevisionIncidenciaRequest;
+
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import com.piccolifield.model.Alerta;
 import com.piccolifield.model.Vendedor;
 import com.piccolifield.model.SupervisionPuntoVenta;
@@ -68,24 +80,31 @@ public class SupervisionFragment extends Fragment {
     private TextView tvMontoTotalVentas, tvPdvActivos, tvAlertasPendientes;
 
     // Pestañas
-    private TextView tvTabInicio, tvTabPuntos, tvTabAlertas;
+    private TextView tvTabInicio, tvTabPuntos, tvTabAlertas, tvTabIncidencias;
 
     // Listas y Contenedores
     private RecyclerView rvVendedores;
     private RecyclerView rvAlertas;
     private RecyclerView rvPuntosVenta;
+    private RecyclerView rvIncidencias;
     private View layoutDashboard; // Para ocultar/mostrar las tarjetas de resumen
     private TextView tvTituloLista;
     private ProgressBar pbLoadingListas;
 
-    // Filtros de Alertas
-    private View layoutFiltrosAlertas;
-    private AlertaAdapter alertaAdapter;
     private VendedorAdapter vendedorAdapter;
     private SupervisionPuntoVentaAdapter puntoVentaAdapter;
+    private AlertaAdapter alertaAdapter;
+    private IncidenciaAdapter incidenciaAdapter;
+
     private EditText etBuscar;
     private Spinner spFiltroEstadoAlerta, spFiltroNivelAlerta;
+    private View layoutFiltrosAlertas;
     private int currentTab = 0;
+
+    // Foto Evidencia Incidencia
+    private ActivityResultLauncher<String> galleryLauncher;
+    private String fotoBase64Incidencia = null;
+    private MaterialButton btnAdjuntarFotoRef = null;
 
     // Layouts por Rol
     private View layoutSupervisor, layoutImpulsador;
@@ -116,6 +135,29 @@ public class SupervisionFragment extends Fragment {
                     }
                 }
         );
+
+        galleryLauncher = registerForActivityResult(
+                new ActivityResultContracts.GetContent(),
+                uri -> {
+                    if (uri != null && getContext() != null) {
+                        try {
+                            InputStream is = getContext().getContentResolver().openInputStream(uri);
+                            Bitmap bitmap = BitmapFactory.decodeStream(is);
+                            if (bitmap != null) {
+                                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                                bitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
+                                byte[] bytes = baos.toByteArray();
+                                fotoBase64Incidencia = Base64.encodeToString(bytes, Base64.NO_WRAP);
+                                if (btnAdjuntarFotoRef != null) {
+                                    btnAdjuntarFotoRef.setText("Evidencia adjuntada ✓");
+                                }
+                            }
+                        } catch (Exception e) {
+                            Toast.makeText(getContext(), "Error al cargar imagen", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+        );
     }
 
     public SupervisionFragment() {}
@@ -136,6 +178,7 @@ public class SupervisionFragment extends Fragment {
         tvTabInicio = view.findViewById(R.id.tvTabInicio);
         tvTabPuntos = view.findViewById(R.id.tvTabPuntos);
         tvTabAlertas = view.findViewById(R.id.tvTabAlertas);
+        tvTabIncidencias = view.findViewById(R.id.tvTabIncidencias);
         tvTituloLista = view.findViewById(R.id.tvTituloLista);
         pbLoadingListas = view.findViewById(R.id.pbLoadingListas);
 
@@ -150,6 +193,10 @@ public class SupervisionFragment extends Fragment {
         // El RecyclerView de Puntos de Venta
         rvPuntosVenta = view.findViewById(R.id.rvPuntosVenta);
         rvPuntosVenta.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        // El RecyclerView de Incidencias
+        rvIncidencias = view.findViewById(R.id.rvIncidencias);
+        rvIncidencias.setLayoutManager(new LinearLayoutManager(getContext()));
 
         // (Opcional pero recomendado) En tu XML deberías envolver tus 2 MaterialCardView del dashboard
         // dentro de un LinearLayout con el id "@+id/layoutDashboard" para poder ocultarlos fácilmente.
@@ -212,6 +259,8 @@ public class SupervisionFragment extends Fragment {
                         puntoVentaAdapter.filtrar(query);
                     } else if (currentTab == 2 && alertaAdapter != null) {
                         alertaAdapter.filtrarPorTexto(query);
+                    } else if (currentTab == 3 && incidenciaAdapter != null) {
+                        incidenciaAdapter.filtrar(query);
                     }
                 }
                 @Override public void afterTextChanged(Editable s) {}
@@ -237,9 +286,7 @@ public class SupervisionFragment extends Fragment {
         }
 
         if (btnReportarIncidencia != null) {
-            btnReportarIncidencia.setOnClickListener(v -> 
-                Toast.makeText(getContext(), "Próximamente: Incidencias", Toast.LENGTH_SHORT).show()
-            );
+            btnReportarIncidencia.setOnClickListener(v -> mostrarBottomSheetIncidencia());
         }
 
         if (btnReponerStock != null) {
@@ -254,6 +301,9 @@ public class SupervisionFragment extends Fragment {
         tvTabInicio.setOnClickListener(v -> seleccionarPestana(0));
         tvTabPuntos.setOnClickListener(v -> seleccionarPestana(1));
         tvTabAlertas.setOnClickListener(v -> seleccionarPestana(2));
+        if (tvTabIncidencias != null) {
+            tvTabIncidencias.setOnClickListener(v -> seleccionarPestana(3));
+        }
 
         // 3. Evaluar el ROL del Usuario
         String rol = SplashStorage.obtenerRol(requireContext());
@@ -303,9 +353,10 @@ public class SupervisionFragment extends Fragment {
 
                 tvTituloLista.setText(getString(R.string.label_mejores_impulsadores));
                 if (layoutDashboard != null) layoutDashboard.setVisibility(View.VISIBLE);
-                rvVendedores.setVisibility(View.GONE);
+                if (rvVendedores != null) rvVendedores.setVisibility(View.VISIBLE);
                 if (rvAlertas != null) rvAlertas.setVisibility(View.GONE);
                 if (rvPuntosVenta != null) rvPuntosVenta.setVisibility(View.GONE);
+                if (rvIncidencias != null) rvIncidencias.setVisibility(View.GONE);
 
                 cargarResumenDashboard();
                 cargarMejoresVendedores();
@@ -319,9 +370,10 @@ public class SupervisionFragment extends Fragment {
 
                 tvTituloLista.setText(getString(R.string.label_lista_pdv));
                 if (layoutDashboard != null) layoutDashboard.setVisibility(View.GONE);
-                rvVendedores.setVisibility(View.GONE);
+                if (rvVendedores != null) rvVendedores.setVisibility(View.GONE);
                 if (rvAlertas != null) rvAlertas.setVisibility(View.GONE);
-                if (rvPuntosVenta != null) rvPuntosVenta.setVisibility(View.GONE);
+                if (rvPuntosVenta != null) rvPuntosVenta.setVisibility(View.VISIBLE);
+                if (rvIncidencias != null) rvIncidencias.setVisibility(View.GONE);
                 
                 cargarPuntosVenta();
                 break;
@@ -334,13 +386,32 @@ public class SupervisionFragment extends Fragment {
 
                 tvTituloLista.setText(getString(R.string.label_alertas));
                 if (layoutDashboard != null) layoutDashboard.setVisibility(View.GONE);
-                rvVendedores.setVisibility(View.GONE);
+                if (rvVendedores != null) rvVendedores.setVisibility(View.GONE);
                 if (rvPuntosVenta != null) rvPuntosVenta.setVisibility(View.GONE);
-                if (rvAlertas != null) rvAlertas.setVisibility(View.GONE);
+                if (rvAlertas != null) rvAlertas.setVisibility(View.VISIBLE);
+                if (rvIncidencias != null) rvIncidencias.setVisibility(View.GONE);
                 
                 if (spFiltroEstadoAlerta != null) spFiltroEstadoAlerta.setSelection(0);
                 if (spFiltroNivelAlerta != null) spFiltroNivelAlerta.setSelection(0);
                 cargarAlertas();
+                break;
+
+            case 3: // INCIDENCIAS
+                if (layoutFiltrosAlertas != null) layoutFiltrosAlertas.setVisibility(View.GONE);
+                if (tvTabIncidencias != null) {
+                    tvTabIncidencias.setBackgroundResource(R.drawable.bg_chip_selected);
+                    tvTabIncidencias.setTextColor(Color.WHITE);
+                    tvTabIncidencias.setTypeface(null, Typeface.BOLD);
+                }
+
+                tvTituloLista.setText("Incidencias Reportadas");
+                if (layoutDashboard != null) layoutDashboard.setVisibility(View.GONE);
+                if (rvVendedores != null) rvVendedores.setVisibility(View.GONE);
+                if (rvAlertas != null) rvAlertas.setVisibility(View.GONE);
+                if (rvPuntosVenta != null) rvPuntosVenta.setVisibility(View.GONE);
+                if (rvIncidencias != null) rvIncidencias.setVisibility(View.VISIBLE);
+
+                cargarIncidencias();
                 break;
         }
     }
@@ -545,12 +616,43 @@ public class SupervisionFragment extends Fragment {
         View view = getLayoutInflater().inflate(R.layout.dialog_bottom_sheet_reponer_stock, null);
         bottomSheetDialog.setContentView(view);
 
+        ImageView ivProducto = view.findViewById(R.id.ivProductoReposicion);
+        TextView tvNombreProducto = view.findViewById(R.id.tvNombreProductoReposicion);
+        TextView tvStockActual = view.findViewById(R.id.tvStockActualReposicion);
         TextView tvEan = view.findViewById(R.id.tvEanReposicion);
         EditText etCantidad = view.findViewById(R.id.etCantidadReposicion);
         EditText etObservacion = view.findViewById(R.id.etObservacionReposicion);
         MaterialButton btnConfirmar = view.findViewById(R.id.btnConfirmarReposicion);
 
         if (tvEan != null) tvEan.setText("EAN/UPC: " + barcode);
+
+        // Buscar información del producto para mostrar su foto, nombre y stock actual
+        ApiService apiService = RetrofitClient.createService();
+        apiService.buscarProductoPorCodigo(barcode).enqueue(new Callback<ApiResponse<ProductoBuscado>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<ProductoBuscado>> call, @NonNull Response<ApiResponse<ProductoBuscado>> response) {
+                if (!isAdded()) return;
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                    ProductoBuscado prod = response.body().getData();
+                    if (tvNombreProducto != null) tvNombreProducto.setText(prod.getNombre());
+                    if (tvStockActual != null) tvStockActual.setText("Stock actual: " + prod.getStockActual() + " unds");
+
+                    if (prod.getId() > 0 && ivProducto != null) {
+                        apiService.obtenerFotoProducto(prod.getId()).enqueue(new Callback<ResponseBody>() {
+                            @Override
+                            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                                if (response.isSuccessful() && response.body() != null) {
+                                    Bitmap bmp = BitmapFactory.decodeStream(response.body().byteStream());
+                                    if (bmp != null) ivProducto.post(() -> ivProducto.setImageBitmap(bmp));
+                                }
+                            }
+                            @Override public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {}
+                        });
+                    }
+                }
+            }
+            @Override public void onFailure(@NonNull Call<ApiResponse<ProductoBuscado>> call, @NonNull Throwable t) {}
+        });
 
         if (btnConfirmar != null) {
             btnConfirmar.setOnClickListener(v -> {
@@ -564,7 +666,6 @@ public class SupervisionFragment extends Fragment {
 
                 final int finalCantidad = cantidad;
                 btnConfirmar.setEnabled(false);
-                ApiService apiService = RetrofitClient.createService();
                 ReponerStockRequest request = new ReponerStockRequest(barcode, null, finalCantidad, observacion);
 
                 apiService.reponerStock(request).enqueue(new Callback<ApiResponse<Object>>() {
@@ -585,6 +686,242 @@ public class SupervisionFragment extends Fragment {
                     public void onFailure(@NonNull Call<ApiResponse<Object>> call, @NonNull Throwable t) {
                         if (!isAdded()) return;
                         btnConfirmar.setEnabled(true);
+                        Toast.makeText(getContext(), "Error de red: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            });
+        }
+
+        bottomSheetDialog.show();
+    }
+
+    private void cargarIncidencias() {
+        if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.VISIBLE);
+        String token = SplashStorage.obtenerToken(requireContext());
+        if (token == null || token.isEmpty()) return;
+
+        ApiService apiService = RetrofitClient.createService();
+        apiService.listarIncidenciasSupervision(null).enqueue(new Callback<ApiResponse<List<Incidencia>>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<List<Incidencia>>> call, @NonNull Response<ApiResponse<List<Incidencia>>> response) {
+                if (!isAdded()) return;
+                if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.GONE);
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                    List<Incidencia> listaIncidencias = response.body().getData();
+                    incidenciaAdapter = new IncidenciaAdapter(listaIncidencias, requireContext(), item -> mostrarBottomSheetRevisarIncidencia(item));
+                    if (rvIncidencias != null) {
+                        rvIncidencias.setAdapter(incidenciaAdapter);
+                        rvIncidencias.setVisibility(View.VISIBLE);
+                    }
+                } else {
+                    Toast.makeText(getContext(), "Error al cargar incidencias", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<List<Incidencia>>> call, @NonNull Throwable t) {
+                if (!isAdded()) return;
+                if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.GONE);
+                Toast.makeText(getContext(), "Error de red: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void mostrarBottomSheetRevisarIncidencia(Incidencia item) {
+        Context ctx = getContext();
+        if (ctx == null) return;
+
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(ctx);
+        View view = getLayoutInflater().inflate(R.layout.dialog_bottom_sheet_revisar_incidencia, null);
+        bottomSheetDialog.setContentView(view);
+
+        TextView tvTitulo = view.findViewById(R.id.tvTituloRevisarIncidencia);
+        TextView tvLocal = view.findViewById(R.id.tvDetalleLocalIncidencia);
+        TextView tvDescripcion = view.findViewById(R.id.tvDetalleDescripcionIncidencia);
+        ImageView ivEvidencia = view.findViewById(R.id.ivEvidenciaIncidencia);
+        EditText etComentario = view.findViewById(R.id.etComentarioAtencionIncidencia);
+        MaterialButton btnEnProceso = view.findViewById(R.id.btnMarcarEnProcesoIncidencia);
+        MaterialButton btnResolver = view.findViewById(R.id.btnResolverIncidencia);
+
+        if (tvTitulo != null) tvTitulo.setText(item.getTipo().replace("_", " ") + " (" + item.getSeveridad() + ")");
+        if (tvLocal != null) tvLocal.setText("Local: " + item.getLocalNombre());
+        if (tvDescripcion != null) tvDescripcion.setText("Descripción: " + item.getDescripcion());
+        if (etComentario != null && item.getComentarioAtencion() != null) {
+            etComentario.setText(item.getComentarioAtencion());
+        }
+
+        if (item.hasEvidencia() && ivEvidencia != null) {
+            ivEvidencia.setVisibility(View.VISIBLE);
+            ApiService apiService = RetrofitClient.createService();
+            apiService.obtenerFotoIncidenciaSupervision(item.getIdIncidencias()).enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        Bitmap bmp = BitmapFactory.decodeStream(response.body().byteStream());
+                        if (bmp != null) ivEvidencia.post(() -> ivEvidencia.setImageBitmap(bmp));
+                    }
+                }
+                @Override public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {}
+            });
+        }
+
+        View.OnClickListener listener = v -> {
+            String estadoNuevo = (v.getId() == R.id.btnResolverIncidencia) ? "RESUELTO" : "EN_PROCESO";
+            String comentario = etComentario != null && etComentario.getText() != null ? etComentario.getText().toString().trim() : "";
+
+            if (comentario.isEmpty()) {
+                comentario = estadoNuevo.equals("RESUELTO") ? "Incidencia resuelta por supervisor" : "Incidencia en proceso";
+            }
+
+            ApiService apiService = RetrofitClient.createService();
+            AtenderIncidenciaRequest request = new AtenderIncidenciaRequest(estadoNuevo, comentario);
+
+            apiService.atenderIncidenciaSupervision(item.getIdIncidencias(), request).enqueue(new Callback<ApiResponse<Object>>() {
+                @Override
+                public void onResponse(@NonNull Call<ApiResponse<Object>> call, @NonNull Response<ApiResponse<Object>> response) {
+                    if (!isAdded()) return;
+                    if (response.isSuccessful()) {
+                        Toast.makeText(getContext(), "Incidencia marcada como " + estadoNuevo + " exitosamente", Toast.LENGTH_SHORT).show();
+                        bottomSheetDialog.dismiss();
+                        cargarIncidencias();
+                    } else {
+                        String errorMsg = "Error al actualizar incidencia";
+                        if (response.errorBody() != null) {
+                            try {
+                                errorMsg = response.errorBody().string();
+                            } catch (Exception ignored) {}
+                        }
+                        Toast.makeText(getContext(), errorMsg, Toast.LENGTH_LONG).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<ApiResponse<Object>> call, @NonNull Throwable t) {
+                    if (!isAdded()) return;
+                    Toast.makeText(getContext(), "Error de red: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        };
+
+        if (btnEnProceso != null) btnEnProceso.setOnClickListener(listener);
+        if (btnResolver != null) btnResolver.setOnClickListener(listener);
+
+        bottomSheetDialog.show();
+    }
+
+    private void mostrarBottomSheetIncidencia() {
+        fotoBase64Incidencia = null;
+        Context ctx = getContext();
+        if (ctx == null) return;
+
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(ctx);
+        View view = getLayoutInflater().inflate(R.layout.dialog_bottom_sheet_incidencia, null);
+        bottomSheetDialog.setContentView(view);
+
+        Spinner spTipo = view.findViewById(R.id.spTipoIncidencia);
+        Spinner spSeveridad = view.findViewById(R.id.spSeveridadIncidencia);
+        EditText etDescripcion = view.findViewById(R.id.etDescripcionIncidencia);
+        MaterialButton btnAdjuntar = view.findViewById(R.id.btnAdjuntarFotoIncidencia);
+        MaterialButton btnEnviar = view.findViewById(R.id.btnEnviarIncidencia);
+
+        btnAdjuntarFotoRef = btnAdjuntar;
+        if (btnAdjuntar != null) {
+            btnAdjuntar.setOnClickListener(v -> {
+                if (galleryLauncher != null) {
+                    galleryLauncher.launch("image/*");
+                }
+            });
+        }
+
+        List<TipoIncidenciaDto> listaTipos = new ArrayList<>();
+        List<String> severidades = new ArrayList<>();
+
+        ApiService apiService = RetrofitClient.createService();
+        apiService.obtenerTiposIncidencia().enqueue(new Callback<ApiResponse<TiposIncidenciaResponse>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<TiposIncidenciaResponse>> call, @NonNull Response<ApiResponse<TiposIncidenciaResponse>> response) {
+                if (!isAdded()) return;
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                    TiposIncidenciaResponse data = response.body().getData();
+                    if (data.getTipos() != null) listaTipos.addAll(data.getTipos());
+                    if (data.getSeveridades() != null) severidades.addAll(data.getSeveridades());
+
+                    if (severidades.isEmpty()) {
+                        severidades.add("BAJA");
+                        severidades.add("MEDIA");
+                        severidades.add("ALTA");
+                    }
+
+                    ArrayAdapter<TipoIncidenciaDto> adapterTipo = new ArrayAdapter<>(ctx, android.R.layout.simple_spinner_item, listaTipos);
+                    adapterTipo.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    if (spTipo != null) spTipo.setAdapter(adapterTipo);
+
+                    ArrayAdapter<String> adapterSeveridad = new ArrayAdapter<>(ctx, android.R.layout.simple_spinner_item, severidades);
+                    adapterSeveridad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    if (spSeveridad != null) spSeveridad.setAdapter(adapterSeveridad);
+
+                    if (spTipo != null) {
+                        spTipo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                            @Override
+                            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                                if (position >= 0 && position < listaTipos.size()) {
+                                    TipoIncidenciaDto item = listaTipos.get(position);
+                                    if (item.getSeveridadSugerida() != null && spSeveridad != null) {
+                                        for (int i = 0; i < severidades.size(); i++) {
+                                            if (severidades.get(i).equalsIgnoreCase(item.getSeveridadSugerida())) {
+                                                spSeveridad.setSelection(i);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            @Override public void onNothingSelected(AdapterView<?> parent) {}
+                        });
+                    }
+                }
+            }
+
+            @Override public void onFailure(@NonNull Call<ApiResponse<TiposIncidenciaResponse>> call, @NonNull Throwable t) {}
+        });
+
+        if (btnEnviar != null) {
+            btnEnviar.setOnClickListener(v -> {
+                String tipo = "OTRO";
+                if (spTipo != null && spTipo.getSelectedItem() instanceof TipoIncidenciaDto) {
+                    tipo = ((TipoIncidenciaDto) spTipo.getSelectedItem()).getTipo();
+                } else if (spTipo != null && spTipo.getSelectedItem() != null) {
+                    tipo = spTipo.getSelectedItem().toString();
+                }
+
+                String severidad = spSeveridad != null && spSeveridad.getSelectedItem() != null ? spSeveridad.getSelectedItem().toString() : "MEDIA";
+                String descripcion = etDescripcion != null && etDescripcion.getText() != null ? etDescripcion.getText().toString().trim() : "";
+
+                if (descripcion.isEmpty()) {
+                    if (etDescripcion != null) etDescripcion.setError("Ingrese una descripción del inconveniente");
+                    return;
+                }
+
+                btnEnviar.setEnabled(false);
+                ReportarIncidenciaRequest request = new ReportarIncidenciaRequest(tipo, severidad, descripcion, null, fotoBase64Incidencia);
+
+                apiService.reportarIncidencia(request).enqueue(new Callback<ApiResponse<Object>>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ApiResponse<Object>> call, @NonNull Response<ApiResponse<Object>> response) {
+                        if (!isAdded()) return;
+                        btnEnviar.setEnabled(true);
+                        if (response.isSuccessful()) {
+                            Toast.makeText(getContext(), "Incidencia reportada exitosamente", Toast.LENGTH_SHORT).show();
+                            bottomSheetDialog.dismiss();
+                        } else {
+                            Toast.makeText(getContext(), "Error al reportar incidencia", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ApiResponse<Object>> call, @NonNull Throwable t) {
+                        if (!isAdded()) return;
+                        btnEnviar.setEnabled(true);
                         Toast.makeText(getContext(), "Error de red: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });

@@ -277,6 +277,19 @@ public class CurvedBottomNavigationView extends FrameLayout {
         this.mListener = listener;
     }
 
+    public void setTabDisabled(int index, boolean disabled) {
+        if (index >= 0 && index < TAB_COUNT && mTabImageViews[index] != null) {
+            mTabImageViews[index].setAlpha(disabled ? 0.3f : 1.0f);
+            mTabImageViews[index].setEnabled(!disabled);
+        }
+    }
+
+    public void setTabVisibility(int index, int visibility) {
+        if (index >= 0 && index < TAB_COUNT && mTabImageViews[index] != null) {
+            mTabImageViews[index].setVisibility(visibility);
+        }
+    }
+
     public int getSelectedIndex() {
         return mSelectedIndex;
     }

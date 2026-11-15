@@ -1,11 +1,22 @@
 package com.piccolifield.data.model;
 
-public class ResumenDashboard {
-    private double monto_total_ventas;
-    private int cantidad_pdv_activos;
-    private int cantidad_alertas;
+import com.google.gson.annotations.SerializedName;
 
-    public double getMonto_total_ventas() { return monto_total_ventas; }
-    public int getCantidad_pdv_activos() { return cantidad_pdv_activos; }
-    public int getCantidad_alertas() { return cantidad_alertas; }
+public class ResumenDashboard {
+    @SerializedName("monto_total_ventas")
+    private double montoTotalVentas;
+
+    @SerializedName("cantidad_pdv_activos")
+    private int cantidadPdvActivos;
+
+    @SerializedName("cantidad_alertas")
+    private int cantidadAlertas;
+
+    @SerializedName("cantidad_incidencias_abiertas")
+    private int cantidadIncidenciasAbiertas;
+
+    public double getMonto_total_ventas() { return montoTotalVentas; }
+    public int getCantidad_pdv_activos() { return cantidadPdvActivos; }
+    public int getCantidad_alertas() { return cantidadAlertas; }
+    public int getCantidadIncidenciasAbiertas() { return cantidadIncidenciasAbiertas; }
 }

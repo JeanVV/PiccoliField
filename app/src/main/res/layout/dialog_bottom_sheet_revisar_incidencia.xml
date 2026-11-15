@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/color_fondo"
+    android:padding="20dp">
+
+    <View
+        android:layout_width="40dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="16dp"
+        android:background="#CCCCCC" />
+
+    <TextView
+        android:id="@+id/tvTituloRevisarIncidencia"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Revisar Incidencia"
+        android:textColor="@color/cafe_profundo"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:id="@+id/tvDetalleLocalIncidencia"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Local: ---"
+        android:textColor="#757575"
+        android:textSize="13sp"
+        android:layout_marginBottom="4dp" />
+
+    <TextView
+        android:id="@+id/tvDetalleDescripcionIncidencia"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Descripción..."
+        android:textColor="#333333"
+        android:textSize="14sp"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Imagen Evidencia -->
+    <ImageView
+        android:id="@+id/ivEvidenciaIncidencia"
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:scaleType="fitCenter"
+        android:background="#E0E0E0"
+        android:visibility="gone"
+        android:layout_marginBottom="16dp"
+        android:contentDescription="Evidencia de Incidencia" />
+
+    <!-- Comentario del Supervisor -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Comentario de Atención / Respuesta:"
+        android:textColor="#333333"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="6dp" />
+
+    <EditText
+        android:id="@+id/etComentarioAtencionIncidencia"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:background="@drawable/bg_search_box"
+        android:gravity="top|start"
+        android:hint="Ej. Se coordinó cambio de producto..."
+        android:padding="12dp"
+        android:textColor="#333333"
+        android:textSize="14sp"
+        android:inputType="textMultiLine"
+        android:autofillHints="description"
+        android:layout_marginBottom="20dp" />
+
+    <!-- Botones de Acción -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:baselineAligned="false">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnMarcarEnProcesoIncidencia"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="6dp"
+            android:text="En Proceso"
+            app:strokeColor="#F57C00"
+            android:textColor="#F57C00"
+            app:cornerRadius="12dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnResolverIncidencia"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
+            android:text="Resolver"
+            app:backgroundTint="#388E3C"
+            android:textColor="@android:color/white"
+            app:cornerRadius="12dp"/>
+
+    </LinearLayout>
+
+</LinearLayout>

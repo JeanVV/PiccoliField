@@ -176,6 +176,7 @@
                     android:layout_height="64dp"
                     android:text="Escanear Producto"
                     app:icon="@drawable/ic_camera_icon"
+                    app:iconTint="@android:color/white"
                     app:iconSize="28dp"
                     app:iconGravity="textStart"
                     android:textSize="18sp"
@@ -249,43 +250,70 @@
                     android:textSize="14sp"
                     android:layout_marginBottom="16dp"/>
 
-                <LinearLayout
+                <HorizontalScrollView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center"
-                    android:layout_marginBottom="24dp">
+                    android:scrollbars="none"
+                    android:overScrollMode="never"
+                    android:clipToPadding="false"
+                    android:paddingEnd="16dp"
+                    android:layout_marginBottom="20dp">
 
-                    <TextView
-                        android:id="@+id/tvTabInicio"
+                    <LinearLayout
                         android:layout_width="wrap_content"
-                        android:layout_height="36dp"
-                        android:gravity="center"
-                        android:paddingHorizontal="24dp"
-                        android:text="@string/nav_inicio"
-                        android:textColor="@color/black"
-                        android:textStyle="bold" />
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
 
-                    <TextView
-                        android:id="@+id/tvTabPuntos"
-                        android:layout_width="wrap_content"
-                        android:layout_height="36dp"
-                        android:layout_marginStart="16dp"
-                        android:gravity="center"
-                        android:paddingHorizontal="16dp"
-                        android:text="@string/btn_pdv"
-                        android:textColor="@color/black" />
+                        <TextView
+                            android:id="@+id/tvTabInicio"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:gravity="center"
+                            android:paddingHorizontal="16dp"
+                            android:singleLine="true"
+                            android:text="@string/nav_inicio"
+                            android:textSize="13sp"
+                            android:textColor="@color/black"
+                            android:textStyle="bold" />
 
-                    <TextView
-                        android:id="@+id/tvTabAlertas"
-                        android:layout_width="wrap_content"
-                        android:layout_height="36dp"
-                        android:layout_marginStart="16dp"
-                        android:gravity="center"
-                        android:paddingHorizontal="16dp"
-                        android:text="@string/btn_alerta"
-                        android:textColor="@color/black" />
-                </LinearLayout>
+                        <TextView
+                            android:id="@+id/tvTabPuntos"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:layout_marginStart="8dp"
+                            android:gravity="center"
+                            android:paddingHorizontal="12dp"
+                            android:singleLine="true"
+                            android:text="@string/btn_pdv"
+                            android:textSize="13sp"
+                            android:textColor="@color/black" />
+
+                        <TextView
+                            android:id="@+id/tvTabAlertas"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:layout_marginStart="8dp"
+                            android:gravity="center"
+                            android:paddingHorizontal="12dp"
+                            android:singleLine="true"
+                            android:text="@string/btn_alerta"
+                            android:textSize="13sp"
+                            android:textColor="@color/black" />
+
+                        <TextView
+                            android:id="@+id/tvTabIncidencias"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:layout_marginStart="8dp"
+                            android:gravity="center"
+                            android:paddingHorizontal="12dp"
+                            android:singleLine="true"
+                            android:text="Incidencias"
+                            android:textSize="13sp"
+                            android:textColor="@color/black" />
+                    </LinearLayout>
+                </HorizontalScrollView>
 
                 <!-- Tarjeta Total Ventas -->
                 <com.google.android.material.card.MaterialCardView
@@ -511,6 +539,16 @@
                     android:nestedScrollingEnabled="false"
                     android:visibility="gone"
                     tools:listitem="@layout/item_alerta"
+                    tools:itemCount="4"/>
+
+                <!-- Lista de Incidencias -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvIncidencias"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    android:visibility="gone"
+                    tools:listitem="@layout/item_incidencia"
                     tools:itemCount="4"/>
 
             </LinearLayout>

@@ -3,6 +3,8 @@ package com.piccolifield;
 import android.os.Bundle;
 import android.view.ViewGroup;
 
+import android.widget.Toast;
+
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -68,6 +70,11 @@ public class MenuActivity extends AppCompatActivity {
             precargarPerfil();
         }
 
+        String rolActual = SplashStorage.obtenerRol(this);
+        if ("IMPULSADOR".equalsIgnoreCase(rolActual)) {
+            binding.curvedBottomNav.setTabVisibility(3, android.view.View.GONE);
+        }
+
         // Cargar por defecto la primera pantalla (Inicio)
         if (savedInstanceState == null) {
             cargarFragmento(new PerfilFragment());
@@ -89,6 +96,10 @@ public class MenuActivity extends AppCompatActivity {
                     break;
                 case 3:
                     // Puntos de Despacho
+                    if ("IMPULSADOR".equalsIgnoreCase(SplashStorage.obtenerRol(MenuActivity.this))) {
+                        Toast.makeText(MenuActivity.this, "Los Puntos de Distribución no están disponibles para Impulsadores", Toast.LENGTH_SHORT).show();
+                        break;
+                    }
                     cargarFragmento(new PuntosDespachoFragment());
                     break;
                 case 4:
