@@ -18,7 +18,7 @@
         android:id="@+id/tvTituloDialogoAlerta"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Comentario de Resolución"
+        android:text="@string/title_comentario_resolucion"
         android:textColor="@color/cafe_profundo"
         android:textSize="18sp"
         android:textStyle="bold"
@@ -27,7 +27,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Por favor ingrese el motivo o detalle de la acción a registrar:"
+        android:text="@string/msg_ingrese_motivo"
         android:textColor="@color/color_texto_secundario"
         android:textSize="14sp"
         android:layout_marginBottom="16dp" />
@@ -38,7 +38,7 @@
         android:layout_height="120dp"
         android:background="@drawable/bg_search_box"
         android:gravity="top|start"
-        android:hint="Ej. Se coordinó reposición con almacén central..."
+        android:hint="@string/hint_comentario_resolucion"
         android:padding="12dp"
         android:textColor="#333333"
         android:textSize="14sp"
@@ -57,7 +57,7 @@
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
-            android:text="Cancelar"
+            android:text="@string/btn_cancelar"
             android:textColor="#757575"
             android:layout_marginEnd="8dp" />
 
@@ -65,7 +65,7 @@
             android:id="@+id/btnConfirmarAlertaDialog"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
-            android:text="Confirmar"
+            android:text="@string/btn_confirmar"
             app:backgroundTint="@color/chocolate"
             android:textColor="@android:color/white"
             app:cornerRadius="12dp" />

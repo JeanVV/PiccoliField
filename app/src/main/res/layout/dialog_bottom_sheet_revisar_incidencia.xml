@@ -18,7 +18,7 @@
         android:id="@+id/tvTituloRevisarIncidencia"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Revisar Incidencia"
+        android:text="@string/title_revisar_incidencia"
         android:textColor="@color/cafe_profundo"
         android:textSize="18sp"
         android:textStyle="bold"
@@ -28,7 +28,7 @@
         android:id="@+id/tvDetalleLocalIncidencia"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Local: ---"
+        android:text="@string/label_correo_vacio"
         android:textColor="#757575"
         android:textSize="13sp"
         android:layout_marginBottom="4dp" />
@@ -37,7 +37,7 @@
         android:id="@+id/tvDetalleDescripcionIncidencia"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Descripción..."
+        android:text="@string/label_correo_vacio"
         android:textColor="#333333"
         android:textSize="14sp"
         android:layout_marginBottom="16dp" />
@@ -51,13 +51,13 @@
         android:background="#E0E0E0"
         android:visibility="gone"
         android:layout_marginBottom="16dp"
-        android:contentDescription="Evidencia de Incidencia" />
+        android:contentDescription="@string/btn_adjuntar_evidencia" />
 
     <!-- Comentario del Supervisor -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Comentario de Atención / Respuesta:"
+        android:text="@string/label_comentario_atencion"
         android:textColor="#333333"
         android:textSize="14sp"
         android:textStyle="bold"
@@ -69,7 +69,7 @@
         android:layout_height="80dp"
         android:background="@drawable/bg_search_box"
         android:gravity="top|start"
-        android:hint="Ej. Se coordinó cambio de producto..."
+        android:hint="@string/hint_comentario_atencion"
         android:padding="12dp"
         android:textColor="#333333"
         android:textSize="14sp"
@@ -91,7 +91,7 @@
             android:layout_height="50dp"
             android:layout_weight="1"
             android:layout_marginEnd="6dp"
-            android:text="En Proceso"
+            android:text="@string/btn_en_proceso"
             app:strokeColor="#F57C00"
             android:textColor="#F57C00"
             app:cornerRadius="12dp"/>
@@ -102,7 +102,7 @@
             android:layout_height="50dp"
             android:layout_weight="1"
             android:layout_marginStart="6dp"
-            android:text="Resolver"
+            android:text="@string/btn_resolver"
             app:backgroundTint="#388E3C"
             android:textColor="@android:color/white"
             app:cornerRadius="12dp"/>

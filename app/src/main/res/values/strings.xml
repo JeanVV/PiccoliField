@@ -152,4 +152,45 @@
     <string name="default_sin_nombre">Sin nombre</string>
     <string name="default_sin_direccion">Sin dirección</string>
     <string name="default_estado_desconocido">DESCONOCIDO</string>
+
+    <!-- Incidencias -->
+    <string name="title_reportar_incidencia">Reportar Incidencia</string>
+    <string name="label_tipo_incidencia">Tipo de Incidencia</string>
+    <string name="label_severidad">Severidad</string>
+    <string name="label_descripcion_inconveniente">Descripción del Inconveniente</string>
+    <string name="hint_descripcion_incidencia">Describa brevemente lo sucedido...</string>
+    <string name="btn_adjuntar_evidencia">Adjuntar Evidencia (Opcional)</string>
+    <string name="btn_enviar_incidencia">Enviar Reporte de Incidencia</string>
+    <string name="title_revisar_incidencia">Revisar Incidencia</string>
+    <string name="label_comentario_atencion">Comentario de Atención / Respuesta:</string>
+    <string name="hint_comentario_atencion">Ej. Se coordinó cambio de producto...</string>
+    <string name="btn_en_proceso">En Proceso</string>
+    <string name="btn_resolver">Resolver</string>
+    <string name="nav_incidencias">Incidencias</string>
+
+    <!-- Reposición de Stock -->
+    <string name="title_reponer_stock">Reponer Stock de Producto</string>
+    <string name="label_cantidad_reponer">Cantidad a reponer:</string>
+    <string name="label_observacion_reposicion">Observación / Guía de Remisión:</string>
+    <string name="hint_observacion_reposicion">Ej. Lote recibido según Guía GR-00412</string>
+    <string name="btn_confirmar_reposicion">Confirmar Reposición</string>
+
+    <!-- Notificaciones -->
+    <string name="title_historial_notificaciones">Historial de Notificaciones</string>
+    <string name="empty_notificaciones">No tienes notificaciones recientes</string>
+    <string name="cd_notificaciones_header">Historial de Notificaciones</string>
+
+    <!-- Diálogo Comentario Alerta -->
+    <string name="title_comentario_resolucion">Comentario de Resolución</string>
+    <string name="msg_ingrese_motivo">Por favor ingrese el motivo o detalle de la acción a registrar:</string>
+    <string name="hint_comentario_resolucion">Ej. Se coordinó reposición con almacén central...</string>
+    <string name="btn_cancelar">Cancelar</string>
+
+    <!-- Chips / Filtros -->
+    <string name="chip_todas">Todas</string>
+    <string name="chip_pendientes">Pendientes</string>
+    <string name="chip_atendidas">Atendidas</string>
+    <string name="chip_todo_nivel">Todo Nivel</string>
+    <string name="chip_stock_bajo">Stock Bajo</string>
+    <string name="chip_agotados">Agotados</string>
 </resources>

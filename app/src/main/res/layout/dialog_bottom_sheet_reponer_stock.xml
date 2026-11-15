@@ -17,7 +17,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Reponer Stock de Producto"
+        android:text="@string/title_reponer_stock"
         android:textColor="@color/cafe_profundo"
         android:textSize="18sp"
         android:textStyle="bold"
@@ -35,7 +35,8 @@
             android:id="@+id/ivProductoReposicion"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:src="@drawable/ic_avatar_placeholder" />
+            android:src="@drawable/ic_avatar_placeholder"
+            android:contentDescription="@string/hint_nombre_producto" />
 
         <LinearLayout
             android:layout_width="0dp"
@@ -48,7 +49,7 @@
                 android:id="@+id/tvNombreProductoReposicion"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Nombre del Producto"
+                android:text="@string/hint_nombre_producto"
                 android:textColor="#333333"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -57,7 +58,7 @@
                 android:id="@+id/tvEanReposicion"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="EAN: ---"
+                android:text="@string/label_correo_vacio"
                 android:textColor="#757575"
                 android:textSize="12sp"
                 android:layout_marginTop="2dp" />
@@ -66,7 +67,7 @@
                 android:id="@+id/tvStockActualReposicion"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Stock actual: 0 unds"
+                android:text="@string/label_stock_actual"
                 android:textColor="@color/chocolate"
                 android:textSize="13sp"
                 android:textStyle="bold"
@@ -77,7 +78,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Cantidad a reponer:"
+        android:text="@string/label_cantidad_reponer"
         android:textColor="#333333"
         android:textSize="14sp"
         android:textStyle="bold"
@@ -99,7 +100,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Observación / Guía de Remisión:"
+        android:text="@string/label_observacion_reposicion"
         android:textColor="#333333"
         android:textSize="14sp"
         android:textStyle="bold"
@@ -111,7 +112,7 @@
         android:layout_height="80dp"
         android:background="@drawable/bg_search_box"
         android:gravity="top|start"
-        android:hint="Ej. Lote recibido según Guía GR-00412"
+        android:hint="@string/hint_observacion_reposicion"
         android:padding="12dp"
         android:textColor="#333333"
         android:textSize="14sp"
@@ -123,7 +124,7 @@
         android:id="@+id/btnConfirmarReposicion"
         android:layout_width="match_parent"
         android:layout_height="52dp"
-        android:text="Confirmar Reposición"
+        android:text="@string/btn_confirmar_reposicion"
         app:backgroundTint="#388E3C"
         android:textColor="@android:color/white"
         app:cornerRadius="12dp" />

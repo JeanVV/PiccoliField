@@ -18,7 +18,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Historial de Notificaciones"
+        android:text="@string/title_historial_notificaciones"
         android:textColor="@color/cafe_profundo"
         android:textSize="18sp"
         android:textStyle="bold"
@@ -36,7 +36,7 @@
         android:id="@+id/tvEmptyNotificaciones"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="No tienes notificaciones recientes"
+        android:text="@string/empty_notificaciones"
         android:textColor="#757575"
         android:textSize="14sp"
         android:visibility="gone"

@@ -50,7 +50,7 @@
                     android:padding="8dp"
                     android:src="@drawable/ic_notification_bell"
                     app:tint="@color/chocolate"
-                    android:contentDescription="Historial de Notificaciones" />
+                    android:contentDescription="@string/cd_notificaciones_header" />
 
             </RelativeLayout>
 
@@ -322,7 +322,7 @@
                             android:gravity="center"
                             android:paddingHorizontal="12dp"
                             android:singleLine="true"
-                            android:text="Incidencias"
+                            android:text="@string/nav_incidencias"
                             android:textSize="13sp"
                             android:textColor="@color/black" />
                     </LinearLayout>

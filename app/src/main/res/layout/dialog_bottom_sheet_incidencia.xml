@@ -17,7 +17,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Reportar Incidencia"
+        android:text="@string/title_reportar_incidencia"
         android:textColor="@color/cafe_profundo"
         android:textSize="18sp"
         android:textStyle="bold"
@@ -27,7 +27,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Tipo de Incidencia"
+        android:text="@string/label_tipo_incidencia"
         android:textColor="#333333"
         android:textSize="14sp"
         android:textStyle="bold"
@@ -46,7 +46,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Severidad"
+        android:text="@string/label_severidad"
         android:textColor="#333333"
         android:textSize="14sp"
         android:textStyle="bold"
@@ -65,7 +65,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Descripción del Inconveniente"
+        android:text="@string/label_descripcion_inconveniente"
         android:textColor="#333333"
         android:textSize="14sp"
         android:textStyle="bold"
@@ -77,7 +77,7 @@
         android:layout_height="90dp"
         android:background="@drawable/bg_search_box"
         android:gravity="top|start"
-        android:hint="Describa brevemente lo sucedido..."
+        android:hint="@string/hint_descripcion_incidencia"
         android:padding="12dp"
         android:textColor="#333333"
         android:textSize="14sp"
@@ -91,7 +91,7 @@
         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:text="Adjuntar Evidencia (Opcional)"
+        android:text="@string/btn_adjuntar_evidencia"
         app:icon="@drawable/ic_photos"
         app:iconTint="@color/chocolate"
         app:iconGravity="textStart"
@@ -105,7 +105,7 @@
         android:id="@+id/btnEnviarIncidencia"
         android:layout_width="match_parent"
         android:layout_height="52dp"
-        android:text="Enviar Reporte de Incidencia"
+        android:text="@string/btn_enviar_incidencia"
         app:backgroundTint="@color/color_acento"
         android:textColor="@android:color/white"
         app:cornerRadius="12dp" />
