@@ -36,11 +36,14 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.piccolifield.R;
 import com.piccolifield.adapter.IncidenciaAdapter;
+import com.piccolifield.adapter.NotificacionAdapter;
 import com.piccolifield.adapter.VendedorAdapter;
 import com.piccolifield.adapter.AlertaAdapter;
 import com.piccolifield.adapter.SupervisionPuntoVentaAdapter;
 import com.piccolifield.data.model.ImpulsadorDashboard;
 import com.piccolifield.data.model.Incidencia;
+import com.piccolifield.data.model.NotificacionItem;
+import com.piccolifield.data.model.NotificacionResponseData;
 import com.piccolifield.data.model.ProductoBuscado;
 import com.piccolifield.data.model.ResumenDashboard;
 import com.piccolifield.data.model.TipoIncidenciaDto;
@@ -197,6 +200,11 @@ public class SupervisionFragment extends Fragment {
         // El RecyclerView de Incidencias
         rvIncidencias = view.findViewById(R.id.rvIncidencias);
         rvIncidencias.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        ImageView btnNotificacionesHeader = view.findViewById(R.id.btnNotificacionesHeader);
+        if (btnNotificacionesHeader != null) {
+            btnNotificacionesHeader.setOnClickListener(v -> mostrarHistorialNotificaciones());
+        }
 
         // (Opcional pero recomendado) En tu XML deberías envolver tus 2 MaterialCardView del dashboard
         // dentro de un LinearLayout con el id "@+id/layoutDashboard" para poder ocultarlos fácilmente.
@@ -532,7 +540,7 @@ public class SupervisionFragment extends Fragment {
         if (token == null || token.isEmpty()) return;
 
         ApiService apiService = RetrofitClient.createService();
-        apiService.listarPuntosVentaSupervision().enqueue(new Callback<ApiResponse<List<SupervisionPuntoVenta>>>() {
+        apiService.listarPuntosVentaSupervision(null).enqueue(new Callback<ApiResponse<List<SupervisionPuntoVenta>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<SupervisionPuntoVenta>>> call, Response<ApiResponse<List<SupervisionPuntoVenta>>> response) {
                 if (!isAdded()) return;
@@ -809,7 +817,71 @@ public class SupervisionFragment extends Fragment {
         bottomSheetDialog.show();
     }
 
-    private void mostrarBottomSheetIncidencia() {
+    private void mostrarHistorialNotificaciones() {
+        Context ctx = getContext();
+        if (ctx == null) return;
+
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(ctx);
+        View view = getLayoutInflater().inflate(R.layout.dialog_bottom_sheet_historial_notificaciones, null);
+        bottomSheetDialog.setContentView(view);
+
+        ProgressBar pbLoading = view.findViewById(R.id.pbLoadingNotificaciones);
+        TextView tvEmpty = view.findViewById(R.id.tvEmptyNotificaciones);
+        RecyclerView rvNotificaciones = view.findViewById(R.id.rvNotificaciones);
+        rvNotificaciones.setLayoutManager(new LinearLayoutManager(ctx));
+
+        if (pbLoading != null) pbLoading.setVisibility(View.VISIBLE);
+
+        ApiService apiService = RetrofitClient.createService();
+        apiService.obtenerHistorialNotificaciones(20).enqueue(new Callback<ApiResponse<NotificacionResponseData>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<NotificacionResponseData>> call, @NonNull Response<ApiResponse<NotificacionResponseData>> response) {
+                if (!isAdded()) return;
+                if (pbLoading != null) pbLoading.setVisibility(View.GONE);
+
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                    List<NotificacionItem> lista = response.body().getData().getNotificaciones();
+                    if (lista == null || lista.isEmpty()) {
+                        if (tvEmpty != null) tvEmpty.setVisibility(View.VISIBLE);
+                        rvNotificaciones.setVisibility(View.GONE);
+                    } else {
+                        if (tvEmpty != null) tvEmpty.setVisibility(View.GONE);
+                        rvNotificaciones.setVisibility(View.VISIBLE);
+                        NotificacionAdapter adapter = new NotificacionAdapter(lista, ctx, item -> {
+                            bottomSheetDialog.dismiss();
+                            String tipo = item.getTipo();
+                            String idStr = item.getId();
+                            if (tipo != null && idStr != null) {
+                                try {
+                                    int refId = Integer.parseInt(idStr);
+                                    if ("ALERTA".equalsIgnoreCase(tipo) || "STOCK".equalsIgnoreCase(tipo)) {
+                                        Intent intent = new Intent(ctx, com.piccolifield.DetalleAlertaActivity.class);
+                                        intent.putExtra("ID_ALERTA", refId);
+                                        ctx.startActivity(intent);
+                                    } else if ("INCIDENCIA".equalsIgnoreCase(tipo)) {
+                                        seleccionarPestana(3);
+                                    }
+                                } catch (NumberFormatException ignored) {}
+                            }
+                        });
+                        rvNotificaciones.setAdapter(adapter);
+                    }
+                } else {
+                    if (tvEmpty != null) tvEmpty.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<NotificacionResponseData>> call, @NonNull Throwable t) {
+                if (!isAdded()) return;
+                if (pbLoading != null) pbLoading.setVisibility(View.GONE);
+                if (tvEmpty != null) tvEmpty.setVisibility(View.VISIBLE);
+            }
+        });
+
+        bottomSheetDialog.show();
+    }
+        private void mostrarBottomSheetIncidencia() {
         fotoBase64Incidencia = null;
         Context ctx = getContext();
         if (ctx == null) return;

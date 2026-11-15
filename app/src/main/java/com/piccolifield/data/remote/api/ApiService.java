@@ -6,6 +6,7 @@ import com.piccolifield.data.model.AlertaDetalle;
 import com.piccolifield.data.model.AsistenciaResumen;
 import com.piccolifield.data.model.Impulsador;
 import com.piccolifield.data.model.Incidencia;
+import com.piccolifield.data.model.NotificacionResponseData;
 import com.piccolifield.data.model.PuntoVentaDetalle;
 import com.piccolifield.data.model.PuntoVentaHistorial;
 import com.piccolifield.data.model.TiposIncidenciaResponse;
@@ -219,8 +220,10 @@ public interface ApiService {
             @Path("id") int idIncidencia
     );
 
-    @GET("supervision/puntos-venta")
-    Call<ApiResponse<List<com.piccolifield.model.SupervisionPuntoVenta>>> listarPuntosVentaSupervision();
+    @GET("notificaciones")
+    Call<ApiResponse<NotificacionResponseData>> obtenerHistorialNotificaciones(
+            @Query("limite") Integer limite
+    );
 
     @GET("supervision/puntos-venta")
     Call<ApiResponse<List<com.piccolifield.model.SupervisionPuntoVenta>>> listarPuntosVentaSupervision(

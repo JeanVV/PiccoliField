@@ -39,6 +39,19 @@
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
+                <ImageView
+                    android:id="@+id/btnNotificacionesHeader"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:background="@drawable/bg_search_rounded"
+                    android:backgroundTint="@color/crema_vainilla"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_notification_bell"
+                    app:tint="@color/chocolate"
+                    android:contentDescription="Historial de Notificaciones" />
+
             </RelativeLayout>
 
             <!-- ======================================================== -->
@@ -116,7 +129,7 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="Meta del Día"
+                                    android:text="Meta mensual"
                                     android:textColor="@color/color_texto_secundario"
                                     android:textSize="12sp" />
 

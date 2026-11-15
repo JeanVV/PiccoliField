@@ -15,9 +15,11 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
 
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.piccolifield.data.model.Usuario;
 import com.piccolifield.data.remote.api.ApiService;
 import com.piccolifield.data.remote.RetrofitClient;
+import com.piccolifield.data.remote.dto.request.FcmTokenRequest;
 import com.piccolifield.data.remote.dto.response.ApiResponse;
 import com.piccolifield.databinding.ActivityMenuBinding;
 import com.piccolifield.sharedpreferences.SplashStorage;
@@ -70,9 +72,14 @@ public class MenuActivity extends AppCompatActivity {
             precargarPerfil();
         }
 
-        String rolActual = SplashStorage.obtenerRol(this);
-        if ("IMPULSADOR".equalsIgnoreCase(rolActual)) {
-            binding.curvedBottomNav.setTabVisibility(3, android.view.View.GONE);
+        // Registrar / Sincronizar Token FCM
+        registrarTokenFcm();
+
+        // Solicitar permiso de notificaciones en Android 13+ (API 33+)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            if (androidx.core.content.ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                androidx.core.app.ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 101);
+            }
         }
 
         // Cargar por defecto la primera pantalla (Inicio)
@@ -135,6 +142,40 @@ public class MenuActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Call<ApiResponse<Usuario>> call, @NonNull Throwable t) {
                 // Se intentará nuevamente cuando el usuario navegue
+            }
+        });
+    }
+
+    private void registrarTokenFcm() {
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult() != null) {
+                String token = task.getResult();
+                android.util.Log.e("FCM_TOKEN_DEBUG", ">>> TOKEN FCM: " + token);
+
+                String deviceId = android.provider.Settings.Secure.getString(getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
+
+                if (RetrofitClient.API_TOKEN == null || RetrofitClient.API_TOKEN.isEmpty()) {
+                    RetrofitClient.API_TOKEN = SplashStorage.obtenerToken(this);
+                }
+
+                ApiService apiService = RetrofitClient.createService();
+                apiService.actualizarFcmToken(new FcmTokenRequest(token, deviceId)).enqueue(new Callback<ApiResponse<Object>>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ApiResponse<Object>> call, @NonNull Response<ApiResponse<Object>> response) {
+                        if (response.isSuccessful()) {
+                            android.util.Log.d("MenuActivity", "Token FCM registrado exitosamente en el servidor");
+                        } else {
+                            android.util.Log.e("MenuActivity", "Fallo al registrar token FCM en servidor: " + response.code());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ApiResponse<Object>> call, @NonNull Throwable t) {
+                        android.util.Log.e("MenuActivity", "Error de red al registrar token FCM", t);
+                    }
+                });
+            } else {
+                android.util.Log.e("FCM_TOKEN_DEBUG", "Error obteniendo token FCM: ", task.getException());
             }
         });
     }

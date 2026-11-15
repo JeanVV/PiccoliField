@@ -55,7 +55,7 @@ public class NotificationUtils {
             return;
 
         // notification icon
-        final int icon = R.drawable.logopicolli;
+        final int icon = R.drawable.logo_piccolifield;
 
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
@@ -249,14 +249,17 @@ public class NotificationUtils {
     }
 
     public static long getTimeMilliSec(String timeStamp) {
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        if (timeStamp == null || timeStamp.isEmpty()) {
+            return System.currentTimeMillis();
+        }
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault());
         try {
             Date date = format.parse(timeStamp);
-            return date.getTime();
+            return date != null ? date.getTime() : System.currentTimeMillis();
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        return 0;
+        return System.currentTimeMillis();
     }
 
     public static String eliminarAcentos(String original){
