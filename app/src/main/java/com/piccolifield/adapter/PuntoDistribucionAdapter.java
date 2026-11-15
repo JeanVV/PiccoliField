@@ -3,8 +3,6 @@ package com.piccolifield.adapter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -54,40 +52,19 @@ public class PuntoDistribucionAdapter extends RecyclerView.Adapter<PuntoDistribu
         PuntoDistribucion pdv = listaPuntos.get(position);
         if (pdv == null) return;
 
-        holder.tvNombrePdv.setText(pdv.getNombre() != null ? pdv.getNombre() : "Punto de Distribución");
-        holder.tvDireccionPdv.setText(pdv.getDireccion() != null ? pdv.getDireccion() : "Sin dirección");
-        
-        String numPed = pdv.getNumeroPedido();
-        if (numPed != null && !numPed.startsWith("Nº Pedido")) {
-            numPed = "Nº Pedido: " + numPed;
+        holder.tvNombrePdv.setText(pdv.getNombre());
+        holder.tvDireccionPdv.setText(pdv.getDireccion());
+
+        String codPdv = pdv.getCodigo();
+        if (codPdv != null && !codPdv.toLowerCase().startsWith("código") && !codPdv.toLowerCase().startsWith("codigo")) {
+            codPdv = "Código: " + codPdv;
         }
-        holder.tvNumeroPedido.setText(numPed != null ? numPed : "Nº Pedido: 0245");
+        holder.tvNumeroPedido.setText(codPdv != null ? codPdv : "Código: PDV-" + (position + 1));
 
         holder.tvBadgeNumero.setText(pdv.getBadgeNumero() != null ? pdv.getBadgeNumero() : String.valueOf(position + 1));
 
-        String estadoDisp = pdv.getEstadoDespacho();
-        if (estadoDisp == null || estadoDisp.isEmpty()) {
-            estadoDisp = "En preparación";
-        }
-        holder.tvEstadoDespacho.setText(estadoDisp);
-
-        // Estilizado dinámico según el estado del pedido
-        try {
-            if ("Pendiente".equalsIgnoreCase(estadoDisp)) {
-                holder.tvEstadoDespacho.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FADBD8")));
-                holder.tvEstadoDespacho.setTextColor(Color.parseColor("#C0392B"));
-            } else if ("En camino".equalsIgnoreCase(estadoDisp)) {
-                holder.tvEstadoDespacho.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FDEBD0")));
-                holder.tvEstadoDespacho.setTextColor(Color.parseColor("#B9783E"));
-            } else if ("En preparación".equalsIgnoreCase(estadoDisp)) {
-                holder.tvEstadoDespacho.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FDEBD0")));
-                holder.tvEstadoDespacho.setTextColor(Color.parseColor("#9C640C"));
-            } else {
-                holder.tvEstadoDespacho.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#E8F5E9")));
-                holder.tvEstadoDespacho.setTextColor(Color.parseColor("#2E7D32"));
-            }
-        } catch (Exception e) {
-            Log.e("PuntoDistribucionAdapter", "Error aplicando colores: " + e.getMessage());
+        if (holder.tvEstadoDespacho != null) {
+            holder.tvEstadoDespacho.setVisibility(View.GONE);
         }
 
         View.OnClickListener clickListener = v -> {
@@ -104,10 +81,11 @@ public class PuntoDistribucionAdapter extends RecyclerView.Adapter<PuntoDistribu
                     }
                     intent.putExtra("ID_PDV", pdv.getId());
                     intent.putExtra("NOMBRE_PDV", pdv.getNombre());
+                    intent.putExtra("CODIGO_PDV", pdv.getCodigo());
+                    intent.putExtra("TIPO_NEGOCIO", pdv.getCriterioNegocio());
                     intent.putExtra("DIRECCION", pdv.getDireccion());
                     intent.putExtra("DISTANCIA", pdv.getDistancia());
-                    intent.putExtra("NUMERO_PEDIDO", pdv.getNumeroPedido());
-                    intent.putExtra("ESTADO_DESPACHO", pdv.getEstadoDespacho());
+                    intent.putExtra("ESTADO_PDV", pdv.getEstado());
                     intent.putExtra("BADGE_NUMERO", pdv.getBadgeNumero());
                     ctx.startActivity(intent);
                 } catch (Exception e) {

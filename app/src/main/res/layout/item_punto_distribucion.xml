@@ -21,7 +21,7 @@
         android:layout_height="wrap_content"
         android:padding="16dp">
 
-        <!-- Circular Badge Avatar a la Izquierda (ej: 12, 5, 14, etc.) -->
+        <!-- Circular Badge Avatar a la Izquierda -->
         <FrameLayout
             android:id="@+id/frameBadgeIcon"
             android:layout_width="44dp"
@@ -54,7 +54,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:tint="@color/dorado_premium" />
 
-        <!-- Nombre del Local -->
+        <!-- Nombre del Punto de Distribución -->
         <TextView
             android:id="@+id/tvNombrePdv"
             android:layout_width="0dp"
@@ -83,35 +83,28 @@
             app:layout_constraintTop_toBottomOf="@+id/tvNombrePdv"
             tools:text="Av. Principal 123, Lima" />
 
-        <!-- Número de Pedido -->
+        <!-- Código del Punto de Distribución -->
         <TextView
             android:id="@+id/tvNumeroPedido"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="10dp"
             android:textColor="@color/cafe_profundo"
             android:textSize="13sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="@+id/tvNombrePdv"
             app:layout_constraintTop_toBottomOf="@+id/tvDireccionPdv"
-            tools:text="Nº Pedido: 0245" />
+            tools:text="Código: PDV-001" />
 
-        <!-- Badge de Estado del Despacho (En preparación, En camino, Pendiente) -->
+        <!-- Oculto según requerimiento (quitar mensaje En preparación) -->
         <TextView
             android:id="@+id/tvEstadoDespacho"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_search_rounded"
-            android:backgroundTint="#FDEBD0"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="4dp"
-            android:textColor="#B9783E"
-            android:textSize="12sp"
-            android:textStyle="bold"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            tools:text="En preparación" />
+            app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

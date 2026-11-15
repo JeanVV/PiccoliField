@@ -12,6 +12,7 @@ import com.piccolifield.R;
 import com.piccolifield.model.Pedido;
 
 import java.util.List;
+import java.util.Locale;
 
 public class PedidoAdapter extends RecyclerView.Adapter<PedidoAdapter.ViewHolder> {
 
@@ -61,12 +62,21 @@ public class PedidoAdapter extends RecyclerView.Adapter<PedidoAdapter.ViewHolder
         }
 
         public void bind(Pedido pedido, OnPedidoClickListener listener) {
-            tvPedidoId.setText("Pedido #" + pedido.getIdPedido());
+            String titulo = "Pedido #" + pedido.getIdPedido();
+            if (pedido.getResumenProductos() != null && !pedido.getResumenProductos().isEmpty()) {
+                titulo += " · " + pedido.getResumenProductos();
+            }
+            tvPedidoId.setText(titulo);
             tvPedidoFecha.setText(pedido.getFecha() != null ? pedido.getFecha() : "Sin fecha");
-            
-            // Si el backend aún no manda estado, simulamos uno
-            tvPedidoEstado.setText("Registrado"); 
-            tvPedidoCantidad.setText(pedido.getCantSolicitada() + " und.");
+
+            String estado = pedido.getEstado();
+            tvPedidoEstado.setText(estado != null && !estado.isEmpty() ? estado : "Registrado");
+
+            if (pedido.getTotalMonto() > 0) {
+                tvPedidoCantidad.setText(String.format(Locale.US, "%d und. · S/ %.2f", pedido.getCantSolicitada(), pedido.getTotalMonto()));
+            } else {
+                tvPedidoCantidad.setText(pedido.getCantSolicitada() + " und.");
+            }
 
             itemView.setOnClickListener(v -> {
                 if (listener != null) {

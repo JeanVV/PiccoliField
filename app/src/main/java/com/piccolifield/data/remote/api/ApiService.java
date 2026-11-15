@@ -88,6 +88,11 @@ public interface ApiService {
             @Path("id") int id
     );
 
+    @POST("puntos-venta")
+    Call<ApiResponse<PuntoDistribucion>> registrarPuntoDistribucion(
+            @Body PuntoDistribucion puntoDistribucion
+    );
+
     @GET("pedidos")
     Call<ApiResponse<List<com.piccolifield.model.Pedido>>> obtenerPedidosPorPdv(
             @Query("idPdv") int idPdv

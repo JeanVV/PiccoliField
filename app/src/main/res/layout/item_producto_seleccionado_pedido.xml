@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="0dp"
+    app:strokeColor="#E5D5C0"
+    app:strokeWidth="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="10dp">
+
+        <!-- Foto miniatura -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            app:cardBackgroundColor="#F8F1E5"
+            app:cardCornerRadius="10dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp">
+
+            <ImageView
+                android:id="@+id/ivFotoItemSeleccionado"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@null"
+                android:padding="4dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/botellasinicio" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Nombre y Precio unitario -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvNombreItemSeleccionado"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pisco Italia 750ml"
+                android:textColor="@color/cafe_profundo"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvPrecioUnitarioItem"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="S/ 45.00 c/u"
+                android:textColor="@color/color_text_muted"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <!-- Controles de cantidad en lista (- / cant / +) -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnMenosItemLista"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:padding="0dp"
+                android:text="-"
+                android:textColor="@color/cafe_profundo"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:cornerRadius="6dp"
+                app:strokeColor="@color/chocolate" />
+
+            <TextView
+                android:id="@+id/tvCantidadItemLista"
+                android:layout_width="28dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="1"
+                android:textColor="@color/cafe_profundo"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnMasItemLista"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:padding="0dp"
+                android:text="+"
+                android:textColor="@color/cafe_profundo"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:cornerRadius="6dp"
+                app:strokeColor="@color/chocolate" />
+        </LinearLayout>
+
+        <!-- Subtotal y Quitar -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:gravity="end"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvSubtotalItem"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="S/ 45.00"
+                android:textColor="@color/cafe_profundo"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvQuitarItem"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="2dp"
+                android:text="Quitar"
+                android:textColor="#C0392B"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

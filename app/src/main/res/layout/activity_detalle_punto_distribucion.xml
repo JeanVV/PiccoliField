@@ -43,6 +43,16 @@
             android:textStyle="bold" />
     </RelativeLayout>
 
+    <ProgressBar
+        android:id="@+id/pbLoading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/headerDetail" />
+
     <!-- ScrollView para el contenido principal -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -59,15 +69,15 @@
             android:paddingTop="8dp"
             android:paddingBottom="30dp">
 
-            <!-- 2. Información del Local (Badge Circular, Nombre, Estado, Dirección) -->
+            <!-- 2. Información del Punto (Badge Circular, Nombre, Código, Mayorista/Minorista, Dirección) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
                 android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:layout_marginBottom="16dp">
+                android:orientation="horizontal">
 
-                <!-- Badge Avatar con Número (ej: 12) -->
+                <!-- Badge Avatar con Número -->
                 <FrameLayout
                     android:id="@+id/frameBadgeIcon"
                     android:layout_width="52dp"
@@ -81,7 +91,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:fontFamily="serif"
-                        android:text="12"
+                        android:text="1"
                         android:textColor="@color/white"
                         android:textSize="19sp"
                         android:textStyle="bold" />
@@ -94,6 +104,7 @@
                     android:layout_weight="1"
                     android:orientation="vertical">
 
+                    <!-- Nombre del Punto de Distribución -->
                     <TextView
                         android:id="@+id/tvNombreTienda"
                         android:layout_width="wrap_content"
@@ -104,34 +115,67 @@
                         android:textSize="20sp"
                         android:textStyle="bold" />
 
-                    <!-- Badge de Estado (En preparación) -->
+                    <!-- Código del Punto -->
+                    <TextView
+                        android:id="@+id/tvCodigoDetalleSub"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Código: PDV-001"
+                        android:textColor="@color/chocolate"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+
+                    <!-- Badges de Criterio (Mayorista / Minorista) y Estado -->
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:background="@drawable/bg_search_rounded"
-                        android:backgroundTint="#E8F5E9"
+                        android:layout_marginTop="6dp"
                         android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingHorizontal="10dp"
-                        android:paddingVertical="3dp">
-
-                        <ImageView
-                            android:layout_width="12dp"
-                            android:layout_height="12dp"
-                            android:contentDescription="@null"
-                            android:src="@drawable/ic_bullet_point"
-                            app:tint="#2E7D32" />
+                        android:orientation="horizontal">
 
                         <TextView
-                            android:id="@+id/tvEstadoBadge"
+                            android:id="@+id/tvTipoNegocioBadge"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="4dp"
-                            android:text="En preparación"
-                            android:textColor="#2E7D32"
+                            android:background="@drawable/bg_search_rounded"
+                            android:backgroundTint="#F3E4C7"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="3dp"
+                            android:text="Minorista"
+                            android:textColor="@color/cafe_profundo"
                             android:textSize="12sp"
                             android:textStyle="bold" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:background="@drawable/bg_search_rounded"
+                            android:backgroundTint="#E8F5E9"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="3dp">
+
+                            <ImageView
+                                android:layout_width="10dp"
+                                android:layout_height="10dp"
+                                android:contentDescription="@null"
+                                android:src="@drawable/ic_bullet_point"
+                                app:tint="#2E7D32" />
+
+                            <TextView
+                                android:id="@+id/tvEstadoBadge"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="4dp"
+                                android:text="ACTIVO"
+                                android:textColor="#2E7D32"
+                                android:textSize="11sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
                     </LinearLayout>
 
                     <!-- Dirección -->
@@ -162,7 +206,7 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- 3. Fila de 3 Tarjetas de Info (Distancia, Pedido Nº, Repartidor) -->
+            <!-- 3. Fila de 3 Tarjetas de Info (Código, Tipo de Negocio, Distancia) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -170,11 +214,127 @@
                 android:baselineAligned="false"
                 android:orientation="horizontal">
 
-                <!-- Card 1: Distancia -->
+                <!-- Card 1: Código del Punto -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="0dp"
                     android:layout_height="80dp"
                     android:layout_marginEnd="4dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/marfil_suave"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="#E5D5C0"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="6dp">
+
+                        <FrameLayout
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:background="@drawable/bg_stat_icon_circle">
+
+                            <ImageView
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
+                                android:layout_gravity="center"
+                                android:contentDescription="@null"
+                                android:src="@drawable/ic_store"
+                                app:tint="@color/cafe_profundo" />
+                        </FrameLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Código"
+                                android:textColor="@color/color_text_muted"
+                                android:textSize="10sp" />
+
+                            <TextView
+                                android:id="@+id/tvPedidoNumVal"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="PDV-001"
+                                android:textColor="@color/cafe_profundo"
+                                android:textSize="13sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Card 2: Mayorista / Minorista -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="80dp"
+                    android:layout_marginHorizontal="2dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/marfil_suave"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="#E5D5C0"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="6dp">
+
+                        <FrameLayout
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:background="@drawable/bg_stat_icon_circle">
+
+                            <ImageView
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
+                                android:layout_gravity="center"
+                                android:contentDescription="@null"
+                                android:src="@drawable/ic_nav_reports"
+                                app:tint="@color/cafe_profundo" />
+                        </FrameLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Criterio"
+                                android:textColor="@color/color_text_muted"
+                                android:textSize="10sp" />
+
+                            <TextView
+                                android:id="@+id/tvRepartidorVal"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Minorista"
+                                android:textColor="@color/cafe_profundo"
+                                android:textSize="13sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Card 3: Distancia -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="80dp"
+                    android:layout_marginStart="4dp"
                     android:layout_weight="1"
                     app:cardBackgroundColor="@color/marfil_suave"
                     app:cardCornerRadius="16dp"
@@ -228,125 +388,9 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Card 2: Pedido Nº -->
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
-                    android:layout_height="80dp"
-                    android:layout_marginHorizontal="2dp"
-                    android:layout_weight="1"
-                    app:cardBackgroundColor="@color/marfil_suave"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="0dp"
-                    app:strokeColor="#E5D5C0"
-                    app:strokeWidth="1dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingHorizontal="6dp">
-
-                        <FrameLayout
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:background="@drawable/bg_stat_icon_circle">
-
-                            <ImageView
-                                android:layout_width="16dp"
-                                android:layout_height="16dp"
-                                android:layout_gravity="center"
-                                android:contentDescription="@null"
-                                android:src="@drawable/ic_nav_reports"
-                                app:tint="@color/cafe_profundo" />
-                        </FrameLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="6dp"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Pedido Nº"
-                                android:textColor="@color/color_text_muted"
-                                android:textSize="10sp" />
-
-                            <TextView
-                                android:id="@+id/tvPedidoNumVal"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="0245"
-                                android:textColor="@color/cafe_profundo"
-                                android:textSize="13sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <!-- Card 3: Repartidor -->
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
-                    android:layout_height="80dp"
-                    android:layout_marginStart="4dp"
-                    android:layout_weight="1"
-                    app:cardBackgroundColor="@color/marfil_suave"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="0dp"
-                    app:strokeColor="#E5D5C0"
-                    app:strokeWidth="1dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingHorizontal="6dp">
-
-                        <FrameLayout
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:background="@drawable/bg_stat_icon_circle">
-
-                            <ImageView
-                                android:layout_width="16dp"
-                                android:layout_height="16dp"
-                                android:layout_gravity="center"
-                                android:contentDescription="@null"
-                                android:src="@drawable/ic_person"
-                                app:tint="@color/cafe_profundo" />
-                        </FrameLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="6dp"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Repartidor"
-                                android:textColor="@color/color_text_muted"
-                                android:textSize="10sp" />
-
-                            <TextView
-                                android:id="@+id/tvRepartidorVal"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Carlos R."
-                                android:textColor="@color/color_text_muted"
-                                android:textSize="13sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
             </LinearLayout>
 
-            <!-- 4. Sección "Productos solicitados" con enlace "Ver todos >" -->
+            <!-- 4. Sección "Pedidos del punto" con enlace "+ Nuevo Pedido" -->
             <RelativeLayout
                 android:id="@+id/layoutProductosHeader"
                 android:layout_width="match_parent"
@@ -390,7 +434,7 @@
                 android:textColor="@color/color_text_muted"
                 android:textSize="12sp" />
 
-            <!-- Lista de Pedidos (Reemplaza la lista estática) -->
+            <!-- Lista de Pedidos -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvPedidos"
                 android:layout_width="match_parent"
@@ -418,5 +462,17 @@
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <!-- Contenedor para el Fragment de Nuevo Pedido -->
+    <FrameLayout
+        android:id="@+id/fragmentContainerDetalle"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:elevation="12dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

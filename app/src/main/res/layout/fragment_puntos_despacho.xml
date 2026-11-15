@@ -116,7 +116,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="12dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
@@ -153,7 +153,7 @@
                             android:layout_height="match_parent"
                             android:layout_marginStart="8dp"
                             android:background="@null"
-                            android:hint="Buscar punto de distribución..."
+                            android:hint="Buscar por nombre, código o dirección..."
                             android:importantForAutofill="no"
                             android:inputType="text"
                             android:textColor="@color/cafe_profundo"
@@ -201,6 +201,52 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
+            </LinearLayout>
+
+            <!-- 3.1. Fila desplegable de Spinners/Combos para filtrar Puntos de Distribución -->
+            <LinearLayout
+                android:id="@+id/layoutFiltrosCombos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="14dp"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="42dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/white"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="#E5D5C0"
+                    app:strokeWidth="1dp">
+
+                    <Spinner
+                        android:id="@+id/spFiltroCriterio"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:paddingHorizontal="8dp" />
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="42dp"
+                    android:layout_marginStart="6dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/white"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="#E5D5C0"
+                    app:strokeWidth="1dp">
+
+                    <Spinner
+                        android:id="@+id/spFiltroEstado"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:paddingHorizontal="8dp" />
+                </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
 
             <!-- 4. Hero Banner Card (Se muestra solo en vista Mapa) -->
@@ -520,5 +566,20 @@
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <!-- Botón flotante (+) en la parte inferior derecha para agregar un nuevo punto de distribución -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAgregarPunto"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="20dp"
+        android:contentDescription="Agregar nuevo punto de distribución"
+        android:src="@drawable/ic_add"
+        app:backgroundTint="@color/cafe_profundo"
+        app:elevation="6dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:tint="@color/white" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
