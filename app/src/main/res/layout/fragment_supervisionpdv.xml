@@ -199,6 +199,24 @@
                     android:textColor="@android:color/white"
                     android:layout_marginBottom="16dp" />
 
+                <!-- Botón Seleccionar del Catálogo -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSeleccionarCatalogo"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:text="Seleccionar del Catálogo"
+                    app:icon="@drawable/ic_search_icon"
+                    app:iconSize="24dp"
+                    app:iconTint="@color/chocolate"
+                    app:iconGravity="textStart"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="16dp"
+                    app:strokeColor="@color/chocolate"
+                    android:textColor="@color/chocolate"
+                    android:layout_marginBottom="16dp" />
+
                 <!-- Botón Reportar Incidencia -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnReportarIncidencia"

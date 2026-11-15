@@ -37,6 +37,7 @@ import com.google.android.material.button.MaterialButton;
 import com.piccolifield.R;
 import com.piccolifield.adapter.IncidenciaAdapter;
 import com.piccolifield.adapter.NotificacionAdapter;
+import com.piccolifield.adapter.ProductoSupervisionAdapter;
 import com.piccolifield.adapter.VendedorAdapter;
 import com.piccolifield.adapter.AlertaAdapter;
 import com.piccolifield.adapter.SupervisionPuntoVentaAdapter;
@@ -45,9 +46,17 @@ import com.piccolifield.data.model.Incidencia;
 import com.piccolifield.data.model.NotificacionItem;
 import com.piccolifield.data.model.NotificacionResponseData;
 import com.piccolifield.data.model.ProductoBuscado;
+import com.piccolifield.data.model.PuntoVentaProducto;
 import com.piccolifield.data.model.ResumenDashboard;
 import com.piccolifield.data.model.TipoIncidenciaDto;
 import com.piccolifield.data.model.TiposIncidenciaResponse;
+import com.piccolifield.data.local.AppDatabase;
+import com.piccolifield.data.local.entity.IncidenciaOfflineEntity;
+import com.piccolifield.data.local.entity.ProductoCacheEntity;
+import com.piccolifield.data.local.entity.ReposicionOfflineEntity;
+import com.piccolifield.data.local.entity.VentaOfflineEntity;
+import com.piccolifield.data.local.sync.SyncWorker;
+import com.piccolifield.util.NetworkUtils;
 import com.piccolifield.data.remote.dto.request.AtenderIncidenciaRequest;
 import com.piccolifield.data.remote.dto.request.RegistrarVentaRequest;
 import com.piccolifield.data.remote.dto.request.ReasignarVendedorRequest;
@@ -115,7 +124,7 @@ public class SupervisionFragment extends Fragment {
     // Componentes del Impulsador
     private TextView tvLocalAsignado, tvHorario, tvMetaVentas, tvAvanceVentas;
     private ProgressBar pbVentasImpulsador;
-    private MaterialButton btnEscanear, btnReportarIncidencia, btnReponerStock;
+    private MaterialButton btnEscanear, btnReportarIncidencia, btnReponerStock, btnSeleccionarCatalogo;
 
     private ActivityResultLauncher<Intent> scannerLauncher;
     private boolean isScannerForReposicion = false;
@@ -284,6 +293,7 @@ public class SupervisionFragment extends Fragment {
         btnEscanear = view.findViewById(R.id.btnEscanear);
         btnReportarIncidencia = view.findViewById(R.id.btnReportarIncidencia);
         btnReponerStock = view.findViewById(R.id.btnReponerStock);
+        btnSeleccionarCatalogo = view.findViewById(R.id.btnSeleccionarCatalogo);
 
         if (btnEscanear != null) {
             btnEscanear.setOnClickListener(v -> {
@@ -303,6 +313,10 @@ public class SupervisionFragment extends Fragment {
                 Intent intent = new Intent(requireActivity(), ScannerActivity.class);
                 scannerLauncher.launch(intent);
             });
+        }
+
+        if (btnSeleccionarCatalogo != null) {
+            btnSeleccionarCatalogo.setOnClickListener(v -> mostrarBottomSheetSeleccionarCatalogo());
         }
 
         // 2. Eventos de las Pestañas
@@ -571,6 +585,8 @@ public class SupervisionFragment extends Fragment {
         String token = SplashStorage.obtenerToken(requireContext());
         if (token == null || token.isEmpty()) return;
 
+        sincronizarCatalogoProductosOffline();
+
         ApiService apiService = RetrofitClient.createService();
         apiService.obtenerDashboardImpulsador().enqueue(new Callback<ApiResponse<ImpulsadorDashboard>>() {
             @Override
@@ -676,31 +692,53 @@ public class SupervisionFragment extends Fragment {
                 btnConfirmar.setEnabled(false);
                 ReponerStockRequest request = new ReponerStockRequest(barcode, null, finalCantidad, observacion);
 
-                apiService.reponerStock(request).enqueue(new Callback<ApiResponse<Object>>() {
-                    @Override
-                    public void onResponse(@NonNull Call<ApiResponse<Object>> call, @NonNull Response<ApiResponse<Object>> response) {
-                        if (!isAdded()) return;
-                        btnConfirmar.setEnabled(true);
-                        if (response.isSuccessful()) {
-                            Toast.makeText(getContext(), "Stock repuesto exitosamente (+ " + finalCantidad + " unds)", Toast.LENGTH_SHORT).show();
-                            bottomSheetDialog.dismiss();
-                            cargarDashboardImpulsador();
-                        } else {
-                            Toast.makeText(getContext(), "Error al reponer stock", Toast.LENGTH_SHORT).show();
+                if (NetworkUtils.isNetworkAvailable(getContext())) {
+                    apiService.reponerStock(request).enqueue(new Callback<ApiResponse<Object>>() {
+                        @Override
+                        public void onResponse(@NonNull Call<ApiResponse<Object>> call, @NonNull Response<ApiResponse<Object>> response) {
+                            if (!isAdded()) return;
+                            btnConfirmar.setEnabled(true);
+                            if (response.isSuccessful()) {
+                                Toast.makeText(getContext(), "Stock repuesto exitosamente (+ " + finalCantidad + " unds)", Toast.LENGTH_SHORT).show();
+                                bottomSheetDialog.dismiss();
+                                cargarDashboardImpulsador();
+                            } else {
+                                Toast.makeText(getContext(), "Error al reponer stock", Toast.LENGTH_SHORT).show();
+                            }
                         }
-                    }
 
-                    @Override
-                    public void onFailure(@NonNull Call<ApiResponse<Object>> call, @NonNull Throwable t) {
-                        if (!isAdded()) return;
-                        btnConfirmar.setEnabled(true);
-                        Toast.makeText(getContext(), "Error de red: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
+                        @Override
+                        public void onFailure(@NonNull Call<ApiResponse<Object>> call, @NonNull Throwable t) {
+                            if (!isAdded()) return;
+                            btnConfirmar.setEnabled(true);
+                            guardarReposicionOffline(barcode, finalCantidad, observacion, bottomSheetDialog);
+                        }
+                    });
+                } else {
+                    guardarReposicionOffline(barcode, finalCantidad, observacion, bottomSheetDialog);
+                }
             });
         }
 
         bottomSheetDialog.show();
+    }
+
+    private void guardarReposicionOffline(String barcode, int cantidad, String observacion, BottomSheetDialog bottomSheetDialog) {
+        Context ctx = getContext();
+        if (ctx == null) return;
+
+        java.util.concurrent.Executors.newSingleThreadExecutor().execute(() -> {
+            String fechaActual = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(new java.util.Date());
+            AppDatabase.getInstance(ctx).reposicionOfflineDao().insertar(new ReposicionOfflineEntity(barcode, cantidad, observacion, fechaActual));
+            SyncWorker.programarSincronizacion(ctx);
+
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(() -> {
+                    Toast.makeText(ctx, "Sin conexión. Reposición guardada localmente y se sincronizará al recuperar red.", Toast.LENGTH_LONG).show();
+                    if (bottomSheetDialog != null) bottomSheetDialog.dismiss();
+                });
+            }
+        });
     }
 
     private void cargarIncidencias() {
@@ -974,52 +1012,99 @@ public class SupervisionFragment extends Fragment {
                     return;
                 }
 
+                final String finalTipo = tipo;
+                final String finalSeveridad = severidad;
+                final String finalDescripcion = descripcion;
+
                 btnEnviar.setEnabled(false);
-                ReportarIncidenciaRequest request = new ReportarIncidenciaRequest(tipo, severidad, descripcion, null, fotoBase64Incidencia);
+                ReportarIncidenciaRequest request = new ReportarIncidenciaRequest(finalTipo, finalSeveridad, finalDescripcion, null, fotoBase64Incidencia);
 
-                apiService.reportarIncidencia(request).enqueue(new Callback<ApiResponse<Object>>() {
-                    @Override
-                    public void onResponse(@NonNull Call<ApiResponse<Object>> call, @NonNull Response<ApiResponse<Object>> response) {
-                        if (!isAdded()) return;
-                        btnEnviar.setEnabled(true);
-                        if (response.isSuccessful()) {
-                            Toast.makeText(getContext(), "Incidencia reportada exitosamente", Toast.LENGTH_SHORT).show();
-                            bottomSheetDialog.dismiss();
-                        } else {
-                            Toast.makeText(getContext(), "Error al reportar incidencia", Toast.LENGTH_SHORT).show();
+                if (NetworkUtils.isNetworkAvailable(getContext())) {
+                    apiService.reportarIncidencia(request).enqueue(new Callback<ApiResponse<Object>>() {
+                        @Override
+                        public void onResponse(@NonNull Call<ApiResponse<Object>> call, @NonNull Response<ApiResponse<Object>> response) {
+                            if (!isAdded()) return;
+                            btnEnviar.setEnabled(true);
+                            if (response.isSuccessful()) {
+                                Toast.makeText(getContext(), "Incidencia reportada exitosamente", Toast.LENGTH_SHORT).show();
+                                bottomSheetDialog.dismiss();
+                            } else {
+                                Toast.makeText(getContext(), "Error al reportar incidencia", Toast.LENGTH_SHORT).show();
+                            }
                         }
-                    }
 
-                    @Override
-                    public void onFailure(@NonNull Call<ApiResponse<Object>> call, @NonNull Throwable t) {
-                        if (!isAdded()) return;
-                        btnEnviar.setEnabled(true);
-                        Toast.makeText(getContext(), "Error de red: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
+                        @Override
+                        public void onFailure(@NonNull Call<ApiResponse<Object>> call, @NonNull Throwable t) {
+                            if (!isAdded()) return;
+                            btnEnviar.setEnabled(true);
+                            guardarIncidenciaOffline(finalTipo, finalSeveridad, finalDescripcion, fotoBase64Incidencia, bottomSheetDialog);
+                        }
+                    });
+                } else {
+                    guardarIncidenciaOffline(finalTipo, finalSeveridad, finalDescripcion, fotoBase64Incidencia, bottomSheetDialog);
+                }
             });
         }
 
         bottomSheetDialog.show();
     }
     private void buscarProducto(String codigoBarras) {
-        Toast.makeText(getContext(), "Buscando: " + codigoBarras, Toast.LENGTH_SHORT).show();
-        ApiService apiService = RetrofitClient.createService();
-        apiService.buscarProductoPorCodigo(codigoBarras).enqueue(new Callback<ApiResponse<ProductoBuscado>>() {
-            @Override
-            public void onResponse(Call<ApiResponse<ProductoBuscado>> call, Response<ApiResponse<ProductoBuscado>> response) {
-                if (!isAdded()) return;
-                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
-                    mostrarBottomSheetVenta(response.body().getData(), codigoBarras);
-                } else {
-                    Toast.makeText(getContext(), "Producto no encontrado o no asignado a tu punto de venta", Toast.LENGTH_SHORT).show();
-                }
-            }
+        Context ctx = getContext();
+        if (ctx == null) return;
 
-            @Override
-            public void onFailure(Call<ApiResponse<ProductoBuscado>> call, Throwable t) {
-                if (!isAdded()) return;
-                Toast.makeText(getContext(), "Error de conexión: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(ctx, "Buscando: " + codigoBarras, Toast.LENGTH_SHORT).show();
+
+        if (NetworkUtils.isNetworkAvailable(ctx)) {
+            ApiService apiService = RetrofitClient.createService();
+            apiService.buscarProductoPorCodigo(codigoBarras).enqueue(new Callback<ApiResponse<ProductoBuscado>>() {
+                @Override
+                public void onResponse(Call<ApiResponse<ProductoBuscado>> call, Response<ApiResponse<ProductoBuscado>> response) {
+                    if (!isAdded()) return;
+                    if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                        ProductoBuscado producto = response.body().getData();
+
+                        // Guardar en caché local de Room para uso offline
+                        java.util.concurrent.Executors.newSingleThreadExecutor().execute(() -> {
+                            AppDatabase.getInstance(ctx).productoCacheDao().guardarProducto(
+                                    new ProductoCacheEntity(producto.getId(), codigoBarras, producto.getNombre(), producto.getPrecio(), producto.getStockActual(), 0)
+                            );
+                        });
+
+                        mostrarBottomSheetVenta(producto, codigoBarras);
+                    } else {
+                        buscarProductoOffline(codigoBarras, ctx);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ApiResponse<ProductoBuscado>> call, Throwable t) {
+                    if (!isAdded()) return;
+                    buscarProductoOffline(codigoBarras, ctx);
+                }
+            });
+        } else {
+            buscarProductoOffline(codigoBarras, ctx);
+        }
+    }
+
+    private void buscarProductoOffline(String codigoBarras, Context ctx) {
+        java.util.concurrent.Executors.newSingleThreadExecutor().execute(() -> {
+            ProductoCacheEntity cache = AppDatabase.getInstance(ctx).productoCacheDao().buscarPorEan(codigoBarras);
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(() -> {
+                    if (cache != null) {
+                        ProductoBuscado producto = new ProductoBuscado();
+                        producto.setId(cache.getIdProductos());
+                        producto.setNombre(cache.getProducto());
+                        producto.setPrecio(cache.getPrecio());
+                        producto.setStockActual(cache.getStockActual());
+
+                        Toast.makeText(ctx, "Modo Offline: Producto cargado desde caché local", Toast.LENGTH_SHORT).show();
+                        mostrarBottomSheetVenta(producto, codigoBarras);
+                    } else {
+                        Toast.makeText(ctx, "Sin conexión y producto no encontrado en caché local", Toast.LENGTH_LONG).show();
+                    }
+                });
             }
         });
     }
@@ -1080,31 +1165,178 @@ public class SupervisionFragment extends Fragment {
         
         btnConfirmarVenta.setOnClickListener(v -> {
             btnConfirmarVenta.setEnabled(false);
-            ApiService apiService = RetrofitClient.createService();
-            RegistrarVentaRequest request = new RegistrarVentaRequest(codigoBarras, cantidad[0]);
-            
-            apiService.registrarVenta(request).enqueue(new Callback<ApiResponse<Object>>() {
-                @Override
-                public void onResponse(Call<ApiResponse<Object>> call, Response<ApiResponse<Object>> response) {
-                    if (!isAdded()) return;
-                    btnConfirmarVenta.setEnabled(true);
-                    if (response.isSuccessful()) {
-                        Toast.makeText(getContext(), "Venta registrada exitosamente", Toast.LENGTH_SHORT).show();
-                        bottomSheetDialog.dismiss();
-                        cargarDashboardImpulsador();
-                    } else {
-                        Toast.makeText(getContext(), "Error al registrar la venta", Toast.LENGTH_SHORT).show();
+            int cantidadVenta = cantidad[0];
+            if (NetworkUtils.isNetworkAvailable(getContext())) {
+                ApiService apiService = RetrofitClient.createService();
+                RegistrarVentaRequest request = new RegistrarVentaRequest(codigoBarras, cantidadVenta);
+
+                apiService.registrarVenta(request).enqueue(new Callback<ApiResponse<Object>>() {
+                    @Override
+                    public void onResponse(Call<ApiResponse<Object>> call, Response<ApiResponse<Object>> response) {
+                        if (!isAdded()) return;
+                        btnConfirmarVenta.setEnabled(true);
+                        if (response.isSuccessful()) {
+                            Toast.makeText(getContext(), "Venta registrada exitosamente", Toast.LENGTH_SHORT).show();
+                            bottomSheetDialog.dismiss();
+                            cargarDashboardImpulsador();
+                        } else {
+                            Toast.makeText(getContext(), "Error al registrar la venta", Toast.LENGTH_SHORT).show();
+                        }
                     }
-                }
-                @Override
-                public void onFailure(Call<ApiResponse<Object>> call, Throwable t) {
-                    if (!isAdded()) return;
-                    btnConfirmarVenta.setEnabled(true);
-                    Toast.makeText(getContext(), "Error de red: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
+
+                    @Override
+                    public void onFailure(Call<ApiResponse<Object>> call, Throwable t) {
+                        if (!isAdded()) return;
+                        btnConfirmarVenta.setEnabled(true);
+                        guardarVentaOffline(codigoBarras, cantidadVenta, bottomSheetDialog);
+                    }
+                });
+            } else {
+                guardarVentaOffline(codigoBarras, cantidadVenta, bottomSheetDialog);
+            }
         });
         
+        bottomSheetDialog.show();
+    }
+
+    private void guardarVentaOffline(String codigoBarras, int cantidad, BottomSheetDialog bottomSheetDialog) {
+        Context ctx = getContext();
+        if (ctx == null) return;
+
+        java.util.concurrent.Executors.newSingleThreadExecutor().execute(() -> {
+            String fechaActual = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(new java.util.Date());
+            AppDatabase.getInstance(ctx).ventaOfflineDao().insertar(new VentaOfflineEntity(codigoBarras, cantidad, fechaActual));
+            SyncWorker.programarSincronizacion(ctx);
+
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(() -> {
+                    Toast.makeText(ctx, "Sin conexión. Venta guardada localmente y se sincronizará al recuperar red.", Toast.LENGTH_LONG).show();
+                    if (bottomSheetDialog != null) bottomSheetDialog.dismiss();
+                });
+            }
+        });
+    }
+
+    private void guardarIncidenciaOffline(String tipo, String severidad, String descripcion, String fotoBase64, BottomSheetDialog bottomSheetDialog) {
+        Context ctx = getContext();
+        if (ctx == null) return;
+
+        java.util.concurrent.Executors.newSingleThreadExecutor().execute(() -> {
+            String fechaActual = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(new java.util.Date());
+            AppDatabase.getInstance(ctx).incidenciaOfflineDao().insertar(new IncidenciaOfflineEntity(tipo, severidad, descripcion, null, fotoBase64, fechaActual));
+            SyncWorker.programarSincronizacion(ctx);
+
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(() -> {
+                    Toast.makeText(ctx, "Sin conexión. Incidencia guardada localmente y se sincronizará al recuperar red.", Toast.LENGTH_LONG).show();
+                    if (bottomSheetDialog != null) bottomSheetDialog.dismiss();
+                });
+            }
+        });
+    }
+
+    private void sincronizarCatalogoProductosOffline() {
+        Context ctx = getContext();
+        if (ctx == null || !NetworkUtils.isNetworkAvailable(ctx)) return;
+
+        ApiService apiService = RetrofitClient.createService();
+        apiService.listarProductos("ACTIVO").enqueue(new Callback<ApiResponse<List<com.piccolifield.model.Producto>>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<List<com.piccolifield.model.Producto>>> call, @NonNull Response<ApiResponse<List<com.piccolifield.model.Producto>>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                    List<com.piccolifield.model.Producto> productos = response.body().getData();
+                    java.util.concurrent.Executors.newSingleThreadExecutor().execute(() -> {
+                        List<ProductoCacheEntity> entities = new ArrayList<>();
+                        for (com.piccolifield.model.Producto p : productos) {
+                            if (p.getCodigoEan() != null && !p.getCodigoEan().isEmpty()) {
+                                entities.add(new ProductoCacheEntity(
+                                        p.getIdProductos(),
+                                        p.getCodigoEan(),
+                                        p.getProducto(),
+                                        0.0,
+                                        100,
+                                        0
+                                ));
+                            }
+                        }
+                        AppDatabase.getInstance(ctx).productoCacheDao().guardarProductos(entities);
+                    });
+                }
+            }
+            @Override public void onFailure(@NonNull Call<ApiResponse<List<com.piccolifield.model.Producto>>> call, @NonNull Throwable t) {}
+        });
+    }
+
+    private void mostrarBottomSheetSeleccionarCatalogo() {
+        Context ctx = getContext();
+        if (ctx == null) return;
+
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(ctx);
+        View view = getLayoutInflater().inflate(R.layout.dialog_bottom_sheet_seleccionar_producto, null);
+        bottomSheetDialog.setContentView(view);
+
+        EditText etBuscar = view.findViewById(R.id.etBuscarCatalogo);
+        ProgressBar pbLoading = view.findViewById(R.id.pbLoadingCatalogo);
+        RecyclerView rvCatalogo = view.findViewById(R.id.rvCatalogoProductos);
+        rvCatalogo.setLayoutManager(new LinearLayoutManager(ctx));
+
+        if (pbLoading != null) pbLoading.setVisibility(View.VISIBLE);
+
+        java.util.concurrent.Executors.newSingleThreadExecutor().execute(() -> {
+            List<ProductoCacheEntity> cacheList = AppDatabase.getInstance(ctx).productoCacheDao().obtenerTodos();
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(() -> {
+                    if (pbLoading != null) pbLoading.setVisibility(View.GONE);
+                    List<PuntoVentaProducto> pdvLista = new ArrayList<>();
+                    for (ProductoCacheEntity c : cacheList) {
+                        PuntoVentaProducto pv = new PuntoVentaProducto();
+                        pv.setIdProductos(c.getIdProductos());
+                        pv.setProducto(c.getProducto());
+                        pv.setSku(c.getCodigoEan());
+                        pv.setStockActual(c.getStockActual());
+                        pdvLista.add(pv);
+                    }
+
+                    ProductoSupervisionAdapter adapter = new ProductoSupervisionAdapter(pdvLista, ctx, producto -> {
+                        bottomSheetDialog.dismiss();
+                        ProductoBuscado pb = new ProductoBuscado();
+                        pb.setId(producto.getIdProductos());
+                        pb.setNombre(producto.getProducto());
+                        pb.setStockActual(producto.getStockActual());
+                        pb.setPrecio(0.0);
+                        mostrarBottomSheetVenta(pb, producto.getSku() != null ? producto.getSku() : "7750000000000");
+                    });
+                    rvCatalogo.setAdapter(adapter);
+
+                    if (etBuscar != null) {
+                        etBuscar.addTextChangedListener(new TextWatcher() {
+                            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                String q = s != null ? s.toString().toLowerCase().trim() : "";
+                                List<PuntoVentaProducto> filtrada = new ArrayList<>();
+                                for (PuntoVentaProducto p : pdvLista) {
+                                    if ((p.getProducto() != null && p.getProducto().toLowerCase().contains(q)) ||
+                                            (p.getSku() != null && p.getSku().toLowerCase().contains(q))) {
+                                        filtrada.add(p);
+                                    }
+                                }
+                                rvCatalogo.setAdapter(new ProductoSupervisionAdapter(filtrada, ctx, producto -> {
+                                    bottomSheetDialog.dismiss();
+                                    ProductoBuscado pb = new ProductoBuscado();
+                                    pb.setId(producto.getIdProductos());
+                                    pb.setNombre(producto.getProducto());
+                                    pb.setStockActual(producto.getStockActual());
+                                    pb.setPrecio(0.0);
+                                    mostrarBottomSheetVenta(pb, producto.getSku() != null ? producto.getSku() : "7750000000000");
+                                }));
+                            }
+                            @Override public void afterTextChanged(Editable s) {}
+                        });
+                    }
+                });
+            }
+        });
+
         bottomSheetDialog.show();
     }
 }

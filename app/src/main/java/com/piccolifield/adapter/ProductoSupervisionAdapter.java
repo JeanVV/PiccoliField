@@ -23,12 +23,24 @@ import java.util.List;
 
 public class ProductoSupervisionAdapter extends RecyclerView.Adapter<ProductoSupervisionAdapter.ViewHolder> {
 
+    public interface OnProductoClickListener {
+        void onProductoClick(PuntoVentaProducto producto);
+    }
+
     private List<PuntoVentaProducto> listaProductos;
     private Context context;
+    private OnProductoClickListener listener;
 
     public ProductoSupervisionAdapter(List<PuntoVentaProducto> listaProductos, Context context) {
         this.listaProductos = listaProductos;
         this.context = context;
+        this.listener = null;
+    }
+
+    public ProductoSupervisionAdapter(List<PuntoVentaProducto> listaProductos, Context context, OnProductoClickListener listener) {
+        this.listaProductos = listaProductos;
+        this.context = context;
+        this.listener = listener;
     }
 
     @NonNull
@@ -44,7 +56,6 @@ public class ProductoSupervisionAdapter extends RecyclerView.Adapter<ProductoSup
         holder.tvNombreProducto.setText(producto.getProducto());
         holder.tvSkuProducto.setText("SKU: " + producto.getSku());
         
-        // Mostrar Stock Actual en lugar de Stock Mínimo
         int stockActual = producto.getStockActual();
         holder.tvStockMinimo.setText("Stock Actual: " + stockActual + " unds (Mín: " + producto.getStockMinimo() + ")");
 
@@ -69,6 +80,10 @@ public class ProductoSupervisionAdapter extends RecyclerView.Adapter<ProductoSup
         } else {
             holder.ivProducto.setImageResource(R.drawable.ic_avatar_placeholder);
         }
+
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) listener.onProductoClick(producto);
+        });
     }
 
     @Override
