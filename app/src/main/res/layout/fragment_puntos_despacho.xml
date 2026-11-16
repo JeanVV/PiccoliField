@@ -11,6 +11,7 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:clipToPadding="false"
         android:fillViewport="true">
 
         <LinearLayout
@@ -19,72 +20,104 @@
             android:orientation="vertical"
             android:paddingHorizontal="16dp"
             android:paddingTop="12dp"
-            android:paddingBottom="90dp">
+            android:paddingBottom="96dp">
 
-            <!-- 1. Cabecera Header (Atrás - Título) -->
-            <RelativeLayout
+            <!-- 1. Tarjeta Cabecera Estilo Mockup -->
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp">
-
-                <ImageView
-                    android:id="@+id/btnMenu"
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:clickable="true"
-                    android:contentDescription="@string/app_name"
-                    android:focusable="true"
-                    android:src="@drawable/ic_back_arrow"
-                    app:tint="@color/cafe_profundo" />
-
-                <TextView
-                    android:id="@+id/tvHeaderTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:fontFamily="serif"
-                    android:text="@string/puntos_distribucion"
-                    android:textColor="@color/cafe_profundo"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
-
-                <ImageView
-                    android:id="@+id/btnNotifications"
-                    android:layout_width="26dp"
-                    android:layout_height="26dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:contentDescription="@string/cd_notification"
-                    android:src="@drawable/ic_notification_bell"
-                    android:visibility="gone" />
-            </RelativeLayout>
-
-            <!-- 2. Toggle Segment Switch ("Mapa" | "Lista") -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardToggleSelector"
-                android:layout_width="match_parent"
-                android:layout_height="46dp"
-                android:layout_marginBottom="14dp"
-                app:cardBackgroundColor="#F3E4C7"
-                app:cardCornerRadius="23dp"
+                android:layout_marginBottom="12dp"
+                app:cardBackgroundColor="#F5E4CA"
+                app:cardCornerRadius="18dp"
                 app:cardElevation="0dp"
-                app:strokeColor="#E3CEAA"
+                app:strokeColor="#E8D2B0"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:padding="3dp">
+                    android:paddingHorizontal="14dp"
+                    android:paddingVertical="14dp">
+
+                    <ImageView
+                        android:id="@+id/btnMenu"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:clickable="true"
+                        android:contentDescription="@string/app_name"
+                        android:focusable="true"
+                        android:padding="5dp"
+                        android:src="@drawable/ic_back_arrow"
+                        app:tint="@color/cafe_profundo" />
+
+                    <ImageView
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
+                        android:layout_marginStart="6dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_location_pin"
+                        app:tint="@color/cafe_profundo" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tvHeaderTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/puntos_distribucion"
+                            android:textColor="@color/cafe_profundo"
+                            android:textSize="19sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="1dp"
+                            android:text="Consulta y gestiona los puntos de venta"
+                            android:textColor="@color/chocolate"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/btnNotifications"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:contentDescription="@string/cd_notification"
+                        android:src="@drawable/ic_notification_bell"
+                        android:visibility="gone" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 2. Toggle Segment Switch ("Mapa" | "Lista") en dos botones pill -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardToggleSelector"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:cardCornerRadius="0dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="46dp"
+                    android:orientation="horizontal">
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnToggleMapa"
-                        style="@style/Widget.Material3.Button.TextButton"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
+                        android:layout_marginEnd="6dp"
                         android:layout_weight="1"
                         android:insetTop="0dp"
                         android:insetBottom="0dp"
@@ -92,12 +125,22 @@
                         android:textAllCaps="false"
                         android:textColor="@color/cafe_profundo"
                         android:textSize="14sp"
-                        app:cornerRadius="20dp" />
+                        android:textStyle="bold"
+                        app:backgroundTint="@color/white"
+                        app:cornerRadius="23dp"
+                        app:icon="@drawable/ic_nav_map"
+                        app:iconGravity="textStart"
+                        app:iconPadding="8dp"
+                        app:iconSize="18dp"
+                        app:iconTint="@color/dorado_premium"
+                        app:strokeColor="#E5D5C0"
+                        app:strokeWidth="1dp" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnToggleLista"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
+                        android:layout_marginStart="6dp"
                         android:layout_weight="1"
                         android:insetTop="0dp"
                         android:insetBottom="0dp"
@@ -107,70 +150,76 @@
                         android:textSize="14sp"
                         android:textStyle="bold"
                         app:backgroundTint="@color/cafe_profundo"
-                        app:cornerRadius="20dp"
-                        app:elevation="0dp" />
+                        app:cornerRadius="23dp"
+                        app:elevation="1dp"
+                        app:icon="@drawable/ic_filter_list"
+                        app:iconGravity="textStart"
+                        app:iconPadding="8dp"
+                        app:iconSize="18dp"
+                        app:iconTint="@color/dorado_premium" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- 3. Buscador y Botón de Filtros -->
+            <!-- 3. Buscador completo -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardSearch"
+                android:layout_width="match_parent"
+                android:layout_height="46dp"
+                android:layout_marginBottom="10dp"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="23dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#E5D5C0"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_search"
+                        app:tint="@color/chocolate" />
+
+                    <EditText
+                        android:id="@+id/etBuscarPuntos"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="10dp"
+                        android:background="@null"
+                        android:hint="Buscar punto de venta..."
+                        android:imeOptions="actionSearch"
+                        android:importantForAutofill="no"
+                        android:inputType="text"
+                        android:singleLine="true"
+                        android:textColor="@color/cafe_profundo"
+                        android:textColorHint="@color/color_text_muted"
+                        android:textSize="13sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 3.1. Botón Filtros alineado a la derecha -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:gravity="center_vertical"
+                android:layout_marginBottom="10dp"
+                android:gravity="end"
                 android:orientation="horizontal">
 
-                <!-- Buscador -->
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/cardSearch"
-                    android:layout_width="0dp"
-                    android:layout_height="46dp"
-                    android:layout_marginEnd="10dp"
-                    android:layout_weight="1"
-                    app:cardBackgroundColor="@color/white"
-                    app:cardCornerRadius="23dp"
-                    app:cardElevation="0dp"
-                    app:strokeColor="#E5D5C0"
-                    app:strokeWidth="1dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingHorizontal="14dp">
-
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:contentDescription="@null"
-                            android:src="@drawable/ic_search"
-                            app:tint="@color/chocolate" />
-
-                        <EditText
-                            android:id="@+id/etBuscarPuntos"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_marginStart="8dp"
-                            android:background="@null"
-                            android:hint="Buscar por nombre, código o dirección..."
-                            android:importantForAutofill="no"
-                            android:inputType="text"
-                            android:textColor="@color/cafe_profundo"
-                            android:textColorHint="@color/color_text_muted"
-                            android:textSize="13sp" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <!-- Botón Filtros (Embudo + Filtros) -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/btnFiltrosContainer"
                     android:layout_width="wrap_content"
-                    android:layout_height="46dp"
+                    android:layout_height="36dp"
                     android:clickable="true"
                     android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
                     app:cardBackgroundColor="@color/white"
-                    app:cardCornerRadius="23dp"
+                    app:cardCornerRadius="18dp"
                     app:cardElevation="0dp"
                     app:strokeColor="#E5D5C0"
                     app:strokeWidth="1dp">
@@ -180,15 +229,15 @@
                         android:layout_height="match_parent"
                         android:gravity="center"
                         android:orientation="horizontal"
-                        android:paddingHorizontal="16dp">
+                        android:paddingHorizontal="14dp">
 
                         <ImageView
                             android:id="@+id/btnFilter"
-                            android:layout_width="18dp"
-                            android:layout_height="18dp"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
                             android:contentDescription="@string/cd_filter"
                             android:src="@drawable/ic_filter"
-                            app:tint="@color/cafe_profundo" />
+                            app:tint="@color/dorado_premium" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -198,27 +247,35 @@
                             android:textColor="@color/cafe_profundo"
                             android:textSize="13sp"
                             android:textStyle="bold" />
+
+                        <ImageView
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:layout_marginStart="2dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_arrow_drop_down"
+                            app:tint="@color/cafe_profundo" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
-
             </LinearLayout>
 
-            <!-- 3.1. Fila desplegable de Spinners/Combos para filtrar Puntos de Distribución -->
+            <!-- 3.2. Panel desplegable de Spinners/Combos para filtrar Puntos de Distribución -->
             <LinearLayout
                 android:id="@+id/layoutFiltrosCombos"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="14dp"
+                android:layout_marginBottom="12dp"
                 android:orientation="horizontal"
-                android:visibility="gone">
+                android:visibility="gone"
+                tools:visibility="visible">
 
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="0dp"
-                    android:layout_height="42dp"
+                    android:layout_height="44dp"
                     android:layout_marginEnd="6dp"
                     android:layout_weight="1"
                     app:cardBackgroundColor="@color/white"
-                    app:cardCornerRadius="12dp"
+                    app:cardCornerRadius="14dp"
                     app:cardElevation="0dp"
                     app:strokeColor="#E5D5C0"
                     app:strokeWidth="1dp">
@@ -227,16 +284,16 @@
                         android:id="@+id/spFiltroCriterio"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:paddingHorizontal="8dp" />
+                        android:paddingHorizontal="10dp" />
                 </com.google.android.material.card.MaterialCardView>
 
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="0dp"
-                    android:layout_height="42dp"
+                    android:layout_height="44dp"
                     android:layout_marginStart="6dp"
                     android:layout_weight="1"
                     app:cardBackgroundColor="@color/white"
-                    app:cardCornerRadius="12dp"
+                    app:cardCornerRadius="14dp"
                     app:cardElevation="0dp"
                     app:strokeColor="#E5D5C0"
                     app:strokeWidth="1dp">
@@ -245,7 +302,7 @@
                         android:id="@+id/spFiltroEstado"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:paddingHorizontal="8dp" />
+                        android:paddingHorizontal="10dp" />
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
 
@@ -254,31 +311,31 @@
                 android:id="@+id/cardHero"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="12dp"
                 android:visibility="gone"
                 app:cardBackgroundColor="#F5E8D0"
-                app:cardCornerRadius="20dp"
+                app:cardCornerRadius="18dp"
                 app:cardElevation="0dp"
-                app:strokeColor="#E3CEAA"
+                app:strokeColor="#DFC79E"
                 app:strokeWidth="1dp">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="20dp">
+                    android:padding="16dp">
 
                     <FrameLayout
                         android:id="@+id/framePinIcon"
-                        android:layout_width="38dp"
-                        android:layout_height="38dp"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
                         android:background="@drawable/bg_stat_icon_circle"
                         android:backgroundTint="@color/cafe_profundo"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent">
 
                         <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
                             android:layout_gravity="center"
                             android:contentDescription="@null"
                             android:src="@drawable/ic_location_pin"
@@ -294,7 +351,7 @@
                         android:fontFamily="serif"
                         android:text="@string/puntos_distribucion"
                         android:textColor="@color/cafe_profundo"
-                        android:textSize="24sp"
+                        android:textSize="18sp"
                         android:textStyle="bold"
                         app:layout_constraintEnd_toStartOf="@+id/imgHeroBottle"
                         app:layout_constraintStart_toStartOf="parent"
@@ -304,7 +361,7 @@
                         android:id="@+id/tvHeroSub"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="4dp"
                         android:layout_marginEnd="12dp"
                         android:text="@string/puntos_distribucion_sub"
                         android:textColor="@color/chocolate"
@@ -315,8 +372,8 @@
 
                     <ImageView
                         android:id="@+id/imgHeroBottle"
-                        android:layout_width="120dp"
-                        android:layout_height="140dp"
+                        android:layout_width="86dp"
+                        android:layout_height="96dp"
                         android:adjustViewBounds="true"
                         android:contentDescription="@null"
                         android:scaleType="fitCenter"
@@ -333,7 +390,7 @@
                 android:id="@+id/layoutStats"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="12dp"
                 android:baselineAligned="false"
                 android:orientation="horizontal"
                 android:visibility="gone">
@@ -341,11 +398,11 @@
                 <!-- Card 1: Total de Puntos -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="0dp"
-                    android:layout_height="80dp"
-                    android:layout_marginEnd="6dp"
+                    android:layout_height="76dp"
+                    android:layout_marginEnd="5dp"
                     android:layout_weight="1"
-                    app:cardBackgroundColor="@color/marfil_suave"
-                    app:cardCornerRadius="16dp"
+                    app:cardBackgroundColor="@color/white"
+                    app:cardCornerRadius="14dp"
                     app:cardElevation="0dp"
                     app:strokeColor="#E5D5C0"
                     app:strokeWidth="1dp">
@@ -355,16 +412,17 @@
                         android:layout_height="match_parent"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        android:paddingHorizontal="8dp">
+                        android:paddingHorizontal="10dp">
 
                         <FrameLayout
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:background="@drawable/bg_stat_icon_circle">
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:background="@drawable/bg_stat_icon_circle"
+                            android:backgroundTint="#F5E4CA">
 
                             <ImageView
-                                android:layout_width="18dp"
-                                android:layout_height="18dp"
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
                                 android:layout_gravity="center"
                                 android:contentDescription="@null"
                                 android:src="@drawable/ic_store"
@@ -380,7 +438,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:maxLines="2"
+                                android:maxLines="1"
                                 android:text="@string/total_puntos"
                                 android:textColor="@color/chocolate"
                                 android:textSize="10sp" />
@@ -391,7 +449,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="32"
                                 android:textColor="@color/cafe_profundo"
-                                android:textSize="20sp"
+                                android:textSize="18sp"
                                 android:textStyle="bold" />
                         </LinearLayout>
                     </LinearLayout>
@@ -400,11 +458,11 @@
                 <!-- Card 2: Ciudades -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="0dp"
-                    android:layout_height="80dp"
+                    android:layout_height="76dp"
                     android:layout_marginHorizontal="3dp"
                     android:layout_weight="1"
-                    app:cardBackgroundColor="@color/marfil_suave"
-                    app:cardCornerRadius="16dp"
+                    app:cardBackgroundColor="@color/white"
+                    app:cardCornerRadius="14dp"
                     app:cardElevation="0dp"
                     app:strokeColor="#E5D5C0"
                     app:strokeWidth="1dp">
@@ -414,16 +472,17 @@
                         android:layout_height="match_parent"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        android:paddingHorizontal="8dp">
+                        android:paddingHorizontal="10dp">
 
                         <FrameLayout
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:background="@drawable/bg_stat_icon_circle">
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:background="@drawable/bg_stat_icon_circle"
+                            android:backgroundTint="#F5E4CA">
 
                             <ImageView
-                                android:layout_width="18dp"
-                                android:layout_height="18dp"
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
                                 android:layout_gravity="center"
                                 android:contentDescription="@null"
                                 android:src="@drawable/ic_city"
@@ -439,6 +498,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:maxLines="1"
                                 android:text="@string/ciudades"
                                 android:textColor="@color/chocolate"
                                 android:textSize="10sp" />
@@ -449,7 +509,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="12"
                                 android:textColor="@color/cafe_profundo"
-                                android:textSize="20sp"
+                                android:textSize="18sp"
                                 android:textStyle="bold" />
                         </LinearLayout>
                     </LinearLayout>
@@ -458,11 +518,11 @@
                 <!-- Card 3: Activos -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="0dp"
-                    android:layout_height="80dp"
-                    android:layout_marginStart="6dp"
+                    android:layout_height="76dp"
+                    android:layout_marginStart="5dp"
                     android:layout_weight="1"
-                    app:cardBackgroundColor="@color/marfil_suave"
-                    app:cardCornerRadius="16dp"
+                    app:cardBackgroundColor="@color/white"
+                    app:cardCornerRadius="14dp"
                     app:cardElevation="0dp"
                     app:strokeColor="#E5D5C0"
                     app:strokeWidth="1dp">
@@ -472,16 +532,17 @@
                         android:layout_height="match_parent"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        android:paddingHorizontal="8dp">
+                        android:paddingHorizontal="10dp">
 
                         <FrameLayout
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:background="@drawable/bg_stat_icon_circle">
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:background="@drawable/bg_stat_icon_circle"
+                            android:backgroundTint="#F5E4CA">
 
                             <ImageView
-                                android:layout_width="18dp"
-                                android:layout_height="18dp"
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
                                 android:layout_gravity="center"
                                 android:contentDescription="@null"
                                 android:src="@drawable/ic_location_pin"
@@ -497,6 +558,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:maxLines="1"
                                 android:text="@string/activos"
                                 android:textColor="@color/chocolate"
                                 android:textSize="10sp" />
@@ -507,7 +569,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="28"
                                 android:textColor="@color/cafe_profundo"
-                                android:textSize="20sp"
+                                android:textSize="18sp"
                                 android:textStyle="bold" />
                         </LinearLayout>
                     </LinearLayout>
@@ -528,7 +590,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="320dp"
                     android:visibility="gone"
-                    app:cardCornerRadius="20dp"
+                    app:cardCornerRadius="18dp"
                     app:cardElevation="2dp"
                     app:strokeColor="#E5D5C0"
                     app:strokeWidth="1dp">
@@ -544,11 +606,11 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="bottom|end"
-                        android:layout_margin="16dp"
+                        android:layout_margin="14dp"
                         android:contentDescription="@string/cd_location_icon"
                         app:backgroundTint="@color/white"
                         app:fabSize="mini"
-                        app:srcCompat="@drawable/ic_navigation_directions"
+                        app:srcCompat="@drawable/ic_my_location"
                         app:tint="@color/cafe_profundo" />
 
                 </com.google.android.material.card.MaterialCardView>
@@ -558,7 +620,9 @@
                     android:id="@+id/rvListaPuntos"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:clipToPadding="false"
                     android:nestedScrollingEnabled="false"
+                    android:paddingBottom="16dp"
                     android:visibility="visible"
                     tools:listitem="@layout/item_punto_distribucion" />
 

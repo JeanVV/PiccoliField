@@ -62,14 +62,17 @@
                 android:orientation="horizontal"
                 android:padding="20dp">
 
-                <ImageView
-                    android:layout_width="52dp"
-                    android:layout_height="52dp"
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/ivFotoColaboradorHeader"
+                    android:layout_width="54dp"
+                    android:layout_height="54dp"
                     android:background="@drawable/bg_stat_icon_circle"
                     android:backgroundTint="@color/dorado_premium"
-                    android:padding="12dp"
-                    android:src="@drawable/ic_person"
-                    app:tint="@color/cafe_profundo"
+                    android:scaleType="centerCrop"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent"
+                    app:srcCompat="@drawable/ic_avatar_placeholder"
+                    app:strokeColor="@color/dorado_premium"
+                    app:strokeWidth="1.5dp"
                     tools:ignore="ContentDescription" />
 
                 <LinearLayout

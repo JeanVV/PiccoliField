@@ -1,82 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="center_vertical"
-    android:orientation="horizontal"
-    android:paddingVertical="12dp"
-    android:background="?attr/selectableItemBackground"
+    android:layout_marginBottom="10dp"
     android:clickable="true"
-    android:focusable="true">
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="1dp"
+    app:strokeColor="#E8D8C2"
+    app:strokeWidth="1dp">
 
-    <com.google.android.material.card.MaterialCardView
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        app:cardBackgroundColor="#F8F1E5"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="0dp"
-        app:strokeWidth="0dp">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="14dp"
+        android:paddingVertical="12dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <!-- Fila superior: Código del pedido + Badge estado -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tvPedidoId"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="@color/cafe_profundo"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    tools:text="Pedido #1001" />
+
+                <TextView
+                    android:id="@+id/tvPedidoEstado"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:background="@drawable/bg_search_rounded"
+                    android:backgroundTint="#DCF2DC"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="3dp"
+                    android:text="Registrado"
+                    android:textColor="#2E7D32"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Fila inferior: Ícono calendario + Fecha + Cantidad/Monto -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_calendar_new"
+                    app:tint="@color/color_text_muted" />
+
+                <TextView
+                    android:id="@+id/tvPedidoFecha"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:layout_weight="1"
+                    android:textColor="@color/color_text_muted"
+                    android:textSize="12sp"
+                    tools:text="15/11/2025 · 10:30 a.m." />
+
+                <TextView
+                    android:id="@+id/tvPedidoCantidad"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
+                    android:textColor="@color/chocolate"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    tools:text="5 und. · S/ 120.00" />
+            </LinearLayout>
+        </LinearLayout>
 
         <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_marginStart="4dp"
             android:contentDescription="@null"
-            android:padding="12dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_nav_reports"
-            app:tint="@color/cafe_profundo" />
-    </com.google.android.material.card.MaterialCardView>
-
-    <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="14dp"
-        android:layout_weight="1"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/tvPedidoId"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Pedido #1024"
-            android:textColor="@color/cafe_profundo"
-            android:textSize="15sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/tvPedidoFecha"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="12 Oct 2023 - 10:30 AM"
-            android:textColor="@color/color_text_muted"
-            android:textSize="12sp" />
+            android:src="@drawable/ic_arrow_forward"
+            app:tint="@color/chocolate" />
     </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="end">
-
-        <TextView
-            android:id="@+id/tvPedidoEstado"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Registrado"
-            android:textColor="@color/chocolate"
-            android:textSize="13sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/tvPedidoCantidad"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="5 und."
-            android:textColor="@color/color_text_muted"
-            android:textSize="12sp"
-            android:textStyle="bold" />
-    </LinearLayout>
-</LinearLayout>
+</com.google.android.material.card.MaterialCardView>

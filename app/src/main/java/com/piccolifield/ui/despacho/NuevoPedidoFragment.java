@@ -170,7 +170,7 @@ public class NuevoPedidoFragment extends Fragment {
     }
 
     private void configurarAdapters() {
-        rvCatalogoProductosPedido.setLayoutManager(new LinearLayoutManager(requireContext()));
+        rvCatalogoProductosPedido.setLayoutManager(new androidx.recyclerview.widget.GridLayoutManager(requireContext(), 2));
         catalogoAdapter = new ProductoCatalogoPedidoAdapter(listaProductosFiltrada, esMayorista, (producto, cantidad, precioUnitario) -> {
             agregarProductoALista(producto, cantidad, precioUnitario);
         });
@@ -253,8 +253,42 @@ public class NuevoPedidoFragment extends Fragment {
     }
 
     private void cargarProductosCatalogo() {
+        if (RetrofitClient.API_TOKEN == null || RetrofitClient.API_TOKEN.isEmpty()) {
+            RetrofitClient.API_TOKEN = com.piccolifield.sharedpreferences.SplashStorage.obtenerToken(requireContext());
+        }
         pbLoadingCatalogo.setVisibility(View.VISIBLE);
         ApiService apiService = RetrofitClient.createService();
+        apiService.listarProductos(null).enqueue(new Callback<ApiResponse<List<Producto>>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<List<Producto>>> call, @NonNull Response<ApiResponse<List<Producto>>> response) {
+                if (!isAdded()) return;
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null && !response.body().getData().isEmpty()) {
+                    pbLoadingCatalogo.setVisibility(View.GONE);
+                    listaProductosOriginal.clear();
+                    for (Producto p : response.body().getData()) {
+                        if (p != null && !"INACTIVO".equalsIgnoreCase(p.getEstado())) {
+                            listaProductosOriginal.add(p);
+                        }
+                    }
+                    if (listaProductosOriginal.isEmpty()) {
+                        listaProductosOriginal.addAll(response.body().getData());
+                    }
+                    poblarSpinnersDinamicos();
+                    filtrarCatalogo();
+                } else {
+                    cargarProductosActivosFallback(apiService);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<List<Producto>>> call, @NonNull Throwable t) {
+                if (!isAdded()) return;
+                cargarProductosActivosFallback(apiService);
+            }
+        });
+    }
+
+    private void cargarProductosActivosFallback(ApiService apiService) {
         apiService.listarProductos("ACTIVO").enqueue(new Callback<ApiResponse<List<Producto>>>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse<List<Producto>>> call, @NonNull Response<ApiResponse<List<Producto>>> response) {

@@ -2,7 +2,6 @@ package com.piccolifield.adapter;
 
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +17,7 @@ import com.piccolifield.R;
 import com.piccolifield.data.remote.RetrofitClient;
 import com.piccolifield.data.remote.api.ApiService;
 import com.piccolifield.model.Producto;
+import com.piccolifield.util.UserPhotoLoader;
 
 import java.util.HashMap;
 import java.util.List;
@@ -80,32 +80,15 @@ public class ProductoCatalogoPedidoAdapter extends RecyclerView.Adapter<Producto
             holder.tvBadgeCriterioPrecio.setTextColor(Color.parseColor("#4A2B1C"));
         }
 
-        // Imagen del producto con caché
-        holder.ivFotoProductoCatalogo.setImageResource(R.drawable.botellasinicio);
+        // Imagen del producto con caché, soporte Base64 / URL directa / endpoint foto
         int idProd = producto.getIdProductos();
-        if (idProd > 0) {
-            if (cacheFotos.containsKey(idProd)) {
-                holder.ivFotoProductoCatalogo.setImageBitmap(cacheFotos.get(idProd));
-            } else {
-                ApiService apiService = RetrofitClient.createService();
-                apiService.obtenerFotoProducto(idProd).enqueue(new Callback<ResponseBody>() {
-                    @Override
-                    public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
-                        if (response.isSuccessful() && response.body() != null) {
-                            Bitmap bmp = BitmapFactory.decodeStream(response.body().byteStream());
-                            if (bmp != null) {
-                                cacheFotos.put(idProd, bmp);
-                                holder.ivFotoProductoCatalogo.post(() -> holder.ivFotoProductoCatalogo.setImageBitmap(bmp));
-                            }
-                        }
-                    }
+        holder.ivFotoProductoCatalogo.setTag(idProd);
+        holder.ivFotoProductoCatalogo.setImageResource(R.drawable.botellasinicio);
 
-                    @Override
-                    public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                        // Mantiene botellasinicio como foto por defecto
-                    }
-                });
-            }
+        if (idProd > 0 && cacheFotos.containsKey(idProd)) {
+            holder.ivFotoProductoCatalogo.setImageBitmap(cacheFotos.get(idProd));
+        } else {
+            cargarFotoProducto(holder.ivFotoProductoCatalogo, producto, idProd);
         }
 
         final int[] cantidadActual = {1};
@@ -132,9 +115,79 @@ public class ProductoCatalogoPedidoAdapter extends RecyclerView.Adapter<Producto
         });
     }
 
+    private void cargarFotoProducto(ImageView imageView, Producto producto, int idProd) {
+        String urlFoto = producto.getUrlFoto();
+
+        // 1. Si url_foto viene en Base64 desde la BD
+        if (urlFoto != null && !urlFoto.trim().isEmpty()) {
+            Bitmap b64 = UserPhotoLoader.decodeBase64OrDataUri(urlFoto);
+            if (b64 != null) {
+                if (idProd > 0) cacheFotos.put(idProd, b64);
+                imageView.setImageBitmap(b64);
+                return;
+            }
+        }
+
+        ApiService apiService = RetrofitClient.createService();
+
+        // 2. Consultar endpoint /api/supervision/productos/{id}/foto
+        if (idProd > 0) {
+            apiService.obtenerFotoProducto(idProd).enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        Bitmap bmp = UserPhotoLoader.decodeBitmapFromResponseBody(response.body());
+                        if (bmp != null) {
+                            cacheFotos.put(idProd, bmp);
+                            imageView.post(() -> {
+                                if (Integer.valueOf(idProd).equals(imageView.getTag())) {
+                                    imageView.setImageBitmap(bmp);
+                                }
+                            });
+                            return;
+                        }
+                    }
+                    // 3. Fallback si urlFoto es una ruta relativa o URL http
+                    intentarDescargarUrlFoto(apiService, imageView, urlFoto, idProd);
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                    intentarDescargarUrlFoto(apiService, imageView, urlFoto, idProd);
+                }
+            });
+        } else {
+            intentarDescargarUrlFoto(apiService, imageView, urlFoto, idProd);
+        }
+    }
+
+    private void intentarDescargarUrlFoto(ApiService apiService, ImageView imageView, String urlFoto, int idProd) {
+        String fullUrl = UserPhotoLoader.buildFullImageUrl(urlFoto);
+        if (fullUrl == null) return;
+        apiService.descargarArchivoPorUrl(fullUrl).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Bitmap bmp = UserPhotoLoader.decodeBitmapFromResponseBody(response.body());
+                    if (bmp != null) {
+                        if (idProd > 0) cacheFotos.put(idProd, bmp);
+                        imageView.post(() -> {
+                            if (Integer.valueOf(idProd).equals(imageView.getTag())) {
+                                imageView.setImageBitmap(bmp);
+                            }
+                        });
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {}
+        });
+    }
+
     @Override
     public int getItemCount() {
-        return listaProductos != null ? listaProductos.size() : 0;
+        return listaProductos.size();
     }
 
     public static Bitmap obtenerFotoCache(int idProd) {
@@ -153,8 +206,8 @@ public class ProductoCatalogoPedidoAdapter extends RecyclerView.Adapter<Producto
             tvDetalleProductoCatalogo = itemView.findViewById(R.id.tvDetalleProductoCatalogo);
             tvBadgeCriterioPrecio = itemView.findViewById(R.id.tvBadgeCriterioPrecio);
             tvPrecioProductoCatalogo = itemView.findViewById(R.id.tvPrecioProductoCatalogo);
-            tvCantidadCatalogo = itemView.findViewById(R.id.tvCantidadCatalogo);
             btnRestarCantCatalogo = itemView.findViewById(R.id.btnRestarCantCatalogo);
+            tvCantidadCatalogo = itemView.findViewById(R.id.tvCantidadCatalogo);
             btnSumarCantCatalogo = itemView.findViewById(R.id.btnSumarCantCatalogo);
             btnAgregarAlPedido = itemView.findViewById(R.id.btnAgregarAlPedido);
         }

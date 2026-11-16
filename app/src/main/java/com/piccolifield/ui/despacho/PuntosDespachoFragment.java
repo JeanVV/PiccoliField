@@ -69,6 +69,10 @@ public class PuntosDespachoFragment extends Fragment implements OnMapReadyCallba
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        if (RetrofitClient.API_TOKEN == null || RetrofitClient.API_TOKEN.isEmpty()) {
+            RetrofitClient.API_TOKEN = com.piccolifield.sharedpreferences.SplashStorage.obtenerToken(requireContext());
+        }
+
         setupRecyclerView();
         setupSpinnersFiltros();
         cargarDatosDesdeApi();
@@ -173,26 +177,28 @@ public class PuntosDespachoFragment extends Fragment implements OnMapReadyCallba
     }
 
     private void cargarDatosDesdeApi() {
+        if (RetrofitClient.API_TOKEN == null || RetrofitClient.API_TOKEN.isEmpty()) {
+            RetrofitClient.API_TOKEN = com.piccolifield.sharedpreferences.SplashStorage.obtenerToken(requireContext());
+        }
         ApiService apiService = RetrofitClient.createService();
+        // Solo obtener puntos del tipo DISTRIBUCION para que no salgan los VENTA
         apiService.listarPuntosVenta(null, "DISTRIBUCION", null, null).enqueue(new Callback<ApiResponse<List<PuntoDistribucion>>>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse<List<PuntoDistribucion>>> call, @NonNull Response<ApiResponse<List<PuntoDistribucion>>> response) {
                 if (!isAdded() || binding == null) return;
-
-                listaPuntosOriginal.clear();
                 if (response.isSuccessful() && response.body() != null && response.body().getData() != null && !response.body().getData().isEmpty()) {
+                    listaPuntosOriginal.clear();
                     listaPuntosOriginal.addAll(response.body().getData());
+                    sincronizarPuntosLocales();
+                    actualizarUI();
                 } else {
                     cargarPuntosRespaldo();
                 }
-                sincronizarPuntosLocales();
-                actualizarUI();
             }
 
             @Override
             public void onFailure(@NonNull Call<ApiResponse<List<PuntoDistribucion>>> call, @NonNull Throwable t) {
                 if (!isAdded() || binding == null) return;
-                listaPuntosOriginal.clear();
                 cargarPuntosRespaldo();
                 sincronizarPuntosLocales();
                 actualizarUI();

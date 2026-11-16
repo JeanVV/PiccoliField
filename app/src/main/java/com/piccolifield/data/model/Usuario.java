@@ -4,22 +4,22 @@ import com.google.gson.annotations.SerializedName;
 
 public class Usuario {
 
-    @SerializedName(value = "idUsuario", alternate = {"usuarioId", "id_usuario", "id"})
+    @SerializedName(value = "idUsuario", alternate = {"idUsuarios", "usuarioId", "id_usuario", "id_usuarios", "id"})
     private int idUsuario;
 
-    @SerializedName(value = "nombres", alternate = {"nombre"})
+    @SerializedName(value = "nombres", alternate = {"nombre", "nombre_completo"})
     private String nombres;
 
-    @SerializedName("apePaterno")
+    @SerializedName(value = "apePaterno", alternate = {"ape_paterno", "apellidoPaterno"})
     private String apePaterno;
 
-    @SerializedName("apeMaterno")
+    @SerializedName(value = "apeMaterno", alternate = {"ape_materno", "apellidoMaterno"})
     private String apeMaterno;
 
     @SerializedName(value = "correo", alternate = {"email"})
     private String correo;
 
-    @SerializedName("foto_perfil")
+    @SerializedName(value = "url_foto", alternate = {"foto_perfil", "urlFoto", "foto", "fotoPerfil", "foto_url", "imagen", "avatar", "foto_base64"})
     private String fotoPerfil;
 
     @SerializedName("rol") // ENUM('ADMINISTRADOR', 'PROMOTOR', 'IMPULSADOR')
@@ -113,6 +113,14 @@ public class Usuario {
 
     public void setFotoPerfil(String fotoPerfil) {
         this.fotoPerfil = fotoPerfil;
+    }
+
+    public String getUrlFoto() {
+        return fotoPerfil;
+    }
+
+    public void setUrlFoto(String urlFoto) {
+        this.fotoPerfil = urlFoto;
     }
 
     public String getRol() {

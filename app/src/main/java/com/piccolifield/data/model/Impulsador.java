@@ -3,19 +3,19 @@ package com.piccolifield.data.model;
 import com.google.gson.annotations.SerializedName;
 
 public class Impulsador {
-    @SerializedName("idUsuario")
+    @SerializedName(value = "idUsuario", alternate = {"idUsuarios", "id_usuario", "usuarioId", "id"})
     private int idUsuario;
 
-    @SerializedName("nombre_completo")
+    @SerializedName(value = "nombre_completo", alternate = {"nombres", "nombre"})
     private String nombreCompleto;
 
-    @SerializedName("correo")
+    @SerializedName(value = "correo", alternate = {"email"})
     private String correo;
 
     @SerializedName("rol")
     private String rol;
 
-    @SerializedName("url_foto")
+    @SerializedName(value = "url_foto", alternate = {"foto_perfil", "foto", "urlFoto", "imagen"})
     private String urlFoto;
 
     @SerializedName("meta_ventas")

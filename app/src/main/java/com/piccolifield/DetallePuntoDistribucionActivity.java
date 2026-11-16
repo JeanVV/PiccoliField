@@ -84,6 +84,11 @@ public class DetallePuntoDistribucionActivity extends AppCompatActivity {
             return insets;
         });
 
+        // 0. Asegurar token de sesión
+        if (RetrofitClient.API_TOKEN == null || RetrofitClient.API_TOKEN.isEmpty()) {
+            RetrofitClient.API_TOKEN = com.piccolifield.sharedpreferences.SplashStorage.obtenerToken(this);
+        }
+
         // 1. Vincular Vistas
         btnBack = findViewById(R.id.btnBack);
         pbLoading = findViewById(R.id.pbLoading);
@@ -127,7 +132,17 @@ public class DetallePuntoDistribucionActivity extends AppCompatActivity {
             direccionPunto = getIntent().getStringExtra("DIRECCION");
             distanciaPunto = getIntent().getStringExtra("DISTANCIA");
             estadoPunto = getIntent().getStringExtra("ESTADO_PDV");
-            badgeNumero = getIntent().getIntExtra("BADGE_NUMERO", idPuntoVenta > 0 ? idPuntoVenta : 1);
+            badgeNumero = getIntent().getIntExtra("BADGE_NUMERO", -1);
+            if (badgeNumero <= 0) {
+                String badgeStr = getIntent().getStringExtra("BADGE_NUMERO");
+                try {
+                    badgeNumero = (badgeStr != null && !badgeStr.trim().isEmpty())
+                            ? Integer.parseInt(badgeStr.trim())
+                            : Math.max(1, idPuntoVenta);
+                } catch (NumberFormatException e) {
+                    badgeNumero = Math.max(1, idPuntoVenta);
+                }
+            }
 
             if (codigoPuntoVenta == null || codigoPuntoVenta.trim().isEmpty()) {
                 codigoPuntoVenta = String.format(Locale.getDefault(), "PDV-%04d", Math.max(1, idPuntoVenta));
@@ -230,12 +245,44 @@ public class DetallePuntoDistribucionActivity extends AppCompatActivity {
                     puntoDistribucionInfo = response.body().getData();
                     aplicarDatosPunto(puntoDistribucionInfo);
                 } else {
-                    actualizarVistaDetalle();
+                    cargarDetalleSupervisionFallback(apiService, id);
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<ApiResponse<PuntoDistribucion>> call, @NonNull Throwable t) {
+                cargarDetalleSupervisionFallback(apiService, id);
+            }
+        });
+    }
+
+    private void cargarDetalleSupervisionFallback(ApiService apiService, int id) {
+        apiService.obtenerDetallePuntoVentaSupervision(id).enqueue(new Callback<ApiResponse<com.piccolifield.data.model.PuntoVentaDetalle>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<com.piccolifield.data.model.PuntoVentaDetalle>> call, @NonNull Response<ApiResponse<com.piccolifield.data.model.PuntoVentaDetalle>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                    com.piccolifield.data.model.PuntoVentaDetalle d = response.body().getData();
+                    if (d.getPuntoVenta() != null && !d.getPuntoVenta().trim().isEmpty()) {
+                        nombrePuntoVenta = d.getPuntoVenta().trim();
+                    }
+                    if (d.getCodigo() != null && !d.getCodigo().trim().isEmpty()) {
+                        codigoPuntoVenta = d.getCodigo().trim();
+                    }
+                    if (d.getTipo() != null && !d.getTipo().trim().isEmpty()) {
+                        tipoNegocioPunto = d.getTipo().trim().toUpperCase(Locale.ROOT).contains("MAYOR") ? "Mayorista" : "Minorista";
+                    }
+                    if (d.getDireccion() != null && !d.getDireccion().trim().isEmpty()) {
+                        direccionPunto = d.getDireccion().trim();
+                    }
+                    if (d.getEstado() != null && !d.getEstado().trim().isEmpty()) {
+                        estadoPunto = d.getEstado().trim();
+                    }
+                }
+                actualizarVistaDetalle();
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<com.piccolifield.data.model.PuntoVentaDetalle>> call, @NonNull Throwable t) {
                 actualizarVistaDetalle();
             }
         });

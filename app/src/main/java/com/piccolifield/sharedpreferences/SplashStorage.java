@@ -61,6 +61,7 @@ public class SplashStorage {
         editor.remove("user_id");
         editor.remove("user_name");
         editor.remove("user_email");
+        editor.remove("user_photo_url");
         editor.apply();
     }
 
@@ -127,6 +128,30 @@ public class SplashStorage {
     public static String obtenerCorreoUsuario(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         return sharedPreferences.getString("user_email", "");
+    }
+
+    public static void guardarFotoUsuario(Context context, String urlFoto) {
+        if (context == null) return;
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        sharedPreferences.edit().putString("user_photo_url", urlFoto != null ? urlFoto : "").apply();
+    }
+
+    public static String obtenerFotoUsuario(Context context) {
+        if (context == null) return "";
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        return sharedPreferences.getString("user_photo_url", "");
+    }
+
+    public static void guardarFotoUsuarioBase64Cache(Context context, int idUsuario, String base64Data) {
+        if (context == null || idUsuario <= 0) return;
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        sharedPreferences.edit().putString("user_photo_b64_" + idUsuario, base64Data != null ? base64Data : "").apply();
+    }
+
+    public static String obtenerFotoUsuarioBase64Cache(Context context, int idUsuario) {
+        if (context == null || idUsuario <= 0) return "";
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        return sharedPreferences.getString("user_photo_b64_" + idUsuario, "");
     }
 
     public static void guardarRegistroAsistenciaLocal(Context context, RegistroAsistencia registro) {

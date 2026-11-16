@@ -52,6 +52,33 @@ public class DetalleVendedorActivity extends AppCompatActivity {
 
     private int idUsuarioSeleccionado;
 
+    private final androidx.activity.result.ActivityResultLauncher<String> pickVendedorPhotoLauncher =
+            registerForActivityResult(new androidx.activity.result.contract.ActivityResultContracts.GetContent(), uri -> {
+                if (uri != null && idUsuarioSeleccionado > 0) {
+                    Toast.makeText(this, "Actualizando foto del vendedor...", Toast.LENGTH_SHORT).show();
+                    com.piccolifield.util.UserPhotoLoader.subirFotoUsuario(
+                            this,
+                            idUsuarioSeleccionado,
+                            uri,
+                            false,
+                            new com.piccolifield.util.UserPhotoLoader.OnFotoActualizadaListener() {
+                                @Override
+                                public void onSuccess(Bitmap nuevoBitmap, String nuevaUrlFoto, String mensaje) {
+                                    if (ivPerfilVendedor != null && nuevoBitmap != null) {
+                                        ivPerfilVendedor.setImageBitmap(nuevoBitmap);
+                                    }
+                                    Toast.makeText(DetalleVendedorActivity.this, mensaje, Toast.LENGTH_SHORT).show();
+                                }
+
+                                @Override
+                                public void onError(String mensajeError) {
+                                    Toast.makeText(DetalleVendedorActivity.this, mensajeError, Toast.LENGTH_LONG).show();
+                                }
+                            }
+                    );
+                }
+            });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -146,21 +173,23 @@ public class DetalleVendedorActivity extends AppCompatActivity {
                         progressBarAsignacion.setProgress(porcentajeInt);
                         tvCantidades.setText(getString(R.string.label_vendidos, cantidadVendida, meta));
                         
-                        apiService.obtenerFotoImpulsador(idUsuarioSeleccionado).enqueue(new Callback<ResponseBody>() {
-                            @Override
-                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                                if (response.isSuccessful() && response.body() != null) {
-                                    Bitmap bmp = BitmapFactory.decodeStream(response.body().byteStream());
-                                    ivPerfilVendedor.post(() -> ivPerfilVendedor.setImageBitmap(bmp));
-                                } else {
-                                    ivPerfilVendedor.setImageResource(R.drawable.ic_avatar_placeholder);
-                                }
-                            }
-                            @Override
-                            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                                ivPerfilVendedor.setImageResource(R.drawable.ic_avatar_placeholder);
-                            }
-                        });
+                        com.piccolifield.util.UserPhotoLoader.loadUserPhoto(
+                                DetalleVendedorActivity.this,
+                                idUsuarioSeleccionado,
+                                vendedor.getUrlFoto(),
+                                vendedor.getNombre(),
+                                ivPerfilVendedor,
+                                R.drawable.ic_avatar_placeholder
+                        );
+                        if (ivPerfilVendedor != null) {
+                            ivPerfilVendedor.setOnClickListener(v ->
+                                    new androidx.appcompat.app.AlertDialog.Builder(DetalleVendedorActivity.this)
+                                            .setTitle("Actualizar foto de " + vendedor.getNombre())
+                                            .setItems(new String[]{"Elegir nueva foto de la galería"}, (d, w) -> pickVendedorPhotoLauncher.launch("image/*"))
+                                            .setNegativeButton("Cancelar", null)
+                                            .show()
+                            );
+                        }
                     }
 
                 } else {

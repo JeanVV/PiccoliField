@@ -134,23 +134,15 @@ public class DetallePuntoVentaSupervisionActivity extends AppCompatActivity {
                             tvImpulsadorNombre.setText(detalle.getImpulsadorNombre());
                             tvImpulsadorCorreo.setText(detalle.getImpulsadorCorreo());
                             
-                            if (detalle.getIdImpulsador() != null && detalle.getIdImpulsador() > 0) {
-                                apiService.obtenerFotoImpulsador(detalle.getIdImpulsador()).enqueue(new Callback<ResponseBody>() {
-                                    @Override
-                                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                                        if (response.isSuccessful() && response.body() != null) {
-                                            Bitmap bmp = BitmapFactory.decodeStream(response.body().byteStream());
-                                            ivImpulsadorFoto.post(() -> ivImpulsadorFoto.setImageBitmap(bmp));
-                                        } else {
-                                            ivImpulsadorFoto.setImageResource(R.drawable.ic_avatar_placeholder);
-                                        }
-                                    }
-                                    @Override
-                                    public void onFailure(Call<ResponseBody> call, Throwable t) {
-                                        ivImpulsadorFoto.setImageResource(R.drawable.ic_avatar_placeholder);
-                                    }
-                                });
-                            }
+                            int idImp = detalle.getIdImpulsador() != null ? detalle.getIdImpulsador() : 0;
+                            com.piccolifield.util.UserPhotoLoader.loadUserPhoto(
+                                    DetallePuntoVentaSupervisionActivity.this,
+                                    idImp,
+                                    detalle.getImpulsadorFoto(),
+                                    detalle.getImpulsadorNombre(),
+                                    ivImpulsadorFoto,
+                                    R.drawable.ic_avatar_placeholder
+                            );
                         } else {
                             tvImpulsadorNombre.setText("Sin Asignar");
                             tvImpulsadorCorreo.setText("---");

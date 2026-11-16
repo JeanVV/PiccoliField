@@ -1,16 +1,31 @@
 package com.piccolifield.data.model;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
 
 public class RegistroAsistencia implements Serializable {
+    @SerializedName(value = "idAsistencias", alternate = {"id_asistencia", "idAsistencia"})
     private int idAsistencias;
+
     private String id_turno;
     private String tipo;
+
+    @SerializedName(value = "idUsuario", alternate = {"idUsuarios", "id_usuario", "id_usuarios", "usuarioId", "id", "idColaborador", "id_colaborador"})
     private int idUsuario;
+
+    @SerializedName(value = "nombres", alternate = {"nombre", "nombre_completo"})
     private String nombres;
+
+    @SerializedName(value = "apePaterno", alternate = {"ape_paterno", "apellidoPaterno"})
     private String apePaterno;
+
+    @SerializedName(value = "apeMaterno", alternate = {"ape_materno", "apellidoMaterno"})
     private String apeMaterno;
+
+    @SerializedName(value = "url_foto", alternate = {"foto_perfil", "foto_url", "urlFoto", "foto", "fotoPerfil", "imagen", "avatar", "foto_base64"})
     private String foto_perfil;
+
     private String sede;
     private String estado;
     private String fecha_hora_dispositivo;

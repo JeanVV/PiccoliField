@@ -18,6 +18,9 @@ public class VendedorDetalle {
     @SerializedName("meta_asignada")
     private int meta;
 
+    @SerializedName(value = "url_foto", alternate = {"foto_perfil", "urlFoto", "foto"})
+    private String urlFoto;
+
     public String getNombre() { return nombre; }
     public String getLocal_pertenece() { return local_pertenece; }
     public double getMonto_vendido() { return monto_vendido; }
@@ -25,4 +28,5 @@ public class VendedorDetalle {
     public List<ProductoVendido> getProductos_vendidos() { return productos_vendidos; }
     public double getCantidadVendida() { return cantidadVendida; }
     public int getMeta() { return meta; }
+    public String getUrlFoto() { return urlFoto; }
 }

@@ -185,6 +185,20 @@ public class AsistenciasFragment extends Fragment {
             rol = "COLABORADOR";
         }
         binding.tvRolColaborador.setText("Rol: " + rol.toUpperCase());
+
+        if (binding.ivFotoColaboradorHeader != null) {
+            com.piccolifield.util.UserPhotoLoader.loadMyProfilePhoto(
+                    requireContext(),
+                    binding.ivFotoColaboradorHeader,
+                    R.drawable.ic_avatar_placeholder
+            );
+            com.piccolifield.util.UserPhotoLoader.sincronizarPerfilRaw(
+                    requireContext(),
+                    binding.ivFotoColaboradorHeader,
+                    R.drawable.ic_avatar_placeholder,
+                    null
+            );
+        }
     }
 
     private static final TimeZone TIME_ZONE_LIMA = TimeZone.getTimeZone("America/Lima");

@@ -4,34 +4,41 @@ import com.google.gson.annotations.SerializedName;
 
 public class Producto {
 
-    @SerializedName(value = "idProductos", alternate = {"id", "id_producto", "idProducto"})
+    @SerializedName(value = "idProductos", alternate = {"id", "id_producto", "idProducto", "id_productos"})
     private int idProductos;
 
-    @SerializedName("sku")
+    @SerializedName(value = "sku", alternate = {"codigo", "codigo_sku", "codigoSku"})
     private String sku;
 
-    @SerializedName(value = "codigo_ean", alternate = {"codigoEan", "ean"})
+    @SerializedName(value = "codigo_ean", alternate = {"codigoEan", "ean", "codigo_barras"})
     private String codigoEan;
 
-    @SerializedName(value = "producto", alternate = {"nombre", "nombre_producto", "descripcion"})
+    @SerializedName(value = "producto", alternate = {"nombre", "nombre_producto", "nombreProducto", "descripcion"})
     private String producto;
 
-    @SerializedName("categoria")
+    @SerializedName(value = "categoria", alternate = {"nombre_categoria", "categoria_nombre"})
     private String categoria;
 
-    @SerializedName("presentacion")
+    @SerializedName(value = "presentacion", alternate = {"unidad", "unidad_medida", "formato"})
     private String presentacion;
 
     @SerializedName("estado") // ENUM('ACTIVO', 'INACTIVO')
     private String estado;
 
-    @SerializedName(value = "precio", alternate = {"precio_unitario", "precio_venta", "precio_minorista", "precioMinorista"})
+    @SerializedName(value = "precio", alternate = {
+            "precio_unitario", "precioUnitario", "precio_venta", "precioVenta",
+            "precio_minorista", "precioMinorista", "precio_publico", "precioPublico"
+    })
     private double precioMinorista;
 
-    @SerializedName(value = "precio_mayorista", alternate = {"precioMayorista", "precio_mayor"})
+    @SerializedName(value = "precio_mayorista", alternate = {
+            "precioMayorista", "precio_mayor", "precioMayor", "precio_distribuidor"
+    })
     private double precioMayorista;
 
-    @SerializedName(value = "url_foto", alternate = {"urlFoto", "foto"})
+    @SerializedName(value = "url_foto", alternate = {
+            "urlFoto", "foto", "imagen", "url_imagen", "foto_producto", "url_foto_producto"
+    })
     private String urlFoto;
 
     public Producto() {}
@@ -55,9 +62,9 @@ public class Producto {
     public int getIdProductos() { return idProductos; }
     public String getSku() { return sku != null && !sku.isEmpty() ? sku : String.format("SKU-%02d", Math.max(1, idProductos)); }
     public String getCodigoEan() { return codigoEan != null ? codigoEan : ""; }
-    public String getProducto() { return producto != null && !producto.isEmpty() ? producto : "Producto Piccoli #" + idProductos; }
-    public String getCategoria() { return categoria != null && !categoria.isEmpty() ? categoria : "Licores"; }
-    public String getPresentacion() { return presentacion != null && !presentacion.isEmpty() ? presentacion : "Botella 750ml"; }
+    public String getProducto() { return producto != null && !producto.isEmpty() ? producto : "Producto #" + idProductos; }
+    public String getCategoria() { return categoria != null && !categoria.isEmpty() ? categoria : "General"; }
+    public String getPresentacion() { return presentacion != null && !presentacion.isEmpty() ? presentacion : "Unidad"; }
     public String getEstado() { return estado != null ? estado : "ACTIVO"; }
     public String getUrlFoto() { return urlFoto; }
 

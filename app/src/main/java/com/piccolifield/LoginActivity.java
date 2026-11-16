@@ -112,18 +112,43 @@ public class LoginActivity extends AppCompatActivity {
                                 JSONObject userObj = json.optJSONObject("user");
                                 if (userObj == null) userObj = json.optJSONObject("usuario");
                                 if (userObj == null && json.opt("data") instanceof JSONObject) {
-                                    userObj = json.optJSONObject("data");
+                                    JSONObject dataJsonObj = json.optJSONObject("data");
+                                    if (dataJsonObj != null) {
+                                        if (dataJsonObj.optJSONObject("usuario") != null) {
+                                            userObj = dataJsonObj.optJSONObject("usuario");
+                                        } else if (dataJsonObj.optJSONObject("user") != null) {
+                                            userObj = dataJsonObj.optJSONObject("user");
+                                        } else {
+                                            userObj = dataJsonObj;
+                                        }
+                                    }
                                 }
                                 if (userObj != null) {
                                     String rol = userObj.optString("rol", userObj.optString("role", ""));
-                                    int idUsuario = userObj.optInt("idUsuario", userObj.optInt("id_usuario", userObj.optInt("id", 0)));
-                                    String nombre = userObj.optString("nombres", userObj.optString("nombre", ""));
+                                    int idUsuario = userObj.optInt("idUsuario",
+                                            userObj.optInt("idUsuarios",
+                                                    userObj.optInt("id_usuario",
+                                                            userObj.optInt("id", 0))));
+                                    String nombre = userObj.optString("nombres", userObj.optString("nombre", userObj.optString("nombre_completo", "")));
+                                    String apePat = userObj.optString("apePaterno", userObj.optString("ape_paterno", ""));
+                                    String apeMat = userObj.optString("apeMaterno", userObj.optString("ape_materno", ""));
+                                    String nombreCompleto = (nombre + " " + apePat + " " + apeMat).trim();
                                     String correo = userObj.optString("correo", userObj.optString("email", ""));
+                                    String urlFoto = userObj.optString("url_foto",
+                                            userObj.optString("foto_perfil",
+                                                    userObj.optString("foto",
+                                                            userObj.optString("urlFoto", ""))));
 
                                     if (!rol.isEmpty()) SplashStorage.guardarRol(LoginActivity.this, rol);
                                     if (idUsuario > 0) SplashStorage.guardarUsuarioId(LoginActivity.this, idUsuario);
-                                    if (!nombre.isEmpty()) SplashStorage.guardarNombreUsuario(LoginActivity.this, nombre);
+                                    if (!nombreCompleto.isEmpty()) SplashStorage.guardarNombreUsuario(LoginActivity.this, nombreCompleto);
                                     if (!correo.isEmpty()) SplashStorage.guardarCorreoUsuario(LoginActivity.this, correo);
+                                    if (!urlFoto.isEmpty()) {
+                                        SplashStorage.guardarFotoUsuario(LoginActivity.this, urlFoto);
+                                        if (idUsuario > 0 && (urlFoto.startsWith("data:") || urlFoto.length() > 100)) {
+                                            SplashStorage.guardarFotoUsuarioBase64Cache(LoginActivity.this, idUsuario, urlFoto);
+                                        }
+                                    }
                                 }
                             }
 

@@ -14,8 +14,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingHorizontal="16dp"
-        android:paddingTop="16dp"
-        android:paddingBottom="12dp"
+        android:paddingTop="14dp"
+        android:paddingBottom="10dp"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
@@ -36,10 +36,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:fontFamily="serif"
-            android:text="Detalle del punto de distribución"
+            android:text="Detalle del Punto"
             android:textColor="@color/cafe_profundo"
-            android:textSize="17sp"
+            android:textSize="18sp"
             android:textStyle="bold" />
     </RelativeLayout>
 
@@ -47,7 +46,7 @@
         android:id="@+id/pbLoading"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="12dp"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -66,347 +65,236 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingHorizontal="16dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="30dp">
+            android:paddingTop="4dp"
+            android:paddingBottom="28dp">
 
-            <!-- 2. Información del Punto (Badge Circular, Nombre, Código, Mayorista/Minorista, Dirección) -->
+            <!-- 2. Imagen Hero del Punto de Distribución -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="156dp"
+                android:layout_marginBottom="14dp"
+                app:cardBackgroundColor="#F5E4CA"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="1dp"
+                app:strokeColor="#E8D8C2"
+                app:strokeWidth="1dp">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@null"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/fondopicolli" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="#223E1F0D" />
+
+                    <!-- Badge numérico en esquina superior izquierda -->
+                    <FrameLayout
+                        android:id="@+id/frameBadgeIcon"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
+                        android:layout_gravity="top|start"
+                        android:layout_margin="12dp"
+                        android:background="@drawable/bg_stat_icon_circle"
+                        android:backgroundTint="@color/cafe_profundo">
+
+                        <TextView
+                            android:id="@+id/tvBadgeNumero"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:text="1"
+                            android:textColor="@color/white"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+                    </FrameLayout>
+
+                    <!-- Estado Activo en esquina superior derecha -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="top|end"
+                        android:layout_margin="12dp"
+                        android:background="@drawable/bg_search_rounded"
+                        android:backgroundTint="#E8F5E9"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="4dp">
+
+                        <ImageView
+                            android:layout_width="8dp"
+                            android:layout_height="8dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_bullet_point"
+                            app:tint="#2E7D32" />
+
+                        <TextView
+                            android:id="@+id/tvEstadoBadge"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="5dp"
+                            android:text="ACTIVO"
+                            android:textColor="#2E7D32"
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </FrameLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 3. Información del Punto (Nombre, Código en pill crema, Dirección, Mayorista/Minorista) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:layout_marginBottom="18dp"
+                android:orientation="vertical">
 
-                <!-- Badge Avatar con Número -->
-                <FrameLayout
-                    android:id="@+id/frameBadgeIcon"
-                    android:layout_width="52dp"
-                    android:layout_height="52dp"
-                    android:background="@drawable/bg_stat_icon_circle"
-                    android:backgroundTint="@color/cafe_profundo">
-
-                    <TextView
-                        android:id="@+id/tvBadgeNumero"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:fontFamily="serif"
-                        android:text="1"
-                        android:textColor="@color/white"
-                        android:textSize="19sp"
-                        android:textStyle="bold" />
-                </FrameLayout>
-
+                <!-- Fila Nombre + Código -->
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="14dp"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
-                    <!-- Nombre del Punto de Distribución -->
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_store"
+                        app:tint="@color/cafe_profundo" />
+
                     <TextView
                         android:id="@+id/tvNombreTienda"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:fontFamily="serif"
-                        android:text="Licorería El Buen Sabor"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
+                        android:ellipsize="end"
+                        android:maxLines="2"
+                        android:text="Bodega El Sol"
                         android:textColor="@color/cafe_profundo"
-                        android:textSize="20sp"
+                        android:textSize="19sp"
                         android:textStyle="bold" />
 
-                    <!-- Código del Punto -->
                     <TextView
                         android:id="@+id/tvCodigoDetalleSub"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
+                        android:background="@drawable/bg_search_rounded"
+                        android:backgroundTint="#F6E5C6"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="4dp"
                         android:text="Código: PDV-001"
-                        android:textColor="@color/chocolate"
-                        android:textSize="13sp"
+                        android:textColor="@color/cafe_profundo"
+                        android:textSize="12sp"
                         android:textStyle="bold" />
+                </LinearLayout>
 
-                    <!-- Badges de Criterio (Mayorista / Minorista) y Estado -->
-                    <LinearLayout
+                <!-- Fila Dirección -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_location_pin"
+                        app:tint="@color/cafe_profundo" />
+
+                    <TextView
+                        android:id="@+id/tvDireccionVal"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_weight="1"
+                        android:text="Av. Principal 123, Chiclayo"
+                        android:textColor="@color/chocolate"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+                <!-- Fila Criterio de Negocio (Mayorista / Minorista) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_nav_reports"
+                        app:tint="@color/cafe_profundo" />
+
+                    <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
+                        android:layout_marginStart="8dp"
+                        android:text="Tipo de negocio:"
+                        android:textColor="@color/chocolate"
+                        android:textSize="13sp" />
 
-                        <TextView
-                            android:id="@+id/tvTipoNegocioBadge"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/bg_search_rounded"
-                            android:backgroundTint="#F3E4C7"
-                            android:paddingHorizontal="10dp"
-                            android:paddingVertical="3dp"
-                            android:text="Minorista"
-                            android:textColor="@color/cafe_profundo"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:background="@drawable/bg_search_rounded"
-                            android:backgroundTint="#E8F5E9"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal"
-                            android:paddingHorizontal="10dp"
-                            android:paddingVertical="3dp">
-
-                            <ImageView
-                                android:layout_width="10dp"
-                                android:layout_height="10dp"
-                                android:contentDescription="@null"
-                                android:src="@drawable/ic_bullet_point"
-                                app:tint="#2E7D32" />
-
-                            <TextView
-                                android:id="@+id/tvEstadoBadge"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="4dp"
-                                android:text="ACTIVO"
-                                android:textColor="#2E7D32"
-                                android:textSize="11sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-                    <!-- Dirección -->
-                    <LinearLayout
+                    <TextView
+                        android:id="@+id/tvTipoNegocioBadge"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:layout_width="14dp"
-                            android:layout_height="14dp"
-                            android:contentDescription="@null"
-                            android:src="@drawable/ic_location_pin"
-                            app:tint="@color/color_text_muted" />
-
-                        <TextView
-                            android:id="@+id/tvDireccionVal"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="4dp"
-                            android:text="Av. Principal 123, Lima"
-                            android:textColor="@color/color_text_muted"
-                            android:textSize="12sp" />
-                    </LinearLayout>
-
+                        android:layout_marginStart="6dp"
+                        android:background="@drawable/bg_search_rounded"
+                        android:backgroundTint="#F3E4C7"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="2dp"
+                        android:text="Minorista"
+                        android:textColor="@color/cafe_profundo"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- 3. Fila de 3 Tarjetas de Info (Código, Tipo de Negocio, Distancia) -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:baselineAligned="false"
-                android:orientation="horizontal">
-
-                <!-- Card 1: Código del Punto -->
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
-                    android:layout_height="80dp"
-                    android:layout_marginEnd="4dp"
-                    android:layout_weight="1"
-                    app:cardBackgroundColor="@color/marfil_suave"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="0dp"
-                    app:strokeColor="#E5D5C0"
-                    app:strokeWidth="1dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingHorizontal="6dp">
-
-                        <FrameLayout
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:background="@drawable/bg_stat_icon_circle">
-
-                            <ImageView
-                                android:layout_width="16dp"
-                                android:layout_height="16dp"
-                                android:layout_gravity="center"
-                                android:contentDescription="@null"
-                                android:src="@drawable/ic_store"
-                                app:tint="@color/cafe_profundo" />
-                        </FrameLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="6dp"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Código"
-                                android:textColor="@color/color_text_muted"
-                                android:textSize="10sp" />
-
-                            <TextView
-                                android:id="@+id/tvPedidoNumVal"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="PDV-001"
-                                android:textColor="@color/cafe_profundo"
-                                android:textSize="13sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <!-- Card 2: Mayorista / Minorista -->
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
-                    android:layout_height="80dp"
-                    android:layout_marginHorizontal="2dp"
-                    android:layout_weight="1"
-                    app:cardBackgroundColor="@color/marfil_suave"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="0dp"
-                    app:strokeColor="#E5D5C0"
-                    app:strokeWidth="1dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingHorizontal="6dp">
-
-                        <FrameLayout
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:background="@drawable/bg_stat_icon_circle">
-
-                            <ImageView
-                                android:layout_width="16dp"
-                                android:layout_height="16dp"
-                                android:layout_gravity="center"
-                                android:contentDescription="@null"
-                                android:src="@drawable/ic_nav_reports"
-                                app:tint="@color/cafe_profundo" />
-                        </FrameLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="6dp"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Criterio"
-                                android:textColor="@color/color_text_muted"
-                                android:textSize="10sp" />
-
-                            <TextView
-                                android:id="@+id/tvRepartidorVal"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Minorista"
-                                android:textColor="@color/cafe_profundo"
-                                android:textSize="13sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <!-- Card 3: Distancia -->
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
-                    android:layout_height="80dp"
-                    android:layout_marginStart="4dp"
-                    android:layout_weight="1"
-                    app:cardBackgroundColor="@color/marfil_suave"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="0dp"
-                    app:strokeColor="#E5D5C0"
-                    app:strokeWidth="1dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingHorizontal="6dp">
-
-                        <FrameLayout
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:background="@drawable/bg_stat_icon_circle">
-
-                            <ImageView
-                                android:layout_width="16dp"
-                                android:layout_height="16dp"
-                                android:layout_gravity="center"
-                                android:contentDescription="@null"
-                                android:src="@drawable/ic_location_pin"
-                                app:tint="@color/cafe_profundo" />
-                        </FrameLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="6dp"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Distancia"
-                                android:textColor="@color/color_text_muted"
-                                android:textSize="10sp" />
-
-                            <TextView
-                                android:id="@+id/tvDistanciaVal"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="0.8 km"
-                                android:textColor="@color/cafe_profundo"
-                                android:textSize="13sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-            </LinearLayout>
-
-            <!-- 4. Sección "Pedidos del punto" con enlace "+ Nuevo Pedido" -->
+            <!-- 4. Sección "Pedidos del Punto" con botón pill oscuro "Nuevo Pedido +" -->
             <RelativeLayout
                 android:id="@+id/layoutProductosHeader"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="4dp">
 
-                <TextView
-                    android:id="@+id/tvProductosTitle"
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
-                    android:fontFamily="serif"
-                    android:text="Pedidos del punto"
-                    android:textColor="@color/cafe_profundo"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:layout_centerVertical="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_store"
+                        app:tint="@color/dorado_premium" />
+
+                    <TextView
+                        android:id="@+id/tvProductosTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:text="Pedidos del Punto"
+                        android:textColor="@color/cafe_profundo"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/btnNuevoPedido"
@@ -414,13 +302,15 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
-                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:background="@drawable/bg_search_rounded"
+                    android:backgroundTint="@color/cafe_profundo"
                     android:clickable="true"
                     android:focusable="true"
-                    android:padding="6dp"
-                    android:text="+ Nuevo Pedido"
-                    android:textColor="@color/caramelo"
-                    android:textSize="14sp"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="8dp"
+                    android:text="Nuevo Pedido +"
+                    android:textColor="@color/white"
+                    android:textSize="13sp"
                     android:textStyle="bold" />
             </RelativeLayout>
 
@@ -429,7 +319,7 @@
                 android:id="@+id/tvPedidosSub"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="12dp"
                 android:text="0 pedidos registrados"
                 android:textColor="@color/color_text_muted"
                 android:textSize="12sp" />
@@ -439,22 +329,186 @@
                 android:id="@+id/rvPedidos"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
+                android:layout_marginBottom="16dp"
                 android:nestedScrollingEnabled="false"
                 tools:listitem="@layout/item_pedido" />
 
-            <!-- 5. Botón de Acción "Ver ruta de entrega" -->
+            <!-- 5. Tarjeta Resumen del Punto (Código, Criterio, Distancia) estilo mockup -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="#F5E4CA"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#E8D2B0"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_nav_reports"
+                            app:tint="@color/dorado_premium" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:text="Resumen del Punto"
+                            android:textColor="@color/cafe_profundo"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:baselineAligned="false"
+                        android:orientation="horizontal">
+
+                        <!-- Col 1: Código -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:contentDescription="@null"
+                                android:src="@drawable/ic_store"
+                                app:tint="@color/cafe_profundo" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="Código"
+                                android:textColor="@color/chocolate"
+                                android:textSize="11sp" />
+
+                            <TextView
+                                android:id="@+id/tvPedidoNumVal"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="PDV-001"
+                                android:textColor="@color/cafe_profundo"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="1dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginVertical="6dp"
+                            android:background="#DEC7A6" />
+
+                        <!-- Col 2: Criterio (Mayorista / Minorista) -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:contentDescription="@null"
+                                android:src="@drawable/ic_person"
+                                app:tint="@color/cafe_profundo" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="Criterio"
+                                android:textColor="@color/chocolate"
+                                android:textSize="11sp" />
+
+                            <TextView
+                                android:id="@+id/tvRepartidorVal"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="Minorista"
+                                android:textColor="@color/cafe_profundo"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="1dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginVertical="6dp"
+                            android:background="#DEC7A6" />
+
+                        <!-- Col 3: Distancia -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:contentDescription="@null"
+                                android:src="@drawable/ic_location_pin"
+                                app:tint="@color/cafe_profundo" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="Distancia"
+                                android:textColor="@color/chocolate"
+                                android:textSize="11sp" />
+
+                            <TextView
+                                android:id="@+id/tvDistanciaVal"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="0.8 km"
+                                android:textColor="@color/cafe_profundo"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 6. Botón de Acción "Ver ruta de entrega" -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnVerRuta"
                 android:layout_width="match_parent"
-                android:layout_height="52dp"
+                android:layout_height="50dp"
                 android:text="Ver ruta de entrega"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
                 android:textSize="15sp"
                 android:textStyle="bold"
                 app:backgroundTint="@color/cafe_profundo"
-                app:cornerRadius="26dp"
+                app:cornerRadius="25dp"
                 app:icon="@drawable/ic_navigation_directions"
                 app:iconGravity="textStart"
                 app:iconPadding="8dp"

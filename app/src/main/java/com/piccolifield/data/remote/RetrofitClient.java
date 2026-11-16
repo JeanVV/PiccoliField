@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Interceptor;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -14,6 +15,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
+    public static final String BASE_SERVER_URL = "https://piccolifield-api-smkc.onrender.com/";
     public static final String URL_API_SERVICE = "https://piccolifield-api-smkc.onrender.com/api/";
     public static String API_TOKEN;
 
@@ -22,8 +24,18 @@ public class RetrofitClient {
         public Response intercept(Chain chain) throws IOException {
             Request original = chain.request();
             Request.Builder requestBuilder = original.newBuilder()
-                    .header("Content-Type", "application/json")
-                    .header("Accept", "application/json");
+                    .header("Accept", "application/json, image/*, */*");
+
+            boolean esMultipart = false;
+            if (original.body() != null && original.body().contentType() != null) {
+                MediaType contentType = original.body().contentType();
+                if ("multipart".equalsIgnoreCase(contentType.type())) {
+                    esMultipart = true;
+                }
+            }
+            if (!esMultipart && original.body() != null && original.header("Content-Type") == null) {
+                requestBuilder.header("Content-Type", "application/json");
+            }
 
             String token = API_TOKEN;
             if (token != null && !token.isEmpty()) {

@@ -17,6 +17,7 @@ import com.piccolifield.data.model.TurnoHistorial;
 import com.piccolifield.data.model.Usuario;
 import com.piccolifield.data.model.VendedorDetalle;
 import com.piccolifield.data.model.VendedorRendimientoHistoricoResponse;
+import com.piccolifield.data.remote.dto.request.ActualizarFotoUsuarioRequest;
 import com.piccolifield.data.remote.dto.request.ReasignarVendedorRequest;
 import com.piccolifield.data.remote.dto.request.RevisionIncidenciaRequest;
 import com.piccolifield.data.remote.dto.request.AtenderIncidenciaRequest;
@@ -40,16 +41,20 @@ import com.piccolifield.data.remote.dto.request.RegistrarVentaRequest;
 import com.piccolifield.data.remote.dto.request.ReponerStockRequest;
 import com.piccolifield.model.Vendedor;
 
+import okhttp3.MultipartBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
+import retrofit2.http.Multipart;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
+import retrofit2.http.Part;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
+import retrofit2.http.Url;
 
 import com.piccolifield.model.Prospecto;
 import com.piccolifield.model.Seguimiento;
@@ -57,7 +62,7 @@ import com.piccolifield.model.Seguimiento;
 public interface ApiService {
 
     // =============================================================
-    // 0. VERIFICACIÓN Y AUTENTICACIÓN
+    // 0. VERIFICACIÓN, AUTENTICACIÓN Y FOTOS DE PERFIL / USUARIOS
     // =============================================================
     @GET("/")
     Call<ResponseBody> pingApi();
@@ -67,6 +72,53 @@ public interface ApiService {
 
     @GET("perfil")
     Call<ApiResponse<Usuario>> obtenerPerfil();
+
+    @GET("perfil")
+    Call<ResponseBody> obtenerPerfilRaw();
+
+    @GET("usuarios")
+    Call<ResponseBody> listarUsuariosRaw();
+
+    @GET("usuarios/{id}")
+    Call<ResponseBody> obtenerUsuarioRaw(@Path("id") int idUsuario);
+
+    @GET("perfil/foto")
+    Call<ResponseBody> obtenerFotoMiPerfil();
+
+    @PUT("perfil/foto")
+    Call<ApiResponse<Usuario>> actualizarFotoMiPerfil(@Body ActualizarFotoUsuarioRequest request);
+
+    @POST("perfil/foto")
+    Call<ApiResponse<Usuario>> registrarFotoMiPerfil(@Body ActualizarFotoUsuarioRequest request);
+
+    @Multipart
+    @POST("perfil/foto")
+    Call<ApiResponse<Usuario>> subirFotoMiPerfilMultipart(@Part MultipartBody.Part foto);
+
+    @GET("usuarios/{id}/foto")
+    Call<ResponseBody> obtenerFotoUsuario(@Path("id") int idUsuario);
+
+    @PUT("usuarios/{id}/foto")
+    Call<ApiResponse<Usuario>> actualizarFotoUsuario(
+            @Path("id") int idUsuario,
+            @Body ActualizarFotoUsuarioRequest request
+    );
+
+    @POST("usuarios/{id}/foto")
+    Call<ApiResponse<Usuario>> registrarFotoUsuario(
+            @Path("id") int idUsuario,
+            @Body ActualizarFotoUsuarioRequest request
+    );
+
+    @Multipart
+    @POST("usuarios/{id}/foto")
+    Call<ApiResponse<Usuario>> subirFotoUsuarioMultipart(
+            @Path("id") int idUsuario,
+            @Part MultipartBody.Part foto
+    );
+
+    @GET
+    Call<ResponseBody> descargarArchivoPorUrl(@Url String url);
 
     @PUT("perfil/fcm-token")
     Call<ApiResponse<Object>> actualizarFcmToken(@Body FcmTokenRequest request);
@@ -78,7 +130,7 @@ public interface ApiService {
     @GET("puntos-venta")
     Call<ApiResponse<List<PuntoDistribucion>>> listarPuntosVenta(
             @Query("search") String search,
-            @Query("categoria") String categoria,
+            @Query("tipo") String tipo,
             @Query("distrito") Integer distrito,
             @Query("estado") String estado
     );
@@ -148,7 +200,7 @@ public interface ApiService {
 
 
     // -------------------------------------------------------------
-    // Superivisión de PDV
+    // Supervisión de PDV
     // -------------------------------------------------------------
     @GET("supervision/resumen")
     Call<ApiResponse<ResumenDashboard>> obtenerResumenDashboard();

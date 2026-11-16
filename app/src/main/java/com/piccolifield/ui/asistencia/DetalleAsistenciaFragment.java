@@ -53,6 +53,34 @@ public class DetalleAsistenciaFragment extends Fragment {
     private RegistroAsistencia registro;
     private ApiService apiService;
 
+    private final androidx.activity.result.ActivityResultLauncher<String> pickUserPhotoLauncher =
+            registerForActivityResult(new androidx.activity.result.contract.ActivityResultContracts.GetContent(), uri -> {
+                if (uri != null && registro != null && registro.getIdUsuario() > 0 && binding != null) {
+                    Toast.makeText(getContext(), "Actualizando foto del colaborador...", Toast.LENGTH_SHORT).show();
+                    com.piccolifield.util.UserPhotoLoader.subirFotoUsuario(
+                            requireContext(),
+                            registro.getIdUsuario(),
+                            uri,
+                            false,
+                            new com.piccolifield.util.UserPhotoLoader.OnFotoActualizadaListener() {
+                                @Override
+                                public void onSuccess(Bitmap nuevoBitmap, String nuevaUrlFoto, String mensaje) {
+                                    if (!isAdded() || binding == null) return;
+                                    registro.setFotoPerfil(nuevaUrlFoto);
+                                    binding.ivUserPhoto.setImageBitmap(nuevoBitmap);
+                                    Toast.makeText(getContext(), mensaje, Toast.LENGTH_SHORT).show();
+                                }
+
+                                @Override
+                                public void onError(String mensajeError) {
+                                    if (!isAdded()) return;
+                                    Toast.makeText(getContext(), mensajeError, Toast.LENGTH_LONG).show();
+                                }
+                            }
+                    );
+                }
+            });
+
     public DetalleAsistenciaFragment() {
         // Required empty public constructor
     }
@@ -98,6 +126,25 @@ public class DetalleAsistenciaFragment extends Fragment {
         if (registro != null) {
             binding.tvUserName.setText(registro.getNombreCompleto());
             binding.tvUserLocation.setText(registro.getSede());
+
+            com.piccolifield.util.UserPhotoLoader.loadUserPhoto(
+                    requireContext(),
+                    registro.getIdUsuario(),
+                    registro.getFotoPerfil(),
+                    registro.getNombreCompleto(),
+                    binding.ivUserPhoto,
+                    R.drawable.ic_avatar_placeholder
+            );
+
+            binding.ivUserPhoto.setOnClickListener(v -> {
+                if (registro.getIdUsuario() > 0) {
+                    new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                            .setTitle("Actualizar foto de " + registro.getNombreCompleto())
+                            .setItems(new String[]{"Elegir nueva foto de la galería"}, (d, w) -> pickUserPhotoLauncher.launch("image/*"))
+                            .setNegativeButton("Cancelar", null)
+                            .show();
+                }
+            });
 
             String horaDisp = registro.getHoraMarcado();
             if (horaDisp != null && horaDisp.length() >= 16) {

@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.piccolifield.R;
 import com.piccolifield.data.model.RegistroAsistencia;
 import com.piccolifield.databinding.ItemRecentPersonnelBinding;
+import com.piccolifield.util.UserPhotoLoader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,7 +86,6 @@ public class RecentPersonnelAdapter extends RecyclerView.Adapter<RecentPersonnel
             binding.tvPersonnelName.setText(item.getNombreCompleto());
             binding.tvPersonnelLocation.setText(item.getSede());
 
-            // Manejo seguro de la hora
             String hora = item.getHoraMarcado();
             if (hora != null && hora.length() >= 16) {
                 binding.tvPersonnelTime.setText(hora.substring(11, 16));
@@ -96,6 +96,15 @@ public class RecentPersonnelAdapter extends RecyclerView.Adapter<RecentPersonnel
             }
 
             configurarBadge(binding.tvPersonnelStatusBadge, item.getEstado());
+
+            UserPhotoLoader.loadUserPhoto(
+                    binding.ivPersonnelPhoto.getContext(),
+                    item.getIdUsuario(),
+                    item.getFotoPerfil(),
+                    item.getNombreCompleto(),
+                    binding.ivPersonnelPhoto,
+                    R.drawable.ic_avatar_placeholder
+            );
 
             itemView.setOnClickListener(v -> {
                 if (listener != null) {

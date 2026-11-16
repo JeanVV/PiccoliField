@@ -49,7 +49,7 @@ public class PuntoVentaDetalle {
     @SerializedName("departamento")
     private String departamento;
 
-    @SerializedName("idImpulsador")
+    @SerializedName(value = "idImpulsador", alternate = {"id_impulsador", "idUsuario", "idUsuarios", "id_usuario"})
     private Integer idImpulsador;
 
     @SerializedName("impulsador_nombre")
@@ -58,7 +58,7 @@ public class PuntoVentaDetalle {
     @SerializedName("impulsador_correo")
     private String impulsadorCorreo;
 
-    @SerializedName("impulsador_foto")
+    @SerializedName(value = "impulsador_foto", alternate = {"url_foto", "foto_perfil", "foto_impulsador"})
     private String impulsadorFoto;
 
     @SerializedName("impulsador_meta")

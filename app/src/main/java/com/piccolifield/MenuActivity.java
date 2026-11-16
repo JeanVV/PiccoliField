@@ -67,10 +67,10 @@ public class MenuActivity extends AppCompatActivity {
             return insets;
         });
 
-        // Asegurar la precarga del perfil si aún no hay rol en SharedPreferences
-        if (SplashStorage.obtenerRol(this).isEmpty()) {
-            precargarPerfil();
-        }
+        // Precargar perfil y directorio de fotos Base64 de usuarios siempre al iniciar
+        precargarPerfil();
+        com.piccolifield.util.UserPhotoLoader.sincronizarPerfilRaw(this, null, 0, null);
+        com.piccolifield.util.UserPhotoLoader.sincronizarDirectorioUsuarios(this, null);
 
         // Registrar / Sincronizar Token FCM
         registrarTokenFcm();
@@ -136,6 +136,9 @@ public class MenuActivity extends AppCompatActivity {
                     SplashStorage.guardarUsuarioId(MenuActivity.this, usuario.getIdUsuario());
                     SplashStorage.guardarNombreUsuario(MenuActivity.this, usuario.getNombreCompleto());
                     SplashStorage.guardarCorreoUsuario(MenuActivity.this, usuario.getEmail());
+                    if (usuario.getFotoPerfil() != null && !usuario.getFotoPerfil().isEmpty()) {
+                        SplashStorage.guardarFotoUsuario(MenuActivity.this, usuario.getFotoPerfil());
+                    }
                 }
             }
 

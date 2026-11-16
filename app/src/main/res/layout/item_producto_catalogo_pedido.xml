@@ -3,191 +3,186 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
-    app:cardBackgroundColor="@color/marfil_suave"
+    android:layout_margin="5dp"
+    app:cardBackgroundColor="@color/white"
     app:cardCornerRadius="16dp"
     app:cardElevation="1dp"
-    app:strokeColor="#E5D5C0"
+    app:strokeColor="#E8D8C2"
     app:strokeWidth="1dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="14dp">
+        android:padding="10dp">
 
-        <!-- Parte superior: Foto, Nombre, Categoría y Precio según Criterio -->
-        <LinearLayout
+        <!-- Contenedor Foto del Producto con Badge de Tarifa -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:layout_height="118dp"
+            app:cardBackgroundColor="#F8EFE0"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp">
 
-            <!-- Foto del Producto en Cartilla -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="68dp"
-                android:layout_height="68dp"
-                app:cardBackgroundColor="#F8F1E5"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="0dp"
-                app:strokeColor="#E5D5C0"
-                app:strokeWidth="1dp">
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
                 <ImageView
                     android:id="@+id/ivFotoProductoCatalogo"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:contentDescription="@null"
-                    android:padding="6dp"
+                    android:padding="8dp"
                     android:scaleType="fitCenter"
                     android:src="@drawable/botellasinicio" />
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Información del Producto -->
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/tvNombreProductoCatalogo"
-                    android:layout_width="match_parent"
+                    android:id="@+id/tvBadgeCriterioPrecio"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="serif"
-                    android:text="Pisco Italia 750ml"
-                    android:textColor="@color/cafe_profundo"
-                    android:textSize="15sp"
+                    android:layout_gravity="top|start"
+                    android:layout_margin="6dp"
+                    android:background="@drawable/bg_search_rounded"
+                    android:backgroundTint="#F3E4C7"
+                    android:paddingHorizontal="7dp"
+                    android:paddingVertical="2dp"
+                    android:text="Minorista"
+                    android:textColor="@color/chocolate"
+                    android:textSize="9sp"
                     android:textStyle="bold" />
+            </FrameLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-                <TextView
-                    android:id="@+id/tvDetalleProductoCatalogo"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="SKU01 · Licores · Botella"
-                    android:textColor="@color/color_text_muted"
-                    android:textSize="12sp" />
-
-                <!-- Fila de Criterio de Negocio y Precio -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/tvBadgeCriterioPrecio"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/bg_search_rounded"
-                        android:backgroundTint="#F3E4C7"
-                        android:paddingHorizontal="8dp"
-                        android:paddingVertical="2dp"
-                        android:text="Precio Minorista"
-                        android:textColor="@color/chocolate"
-                        android:textSize="11sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tvPrecioProductoCatalogo"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:text="S/ 45.00"
-                        android:textColor="@color/cafe_profundo"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <View
+        <!-- Nombre y Detalle con altura uniforme para alinear las 2 columnas -->
+        <TextView
+            android:id="@+id/tvNombreProductoCatalogo"
             android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginVertical="10dp"
-            android:background="#E8DCC8" />
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:ellipsize="end"
+            android:lines="2"
+            android:maxLines="2"
+            android:text="Piccoli Café"
+            android:textColor="@color/cafe_profundo"
+            android:textSize="13sp"
+            android:textStyle="bold" />
 
-        <!-- Parte inferior: Selector de Cantidad y Botón Agregar a la lista -->
+        <TextView
+            android:id="@+id/tvDetalleProductoCatalogo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:text="750 ml · Licores"
+            android:textColor="@color/color_text_muted"
+            android:textSize="10sp" />
+
+        <!-- Precio y Botón circular (+) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:id="@+id/tvPrecioProductoCatalogo"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Cantidad:"
-                android:textColor="@color/chocolate"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnRestarCantCatalogo"
-                style="?attr/materialButtonOutlinedStyle"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:layout_marginStart="8dp"
-                android:insetTop="0dp"
-                android:insetBottom="0dp"
-                android:padding="0dp"
-                android:text="-"
-                android:textColor="@color/cafe_profundo"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                app:cornerRadius="8dp"
-                app:strokeColor="@color/chocolate" />
-
-            <TextView
-                android:id="@+id/tvCantidadCatalogo"
-                android:layout_width="36dp"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="1"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="S/ 18.00"
                 android:textColor="@color/cafe_profundo"
                 android:textSize="15sp"
                 android:textStyle="bold" />
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAgregarAlPedido"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:insetLeft="0dp"
+                android:insetTop="0dp"
+                android:insetRight="0dp"
+                android:insetBottom="0dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:padding="0dp"
+                android:text="+"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:backgroundTint="@color/cafe_profundo"
+                app:cornerRadius="17dp" />
+        </LinearLayout>
+
+        <!-- Stepper compacto de cantidad (- 1 +) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Cant:"
+                android:textColor="@color/color_text_muted"
+                android:textSize="11sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRestarCantCatalogo"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:insetLeft="0dp"
+                android:insetTop="0dp"
+                android:insetRight="0dp"
+                android:insetBottom="0dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:padding="0dp"
+                android:text="-"
+                android:textColor="@color/cafe_profundo"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                app:cornerRadius="13dp"
+                app:strokeColor="#DEC7A6" />
+
+            <TextView
+                android:id="@+id/tvCantidadCatalogo"
+                android:layout_width="26dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="1"
+                android:textColor="@color/cafe_profundo"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSumarCantCatalogo"
                 style="?attr/materialButtonOutlinedStyle"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:insetLeft="0dp"
                 android:insetTop="0dp"
+                android:insetRight="0dp"
                 android:insetBottom="0dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
                 android:padding="0dp"
                 android:text="+"
                 android:textColor="@color/cafe_profundo"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                app:cornerRadius="8dp"
-                app:strokeColor="@color/chocolate" />
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_weight="1" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnAgregarAlPedido"
-                android:layout_width="wrap_content"
-                android:layout_height="38dp"
-                android:insetTop="0dp"
-                android:insetBottom="0dp"
-                android:paddingHorizontal="14dp"
-                android:text="+ Agregar"
-                android:textAllCaps="false"
-                android:textColor="@color/white"
                 android:textSize="13sp"
                 android:textStyle="bold"
-                app:backgroundTint="@color/cafe_profundo"
-                app:cornerRadius="19dp" />
-
+                app:cornerRadius="13dp"
+                app:strokeColor="#DEC7A6" />
         </LinearLayout>
 
     </LinearLayout>

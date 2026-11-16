@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.piccolifield.R;
 import com.piccolifield.data.model.RegistroAsistencia;
 import com.piccolifield.databinding.ItemCollaboratorBinding;
+import com.piccolifield.util.UserPhotoLoader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -95,6 +96,15 @@ public class ColaboradorAdapter extends RecyclerView.Adapter<ColaboradorAdapter.
             }
 
             configurarBadge(binding.tvCollaboratorStatusBadge, item.getEstado());
+
+            UserPhotoLoader.loadUserPhoto(
+                    binding.ivCollaboratorPhoto.getContext(),
+                    item.getIdUsuario(),
+                    item.getFotoPerfil(),
+                    item.getNombreCompleto(),
+                    binding.ivCollaboratorPhoto,
+                    R.drawable.ic_avatar_placeholder
+            );
 
             itemView.setOnClickListener(v -> {
                 if (listener != null) {

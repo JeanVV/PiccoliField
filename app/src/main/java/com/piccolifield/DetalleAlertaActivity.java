@@ -194,32 +194,15 @@ public class DetalleAlertaActivity extends AppCompatActivity {
                         });
                     }
 
-                    if (alerta.getResponsableId() > 0 && ivResponsable != null) {
-                        apiService.obtenerFotoImpulsador(alerta.getResponsableId()).enqueue(new Callback<ResponseBody>() {
-                            @Override
-                            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
-                                if (isFinishing() || isDestroyed()) return;
-                                if (response.isSuccessful() && response.body() != null) {
-                                    try {
-                                        Bitmap bmp = BitmapFactory.decodeStream(response.body().byteStream());
-                                        if (bmp != null) {
-                                            ivResponsable.post(() -> ivResponsable.setImageBitmap(bmp));
-                                        } else {
-                                            ivResponsable.setImageResource(R.drawable.ic_avatar_placeholder);
-                                        }
-                                    } catch (Exception e) {
-                                        ivResponsable.setImageResource(R.drawable.ic_avatar_placeholder);
-                                    }
-                                } else {
-                                    ivResponsable.setImageResource(R.drawable.ic_avatar_placeholder);
-                                }
-                            }
-                            @Override
-                            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                                if (isFinishing() || isDestroyed()) return;
-                                ivResponsable.setImageResource(R.drawable.ic_avatar_placeholder);
-                            }
-                        });
+                    if (ivResponsable != null) {
+                        com.piccolifield.util.UserPhotoLoader.loadUserPhoto(
+                                DetalleAlertaActivity.this,
+                                alerta.getResponsableId(),
+                                alerta.getResponsableFoto(),
+                                alerta.getResponsableNombre(),
+                                ivResponsable,
+                                R.drawable.ic_avatar_placeholder
+                        );
                     }
                 } else {
                     Toast.makeText(DetalleAlertaActivity.this, getString(R.string.error_cargar_alerta), Toast.LENGTH_SHORT).show();

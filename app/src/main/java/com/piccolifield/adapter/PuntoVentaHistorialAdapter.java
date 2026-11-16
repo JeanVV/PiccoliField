@@ -69,27 +69,14 @@ public class PuntoVentaHistorialAdapter extends RecyclerView.Adapter<PuntoVentaH
             holder.tvBadgeActual.setVisibility(View.GONE);
         }
 
-        if (item.getIdUsuario() > 0) {
-            ApiService apiService = RetrofitClient.createService();
-            apiService.obtenerFotoImpulsador(item.getIdUsuario()).enqueue(new Callback<ResponseBody>() {
-                @Override
-                public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        Bitmap bmp = BitmapFactory.decodeStream(response.body().byteStream());
-                        holder.ivImpulsadorFoto.post(() -> holder.ivImpulsadorFoto.setImageBitmap(bmp));
-                    } else {
-                        holder.ivImpulsadorFoto.setImageResource(R.drawable.ic_avatar_placeholder);
-                    }
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                    holder.ivImpulsadorFoto.setImageResource(R.drawable.ic_avatar_placeholder);
-                }
-            });
-        } else {
-            holder.ivImpulsadorFoto.setImageResource(R.drawable.ic_avatar_placeholder);
-        }
+        com.piccolifield.util.UserPhotoLoader.loadUserPhoto(
+                context,
+                item.getIdUsuario(),
+                item.getImpulsadorFoto(),
+                item.getImpulsadorNombre(),
+                holder.ivImpulsadorFoto,
+                R.drawable.ic_avatar_placeholder
+        );
     }
 
     @Override

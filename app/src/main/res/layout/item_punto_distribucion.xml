@@ -5,97 +5,150 @@
     android:id="@+id/cardPuntoDistribucion"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
+    android:layout_marginBottom="10dp"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground"
-    app:cardBackgroundColor="@color/marfil_suave"
+    app:cardBackgroundColor="@color/white"
     app:cardCornerRadius="16dp"
     app:cardElevation="1dp"
-    app:strokeColor="#E5D5C0"
+    app:strokeColor="#E8D8C2"
     app:strokeWidth="1dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/containerContentLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:padding="12dp">
 
-        <!-- Circular Badge Avatar a la Izquierda -->
-        <FrameLayout
-            android:id="@+id/frameBadgeIcon"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:background="@drawable/bg_stat_icon_circle"
-            android:backgroundTint="@color/cafe_profundo"
+        <!-- Miniatura izquierda con ícono de tienda y badge numérico -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardThumbWrapper"
+            android:layout_width="78dp"
+            android:layout_height="68dp"
+            app:cardBackgroundColor="#F5E4CA"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:strokeColor="#E2CBB0"
+            app:strokeWidth="1dp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <TextView
-                android:id="@+id/tvBadgeNumero"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:fontFamily="serif"
-                android:textColor="@color/white"
-                android:textSize="17sp"
-                android:textStyle="bold"
-                tools:text="12" />
-        </FrameLayout>
+            <FrameLayout
+                android:id="@+id/frameBadgeIcon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:alpha="0.35"
+                    android:contentDescription="@null"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/fondo_tarjeta_b" />
+
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_store"
+                    app:tint="@color/cafe_profundo" />
+
+                <TextView
+                    android:id="@+id/tvBadgeNumero"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:layout_gravity="top|start"
+                    android:layout_margin="4dp"
+                    android:background="@drawable/bg_stat_icon_circle"
+                    android:backgroundTint="@color/cafe_profundo"
+                    android:gravity="center"
+                    android:textColor="@color/white"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    tools:text="1" />
+            </FrameLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- Flecha Chevron a la Derecha -->
         <ImageView
             android:id="@+id/ivChevron"
-            android:layout_width="18dp"
-            android:layout_height="18dp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
             android:contentDescription="@null"
             android:src="@drawable/ic_arrow_forward"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/dorado_premium" />
+            app:tint="@color/chocolate" />
 
         <!-- Nombre del Punto de Distribución -->
         <TextView
             android:id="@+id/tvNombrePdv"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="14dp"
+            android:layout_marginStart="12dp"
             android:layout_marginEnd="8dp"
-            android:fontFamily="serif"
+            android:ellipsize="end"
+            android:maxLines="1"
             android:textColor="@color/cafe_profundo"
             android:textSize="16sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toStartOf="@+id/ivChevron"
-            app:layout_constraintStart_toEndOf="@+id/frameBadgeIcon"
+            app:layout_constraintStart_toEndOf="@+id/cardThumbWrapper"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="Licorería El Buen Sabor" />
+            tools:text="Bodega El Sol" />
 
-        <!-- Dirección -->
-        <TextView
-            android:id="@+id/tvDireccionPdv"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textColor="@color/color_text_muted"
-            android:textSize="13sp"
-            app:layout_constraintEnd_toStartOf="@+id/ivChevron"
-            app:layout_constraintStart_toStartOf="@+id/tvNombrePdv"
-            app:layout_constraintTop_toBottomOf="@+id/tvNombrePdv"
-            tools:text="Av. Principal 123, Lima" />
-
-        <!-- Código del Punto de Distribución -->
+        <!-- Código del Punto de Distribución en pill crema -->
         <TextView
             android:id="@+id/tvNumeroPedido"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/bg_search_rounded"
+            android:backgroundTint="#F6E5C6"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="3dp"
             android:textColor="@color/cafe_profundo"
-            android:textSize="13sp"
+            android:textSize="12sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="@+id/tvNombrePdv"
-            app:layout_constraintTop_toBottomOf="@+id/tvDireccionPdv"
-            tools:text="Código: PDV-001" />
+            app:layout_constraintTop_toBottomOf="@+id/tvNombrePdv"
+            tools:text="Código: PD-001" />
+
+        <!-- Fila Dirección con Pin -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/ivChevron"
+            app:layout_constraintStart_toStartOf="@+id/tvNombrePdv"
+            app:layout_constraintTop_toBottomOf="@+id/tvNumeroPedido">
+
+            <ImageView
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_location_pin"
+                app:tint="@color/cafe_profundo" />
+
+            <TextView
+                android:id="@+id/tvDireccionPdv"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@color/chocolate"
+                android:textSize="12sp"
+                tools:text="Av. Principal 123, Chiclayo" />
+        </LinearLayout>
 
         <!-- Oculto según requerimiento (quitar mensaje En preparación) -->
         <TextView
