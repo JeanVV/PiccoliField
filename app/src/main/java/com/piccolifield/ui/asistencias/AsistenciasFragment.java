@@ -76,6 +76,7 @@ public class AsistenciasFragment extends Fragment {
     private String fotoSustentoBase64;
     private String tipoMarcaActual = "INGRESO";
     private String tipoMarcaPendiente;
+    private boolean marcadoEntradaEnSesion = false;
 
     // Referencias para actualizar el preview en la ventana emergente / BottomSheetDialog
     private ImageView currentDialogIvPreview;
@@ -144,7 +145,7 @@ public class AsistenciasFragment extends Fragment {
 
         // Cargar última asistencia guardada en la base de datos para el usuario activo
         int idUserStart = SplashStorage.obtenerUsuarioId(requireContext());
-        viewModel.cargarUltimaAsistencia(idUserStart > 0 ? idUserStart : 1);
+        viewModel.cargarUltimaAsistencia(idUserStart);
 
         // 1. Mostrar información del usuario
         mostrarInfoUsuario();
@@ -164,8 +165,14 @@ public class AsistenciasFragment extends Fragment {
                     setBotonesEstado(false, "Guardando...");
                     break;
                 case SUCCESS:
+                    if (binding.pbLoadingAsistencia != null) {
+                        binding.pbLoadingAsistencia.setVisibility(View.GONE);
+                    }
                     String tipoTexto = "INGRESO".equalsIgnoreCase(tipoMarcaActual) ? "entrada" : "salida";
                     if ("INGRESO".equalsIgnoreCase(tipoMarcaActual)) {
+                        marcadoEntradaEnSesion = true;
+                        int idU = SplashStorage.obtenerUsuarioId(requireContext());
+                        SplashStorage.guardarEntradaHoy(requireContext(), idU);
                         binding.btnMarcarEntrada.setEnabled(false);
                         binding.btnMarcarEntrada.setText("REGISTRADO");
                         if (binding.cardJustificacionContainer != null) {
@@ -173,12 +180,18 @@ public class AsistenciasFragment extends Fragment {
                         }
                     }
                     int idU = SplashStorage.obtenerUsuarioId(requireContext());
-                    viewModel.cargarUltimaAsistencia(idU > 0 ? idU : 1);
+                    if (idU > 0) {
+                        viewModel.cargarUltimaAsistencia(idU);
+                    }
                     actualizarTextoUltimaMarca(tipoMarcaActual);
-                    mostrarDialogoExitoMinimal("¡Asistencia Registrada!", "Tu " + tipoTexto + " ha sido registrada exitosamente en la base de datos.");
+                    String msgExito = state.getMensaje() != null ? state.getMensaje() : ("Tu " + tipoTexto + " ha sido registrada exitosamente.");
+                    mostrarDialogoExitoMinimal("¡Asistencia Registrada!", msgExito);
                     viewModel.resetUiState();
                     break;
                 case ERROR:
+                    if (binding.pbLoadingAsistencia != null) {
+                        binding.pbLoadingAsistencia.setVisibility(View.GONE);
+                    }
                     String msgError = state.getMensaje() != null ? state.getMensaje() : "Error al registrar asistencia";
                     Toast.makeText(getContext(), msgError, Toast.LENGTH_LONG).show();
                     restaurarBotonesEnError();
@@ -187,6 +200,19 @@ public class AsistenciasFragment extends Fragment {
                 case IDLE:
                 default:
                     break;
+            }
+        });
+
+        viewModel.getJustificacionResultLiveData().observe(getViewLifecycleOwner(), resource -> {
+            if (!isAdded() || binding == null || resource == null) return;
+            if (binding.btnAbrirJustificacionBS != null) binding.btnAbrirJustificacionBS.setEnabled(true);
+            if (resource.status == com.piccolifield.data.remote.Resource.Status.SUCCESS) {
+                String msg = resource.data != null ? resource.data : "Justificación registrada exitosamente.";
+                mostrarDialogoExitoMinimal("¡Justificación Registrada!", msg);
+                limpiarFormularioJustificacion();
+            } else if (resource.status == com.piccolifield.data.remote.Resource.Status.ERROR) {
+                String err = resource.message != null ? resource.message : "Error al registrar justificación";
+                Toast.makeText(getContext(), err, Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -397,15 +423,33 @@ public class AsistenciasFragment extends Fragment {
 
     private boolean yaRegistroIngresoHoy() {
         if (!isAdded() || getContext() == null) return false;
+
+        if (marcadoEntradaEnSesion) {
+            return true;
+        }
+
+        int idUsuario = SplashStorage.obtenerUsuarioId(requireContext());
+        if (SplashStorage.consultarEntradaHoy(requireContext(), idUsuario)) {
+            return true;
+        }
+
+        SimpleDateFormat sdfFecha = new SimpleDateFormat("yyyy-MM-dd", LOCALE_PERU);
+        sdfFecha.setTimeZone(TIME_ZONE_LIMA);
+        String hoyStr = sdfFecha.format(new Date());
+
         try {
-            if (viewModel != null && viewModel.getUltimaAsistencia().getValue() != null) {
+            if (viewModel != null && viewModel.getUltimaAsistencia() != null && viewModel.getUltimaAsistencia().getValue() != null) {
                 com.piccolifield.data.remote.dto.response.AsistenciaResponse ultima = viewModel.getUltimaAsistencia().getValue();
-                if (ultima != null && ultima.getFecha() != null && !ultima.getFecha().trim().isEmpty() && ultima.getHora() != null && !ultima.getHora().trim().isEmpty()) {
-                    SimpleDateFormat sdfFecha = new SimpleDateFormat("yyyy-MM-dd", LOCALE_PERU);
-                    sdfFecha.setTimeZone(TIME_ZONE_LIMA);
-                    String hoyStr = sdfFecha.format(new Date());
-                    String fUlt = ultima.getFecha();
-                    return fUlt != null && (hoyStr.equalsIgnoreCase(fUlt) || fUlt.startsWith(hoyStr) || fUlt.contains(hoyStr));
+                if (ultima != null) {
+                    String fecha = ultima.getFecha();
+                    String tipo = ultima.getTipo();
+                    boolean esDeHoy = fecha != null && (hoyStr.equalsIgnoreCase(fecha) || fecha.startsWith(hoyStr) || fecha.contains(hoyStr));
+                    boolean esIngreso = tipo != null && (tipo.equalsIgnoreCase("INGRESO") || tipo.equalsIgnoreCase("ENTRADA"));
+
+                    if (esDeHoy && esIngreso) {
+                        SplashStorage.guardarEntradaHoy(requireContext(), idUsuario);
+                        return true;
+                    }
                 }
             }
         } catch (Exception e) {
@@ -562,7 +606,7 @@ public class AsistenciasFragment extends Fragment {
         request.setSede(sede);
         request.setFechaHoraDispositivo(fechaHora);
 
-        viewModel.marcarAsistencia(request);
+        viewModel.marcarAsistencia(request, requireContext());
     }
 
     private void restaurarBotonesEnError() {
@@ -580,13 +624,36 @@ public class AsistenciasFragment extends Fragment {
     private void actualizarEstadoSegunUltimaMarca(@Nullable com.piccolifield.data.remote.dto.response.AsistenciaResponse ultima) {
         if (binding == null) return;
 
-        boolean yaIngreso = false;
+        if (binding.pbLoadingAsistencia != null) {
+            binding.pbLoadingAsistencia.setVisibility(View.GONE);
+        }
+
+        SimpleDateFormat sdfFecha = new SimpleDateFormat("yyyy-MM-dd", LOCALE_PERU);
+        sdfFecha.setTimeZone(TIME_ZONE_LIMA);
+        String hoyStr = sdfFecha.format(new Date());
+
+        int idUsuarioActual = SplashStorage.obtenerUsuarioId(requireContext());
+        boolean esDeHoy = false;
         String horaStr = null;
 
-        if (ultima != null && ultima.getHora() != null && !ultima.getHora().trim().isEmpty()) {
-            yaIngreso = true;
-            horaStr = ultima.getHora();
+        if (ultima != null && ultima.getFecha() != null && !ultima.getFecha().trim().isEmpty()) {
+            String fechaServidor = ultima.getFecha();
+            esDeHoy = hoyStr.equalsIgnoreCase(fechaServidor) || fechaServidor.startsWith(hoyStr) || fechaServidor.contains(hoyStr);
+            boolean esIngreso = "INGRESO".equalsIgnoreCase(ultima.getTipo()) || "ENTRADA".equalsIgnoreCase(ultima.getTipo());
+
+            if (esDeHoy && esIngreso) {
+                SplashStorage.guardarEntradaHoy(requireContext(), idUsuarioActual);
+                horaStr = ultima.getHora();
+            } else if (!esDeHoy && !marcadoEntradaEnSesion) {
+                // Solo si la respuesta explícita del servidor es de un día anterior
+                SplashStorage.limpiarEntradaHoy(requireContext(), idUsuarioActual);
+            }
+        } else if (ultima == null && !marcadoEntradaEnSesion) {
+            // El servidor confirma que este usuario no tiene ninguna asistencia registrada en la BD
+            SplashStorage.limpiarEntradaHoy(requireContext(), idUsuarioActual);
         }
+
+        boolean yaIngreso = marcadoEntradaEnSesion || yaRegistroIngresoHoy();
 
         binding.btnMarcarEntrada.setEnabled(!yaIngreso);
         binding.btnMarcarEntrada.setText(yaIngreso ? "REGISTRADO" : "ENTRADA");
@@ -597,11 +664,17 @@ public class AsistenciasFragment extends Fragment {
             binding.cardJustificacionContainer.setVisibility(yaIngreso ? View.GONE : View.VISIBLE);
         }
 
-        if (yaIngreso && horaStr != null && !horaStr.trim().isEmpty()) {
-            if (horaStr.length() >= 5) {
-                horaStr = horaStr.substring(0, 5);
+        if (yaIngreso) {
+            if (horaStr != null && !horaStr.trim().isEmpty() && !horaStr.contains("--:--")) {
+                if (horaStr.length() >= 5) {
+                    horaStr = horaStr.substring(0, 5);
+                }
+                binding.tvEstadoHoy.setText("Última marca: Entrada a las " + horaStr + " (Lima)");
+            } else {
+                binding.tvEstadoHoy.setText("Última marca: Entrada registrada hoy");
             }
-            binding.tvEstadoHoy.setText("Última marca: Entrada a las " + horaStr + " (Lima)");
+        } else {
+            binding.tvEstadoHoy.setText("Sin marcas registradas hoy");
         }
     }
 
@@ -751,43 +824,8 @@ public class AsistenciasFragment extends Fragment {
             binding.btnAbrirJustificacionBS.setEnabled(false);
         }
 
-        // Guardar justificación localmente para vincular de inmediato
-        SplashStorage.guardarJustificacionLocal(requireContext(), idUsuario, motivo, detalle, fotoSustentoBase64);
-
-        if (apiService != null) {
-            apiService.registrarJustificacion(request).enqueue(new Callback<ApiResponse<Object>>() {
-                @Override
-                public void onResponse(@NonNull Call<ApiResponse<Object>> call, @NonNull Response<ApiResponse<Object>> response) {
-                    if (!isAdded() || binding == null) return;
-                    if (binding.btnAbrirJustificacionBS != null) binding.btnAbrirJustificacionBS.setEnabled(true);
-
-                    if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                        mostrarResumenJustificacion(motivo, detalle);
-                        mostrarDialogoExitoMinimal("¡Justificación Registrada!", "Tu justificación se registró exitosamente en la base de datos y fue notificada al administrador.");
-                        limpiarFormularioJustificacion();
-                    } else {
-                        String errorMsg = (response.body() != null && response.body().getMessage() != null)
-                                ? response.body().getMessage()
-                                : "Error del servidor (Código " + response.code() + ")";
-                        Log.e("AsistenciasFragment", "Error registrarJustificacion: " + errorMsg);
-                        Toast.makeText(getContext(), errorMsg, Toast.LENGTH_LONG).show();
-                        mostrarResumenJustificacion(motivo, detalle);
-                        limpiarFormularioJustificacion();
-                    }
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<ApiResponse<Object>> call, @NonNull Throwable t) {
-                    if (!isAdded() || binding == null) return;
-                    if (binding.btnAbrirJustificacionBS != null) binding.btnAbrirJustificacionBS.setEnabled(true);
-
-                    Log.e("AsistenciasFragment", "Fallo red registrarJustificacion: " + t.getMessage());
-                    mostrarResumenJustificacion(motivo, detalle);
-                    Toast.makeText(getContext(), "Error de red al conectar con la base de datos: " + t.getMessage(), Toast.LENGTH_LONG).show();
-                    limpiarFormularioJustificacion();
-                }
-            });
-        }
+        mostrarResumenJustificacion(motivo, detalle);
+        viewModel.registrarJustificacion(request, requireContext());
     }
 
     private void mostrarDialogoExitoMinimal(String titulo, String mensaje) {

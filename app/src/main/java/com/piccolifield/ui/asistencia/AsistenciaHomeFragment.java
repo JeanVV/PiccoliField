@@ -13,32 +13,28 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.piccolifield.R;
 import com.piccolifield.adapter.RecentPersonnelAdapter;
-import com.piccolifield.data.model.AsistenciaResumen;
 import com.piccolifield.data.model.RegistroAsistencia;
-import com.piccolifield.data.remote.api.ApiService;
+import com.piccolifield.data.remote.Resource;
 import com.piccolifield.data.remote.RetrofitClient;
-import com.piccolifield.data.remote.dto.response.ApiResponse;
 import com.piccolifield.databinding.FragmentAsistenciaInicioBinding;
 import com.piccolifield.sharedpreferences.SplashStorage;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
 public class AsistenciaHomeFragment extends Fragment {
 
     private FragmentAsistenciaInicioBinding binding;
-    private ApiService apiService;
+    private AsistenciaViewModel viewModel;
     private RecentPersonnelAdapter adapter;
     private String estadoFiltroActual = "TODOS";
 
@@ -56,18 +52,66 @@ public class AsistenciaHomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // 1. Asegurar que el token de autenticación esté cargado en RetrofitClient
+        // 1. Asegurar que el token de autenticación esté cargado
         if (RetrofitClient.API_TOKEN == null || RetrofitClient.API_TOKEN.isEmpty()) {
             RetrofitClient.API_TOKEN = SplashStorage.obtenerToken(requireContext());
         }
 
-        apiService = RetrofitClient.createService();
+        // 2. Inicializar ViewModel y suscribirse a observadores MVVM
+        viewModel = new ViewModelProvider(requireActivity()).get(AsistenciaViewModel.class);
+        observarViewModel();
 
-        // 2. Configurar eventos de navegación interna y búsqueda
+        // 3. Configurar eventos de navegación interna y búsqueda
         setupListeners();
 
-        // 3. Cargar datos del resumen y personal reciente
+        // 4. Solicitar carga de datos al ViewModel
         cargarDatos();
+    }
+
+    private void observarViewModel() {
+        viewModel.getColaboradoresLiveData().observe(getViewLifecycleOwner(), resource -> {
+            if (!isAdded() || binding == null || resource == null) return;
+
+            switch (resource.status) {
+                case LOADING:
+                    if (binding.pbLoadingHome != null) binding.pbLoadingHome.setVisibility(View.VISIBLE);
+                    break;
+
+                case SUCCESS:
+                    if (binding.pbLoadingHome != null) binding.pbLoadingHome.setVisibility(View.GONE);
+                    List<RegistroAsistencia> listaRemote = resource.data != null ? resource.data : new ArrayList<>();
+
+                    verificarJustificacionesPendientes(listaRemote);
+                    actualizarMetricasFaltas(listaRemote);
+
+                    if (listaRemote.isEmpty()) {
+                        binding.layoutEmptyRecentState.setVisibility(View.VISIBLE);
+                        binding.rvRecentPersonnel.setVisibility(View.GONE);
+                    } else {
+                        binding.layoutEmptyRecentState.setVisibility(View.GONE);
+                        binding.rvRecentPersonnel.setVisibility(View.VISIBLE);
+                        binding.rvRecentPersonnel.setLayoutManager(new LinearLayoutManager(getContext()));
+
+                        adapter = new RecentPersonnelAdapter(listaRemote);
+                        adapter.setOnItemClickListener(item -> {
+                            DetalleAsistenciaFragment fragment = DetalleAsistenciaFragment.newInstance(item);
+                            getParentFragmentManager().beginTransaction()
+                                    .replace(R.id.fragmentContainer, fragment)
+                                    .addToBackStack(null)
+                                    .commit();
+                        });
+                        binding.rvRecentPersonnel.setAdapter(adapter);
+                    }
+                    break;
+
+                case ERROR:
+                    if (binding.pbLoadingHome != null) binding.pbLoadingHome.setVisibility(View.GONE);
+                    Log.e("AsistenciaHome", "Error cargando personal: " + resource.message);
+                    binding.layoutEmptyRecentState.setVisibility(View.VISIBLE);
+                    binding.rvRecentPersonnel.setVisibility(View.GONE);
+                    break;
+            }
+        });
     }
 
     private void setupListeners() {
@@ -199,53 +243,9 @@ public class AsistenciaHomeFragment extends Fragment {
     }
 
     private void cargarDatos() {
-        if (apiService == null || binding == null) return;
-
-        if (binding.pbLoadingHome != null) binding.pbLoadingHome.setVisibility(View.VISIBLE);
-
-        // Cargar Lista de Colaboradores del Día y calcular Métricas en tiempo real
-        apiService.obtenerColaboradoresConAsistencia().enqueue(new Callback<ApiResponse<List<RegistroAsistencia>>>() {
-            @Override
-            public void onResponse(@NonNull Call<ApiResponse<List<RegistroAsistencia>>> call, @NonNull Response<ApiResponse<List<RegistroAsistencia>>> response) {
-                if (!isAdded() || binding == null) return;
-                if (binding.pbLoadingHome != null) binding.pbLoadingHome.setVisibility(View.GONE);
-
-                List<RegistroAsistencia> listaRemote = response.isSuccessful() && response.body() != null && response.body().getData() != null
-                        ? response.body().getData()
-                        : new java.util.ArrayList<>();
-
-                verificarJustificacionesPendientes(listaRemote);
-                actualizarMetricasFaltas(listaRemote);
-
-                if (listaRemote.isEmpty()) {
-                    binding.layoutEmptyRecentState.setVisibility(View.VISIBLE);
-                    binding.rvRecentPersonnel.setVisibility(View.GONE);
-                } else {
-                    binding.layoutEmptyRecentState.setVisibility(View.GONE);
-                    binding.rvRecentPersonnel.setVisibility(View.VISIBLE);
-                    binding.rvRecentPersonnel.setLayoutManager(new LinearLayoutManager(getContext()));
-
-                    adapter = new RecentPersonnelAdapter(listaRemote);
-                    adapter.setOnItemClickListener(item -> {
-                        DetalleAsistenciaFragment fragment = DetalleAsistenciaFragment.newInstance(item);
-                        getParentFragmentManager().beginTransaction()
-                                .replace(R.id.fragmentContainer, fragment)
-                                .addToBackStack(null)
-                                .commit();
-                    });
-                    binding.rvRecentPersonnel.setAdapter(adapter);
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<ApiResponse<List<RegistroAsistencia>>> call, @NonNull Throwable t) {
-                if (!isAdded() || binding == null) return;
-                if (binding.pbLoadingHome != null) binding.pbLoadingHome.setVisibility(View.GONE);
-                Log.e("AsistenciaHome", "Fallo red personal: " + t.getMessage());
-                binding.layoutEmptyRecentState.setVisibility(View.VISIBLE);
-                binding.rvRecentPersonnel.setVisibility(View.GONE);
-            }
-        });
+        if (viewModel != null && isAdded()) {
+            viewModel.cargarColaboradoresConAsistencia(requireContext());
+        }
     }
 
     private void verificarJustificacionesPendientes(List<RegistroAsistencia> lista) {

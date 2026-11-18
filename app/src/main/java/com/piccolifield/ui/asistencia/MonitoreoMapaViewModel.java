@@ -119,27 +119,24 @@ public class MonitoreoMapaViewModel extends ViewModel {
         }
     }
 
-    public void cargarUltimaAsistencia() {
-        repository.obtenerUltimaAsistencia(new Callback<ApiResponse<AsistenciaResponse>>() {
-            @Override
-            public void onResponse(@NonNull Call<ApiResponse<AsistenciaResponse>> call, @NonNull Response<ApiResponse<AsistenciaResponse>> response) {
-                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
-                    AsistenciaResponse asistencia = response.body().getData();
-                    ultimaAsistencia.setValue(asistencia);
-                    if (ubicacionUsuario.getValue() != null) {
-                        actualizarUbicacionUsuario(ubicacionUsuario.getValue().latitude, ubicacionUsuario.getValue().longitude);
-                    } else {
-                        mensajeEstado.setValue("Asistencia registrada");
-                    }
+    public void cargarUltimaAsistencia(int idUsuario) {
+        LiveData<com.piccolifield.data.remote.Resource<AsistenciaResponse>> res = repository.obtenerUltimaAsistencia(idUsuario);
+        res.observeForever(resource -> {
+            if (resource != null && resource.status == com.piccolifield.data.remote.Resource.Status.SUCCESS && resource.data != null) {
+                AsistenciaResponse asistencia = resource.data;
+                ultimaAsistencia.setValue(asistencia);
+                if (ubicacionUsuario.getValue() != null) {
+                    actualizarUbicacionUsuario(ubicacionUsuario.getValue().latitude, ubicacionUsuario.getValue().longitude);
                 } else {
-                    ultimaAsistencia.setValue(null);
+                    mensajeEstado.setValue("Asistencia registrada");
                 }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<ApiResponse<AsistenciaResponse>> call, @NonNull Throwable t) {
+            } else if (resource != null && resource.status == com.piccolifield.data.remote.Resource.Status.ERROR) {
                 ultimaAsistencia.setValue(null);
             }
         });
+    }
+
+    public void cargarUltimaAsistencia() {
+        cargarUltimaAsistencia(0);
     }
 }

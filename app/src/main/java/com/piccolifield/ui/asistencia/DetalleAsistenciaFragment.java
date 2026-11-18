@@ -15,12 +15,11 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.piccolifield.data.remote.dto.request.RevisionJustificacionRequest;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -34,24 +33,20 @@ import com.piccolifield.R;
 import com.piccolifield.adapter.TurnoHistorialAdapter;
 import com.piccolifield.data.model.RegistroAsistencia;
 import com.piccolifield.data.model.TurnoHistorial;
-import com.piccolifield.data.remote.api.ApiService;
+import com.piccolifield.data.remote.Resource;
 import com.piccolifield.data.remote.RetrofitClient;
-import com.piccolifield.data.remote.dto.response.ApiResponse;
+import com.piccolifield.data.remote.dto.request.RevisionJustificacionRequest;
 import com.piccolifield.databinding.FragmentDetalleAsistenciaBinding;
 import com.piccolifield.sharedpreferences.SplashStorage;
 
 import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class DetalleAsistenciaFragment extends Fragment {
 
     private static final String ARG_REGISTRO = "registro_asistencia";
     private FragmentDetalleAsistenciaBinding binding;
     private RegistroAsistencia registro;
-    private ApiService apiService;
+    private AsistenciaViewModel viewModel;
 
     private final androidx.activity.result.ActivityResultLauncher<String> pickUserPhotoLauncher =
             registerForActivityResult(new androidx.activity.result.contract.ActivityResultContracts.GetContent(), uri -> {
@@ -115,7 +110,9 @@ public class DetalleAsistenciaFragment extends Fragment {
         if (RetrofitClient.API_TOKEN == null || RetrofitClient.API_TOKEN.isEmpty()) {
             RetrofitClient.API_TOKEN = SplashStorage.obtenerToken(requireContext());
         }
-        apiService = RetrofitClient.createService();
+
+        viewModel = new ViewModelProvider(requireActivity()).get(AsistenciaViewModel.class);
+        observarViewModel();
 
         cargarMapaEstatico();
 
@@ -161,8 +158,64 @@ public class DetalleAsistenciaFragment extends Fragment {
             configurarBadge(binding.tvUserStatusBadge, registro.getEstado());
             cargarJustificacionAdmin();
             configurarControlesRevisionAdmin();
-            cargarHistorialTurnos(registro.getIdUsuario());
+            viewModel.cargarHistorialTurnos(registro.getIdUsuario());
         }
+    }
+
+    private void observarViewModel() {
+        // Observador de Revisión de Justificación
+        viewModel.getRevisionJustificacionLiveData().observe(getViewLifecycleOwner(), resource -> {
+            if (!isAdded() || binding == null || resource == null) return;
+            switch (resource.status) {
+                case LOADING:
+                    binding.btnAprobarJustificacion.setEnabled(false);
+                    binding.btnRechazarJustificacion.setEnabled(false);
+                    if (binding.pbLoadingDetalle != null) binding.pbLoadingDetalle.setVisibility(View.VISIBLE);
+                    break;
+                case SUCCESS:
+                    if (binding.pbLoadingDetalle != null) binding.pbLoadingDetalle.setVisibility(View.GONE);
+                    binding.btnAprobarJustificacion.setEnabled(true);
+                    binding.btnRechazarJustificacion.setEnabled(true);
+                    String msj = resource.data != null ? resource.data : "Procesada exitosamente.";
+                    mostrarDialogoExitoRevision("¡Justificación Procesada!", msj);
+                    break;
+                case ERROR:
+                    if (binding.pbLoadingDetalle != null) binding.pbLoadingDetalle.setVisibility(View.GONE);
+                    binding.btnAprobarJustificacion.setEnabled(true);
+                    binding.btnRechazarJustificacion.setEnabled(true);
+                    String err = resource.message != null ? resource.message : "Error al revisar justificación";
+                    Toast.makeText(getContext(), err, Toast.LENGTH_LONG).show();
+                    break;
+            }
+        });
+
+        // Observador de Justificación de Usuario
+        viewModel.getJustificacionUsuarioLiveData().observe(getViewLifecycleOwner(), resource -> {
+            if (!isAdded() || binding == null || resource == null) return;
+            if (resource.status == Resource.Status.SUCCESS && resource.data != null) {
+                RegistroAsistencia resJust = resource.data;
+                if (resJust.getJustificacion() != null && !resJust.getJustificacion().isEmpty()) {
+                    binding.cardJustificacionAdmin.setVisibility(View.VISIBLE);
+                    binding.tvMotivoJustificacionAdmin.setText("Motivo: " + (resJust.getMotivoJustificacion() != null ? resJust.getMotivoJustificacion() : "Inasistencia"));
+                    binding.tvDetalleJustificacionAdmin.setText("Detalle: " + resJust.getJustificacion());
+                    mostrarFotoSustento(resJust.getRutaSustento());
+                } else {
+                    mostrarJustificacionPorDefectoOEstado();
+                }
+            } else if (resource.status == Resource.Status.ERROR) {
+                mostrarJustificacionPorDefectoOEstado();
+            }
+        });
+
+        // Observador de Historial de Turnos
+        viewModel.getHistorialTurnosLiveData().observe(getViewLifecycleOwner(), resource -> {
+            if (!isAdded() || binding == null || resource == null) return;
+            if (resource.status == Resource.Status.SUCCESS && resource.data != null) {
+                List<TurnoHistorial> historial = resource.data;
+                binding.rvShiftHistory.setLayoutManager(new LinearLayoutManager(getContext()));
+                binding.rvShiftHistory.setAdapter(new TurnoHistorialAdapter(historial));
+            }
+        });
     }
 
     private String formatearHoraCorta(String str) {
@@ -213,47 +266,8 @@ public class DetalleAsistenciaFragment extends Fragment {
                 idUsuarioColaborador, idAsistencia, idRevisor, estadoNuevo, comentario
         );
 
-        binding.btnAprobarJustificacion.setEnabled(false);
-        binding.btnRechazarJustificacion.setEnabled(false);
-        if (binding.pbLoadingDetalle != null) binding.pbLoadingDetalle.setVisibility(View.VISIBLE);
-
         actualizarEstadoBadgeJustificacion(estadoNuevo);
-
-        if (apiService != null) {
-            apiService.revisarJustificacion(request).enqueue(new Callback<ApiResponse<Object>>() {
-                @Override
-                public void onResponse(@NonNull Call<ApiResponse<Object>> call, @NonNull Response<ApiResponse<Object>> response) {
-                    if (!isAdded() || binding == null) return;
-                    if (binding.pbLoadingDetalle != null) binding.pbLoadingDetalle.setVisibility(View.GONE);
-                    binding.btnAprobarJustificacion.setEnabled(true);
-                    binding.btnRechazarJustificacion.setEnabled(true);
-
-                    if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                        String estadoStr = "APROBADA".equalsIgnoreCase(estadoNuevo) ? "Aprobada" : "Rechazada";
-                        String msj = "La justificación del colaborador ha sido " + estadoStr.toLowerCase() + " exitosamente en la base de datos.";
-                        mostrarDialogoExitoRevision("¡Justificación " + estadoStr + "!", msj);
-                    } else {
-                        String err = (response.body() != null && response.body().getMessage() != null)
-                                ? response.body().getMessage()
-                                : "Error del servidor (Código " + response.code() + ")";
-                        Log.e("DetalleAsistencia", "Error al revisar justificación: " + err);
-                        Toast.makeText(getContext(), err, Toast.LENGTH_LONG).show();
-                    }
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<ApiResponse<Object>> call, @NonNull Throwable t) {
-                    if (!isAdded() || binding == null) return;
-                    if (binding.pbLoadingDetalle != null) binding.pbLoadingDetalle.setVisibility(View.GONE);
-                    binding.btnAprobarJustificacion.setEnabled(true);
-                    binding.btnRechazarJustificacion.setEnabled(true);
-
-                    Log.e("DetalleAsistencia", "Fallo red al revisar: " + t.getMessage());
-                    String estadoStr = "APROBADA".equalsIgnoreCase(estadoNuevo) ? "Aprobada" : "Rechazada";
-                    mostrarDialogoExitoRevision("¡Justificación " + estadoStr + "!", "Justificación registrada localmente.");
-                }
-            });
-        }
+        viewModel.revisarJustificacion(request);
     }
 
     private void mostrarDialogoExitoRevision(String titulo, String mensaje) {
@@ -303,7 +317,6 @@ public class DetalleAsistenciaFragment extends Fragment {
     private void cargarJustificacionAdmin() {
         if (registro == null || binding == null) return;
 
-        // Si el objeto ya tiene la información de la justificación
         if (registro.getJustificacion() != null && !registro.getJustificacion().isEmpty()) {
             binding.cardJustificacionAdmin.setVisibility(View.VISIBLE);
             binding.tvMotivoJustificacionAdmin.setText("Motivo: " + (registro.getMotivoJustificacion() != null ? registro.getMotivoJustificacion() : "Inasistencia"));
@@ -312,34 +325,8 @@ public class DetalleAsistenciaFragment extends Fragment {
             return;
         }
 
-        // Si no está cargada pero hay un ID de usuario, la solicitamos a la API
-        if (apiService != null && registro.getIdUsuario() > 0) {
-            apiService.obtenerJustificacionUsuario(registro.getIdUsuario()).enqueue(new Callback<ApiResponse<RegistroAsistencia>>() {
-                @Override
-                public void onResponse(@NonNull Call<ApiResponse<RegistroAsistencia>> call, @NonNull Response<ApiResponse<RegistroAsistencia>> response) {
-                    if (!isAdded() || binding == null) return;
-
-                    if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
-                        RegistroAsistencia resJust = response.body().getData();
-                        if (resJust.getJustificacion() != null && !resJust.getJustificacion().isEmpty()) {
-                            binding.cardJustificacionAdmin.setVisibility(View.VISIBLE);
-                            binding.tvMotivoJustificacionAdmin.setText("Motivo: " + (resJust.getMotivoJustificacion() != null ? resJust.getMotivoJustificacion() : "Inasistencia"));
-                            binding.tvDetalleJustificacionAdmin.setText("Detalle: " + resJust.getJustificacion());
-                            mostrarFotoSustento(resJust.getRutaSustento());
-                        } else {
-                            mostrarJustificacionPorDefectoOEstado();
-                        }
-                    } else {
-                        mostrarJustificacionPorDefectoOEstado();
-                    }
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<ApiResponse<RegistroAsistencia>> call, @NonNull Throwable t) {
-                    if (!isAdded() || binding == null) return;
-                    mostrarJustificacionPorDefectoOEstado();
-                }
-            });
+        if (registro.getIdUsuario() > 0) {
+            viewModel.cargarJustificacionUsuario(registro.getIdUsuario());
         } else {
             mostrarJustificacionPorDefectoOEstado();
         }
@@ -375,7 +362,6 @@ public class DetalleAsistenciaFragment extends Fragment {
     private void mostrarJustificacionPorDefectoOEstado() {
         if (registro == null || binding == null) return;
 
-        // Si el estado es FALTA o TARDANZA, mostrar aviso de justificación pendiente o sin registro
         String estado = registro.getEstado();
         if ("FALTA".equalsIgnoreCase(estado) || "PERMISO".equalsIgnoreCase(estado)) {
             binding.cardJustificacionAdmin.setVisibility(View.VISIBLE);
@@ -399,7 +385,6 @@ public class DetalleAsistenciaFragment extends Fragment {
                 double lat = registro.getLatitud();
                 double lng = registro.getLongitud();
 
-                // Validación: Si las coordenadas vienen en 0 (océano), forzamos las de Chiclayo
                 if (lat == 0.0 && lng == 0.0) {
                     lat = -6.7714;
                     lng = -79.8409;
@@ -410,7 +395,6 @@ public class DetalleAsistenciaFragment extends Fragment {
                 googleMap.clear();
                 googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
-                // Crear el marcador verde personalizado de forma nativa
                 BitmapDescriptor iconoPersonalizado = obtenerIconoVectorial(R.drawable.ic_location_pin);
 
                 if (iconoPersonalizado != null) {
@@ -422,18 +406,15 @@ public class DetalleAsistenciaFragment extends Fragment {
                     googleMap.addMarker(new MarkerOptions().position(ubicacion).title(registro.getSede()));
                 }
 
-                // Ajustamos el zoom a 16f para que las calles sean bien visibles
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ubicacion, 16f));
             });
         }
     }
 
-    // Método para convertir tu ícono SVG/XML a un marcador válido de Google Maps
     private BitmapDescriptor obtenerIconoVectorial(int vectorResId) {
         Drawable vectorDrawable = ContextCompat.getDrawable(requireContext(), vectorResId);
         if (vectorDrawable == null) return null;
 
-        // Le aplicamos el color verde que usabas en el tint del XML
         vectorDrawable.setTint(Color.parseColor("#00B050"));
 
         int ancho = vectorDrawable.getIntrinsicWidth() > 0 ? vectorDrawable.getIntrinsicWidth() : 100;
@@ -445,31 +426,6 @@ public class DetalleAsistenciaFragment extends Fragment {
         vectorDrawable.draw(canvas);
 
         return BitmapDescriptorFactory.fromBitmap(bitmap);
-    }
-
-    private void cargarHistorialTurnos(int idUsuario) {
-        if (apiService == null || idUsuario == 0) return;
-
-        apiService.obtenerHistorialTurnos(idUsuario).enqueue(new Callback<ApiResponse<List<TurnoHistorial>>>() {
-            @Override
-            public void onResponse(@NonNull Call<ApiResponse<List<TurnoHistorial>>> call, @NonNull Response<ApiResponse<List<TurnoHistorial>>> response) {
-                if (!isAdded() || binding == null) return;
-
-                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
-                    List<TurnoHistorial> historial = response.body().getData();
-                    binding.rvShiftHistory.setLayoutManager(new LinearLayoutManager(getContext()));
-                    binding.rvShiftHistory.setAdapter(new TurnoHistorialAdapter(historial));
-                } else {
-                    Log.e("DetalleAsistencia", "No se pudo cargar historial: " + response.code());
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<ApiResponse<List<TurnoHistorial>>> call, @NonNull Throwable t) {
-                if (!isAdded() || binding == null) return;
-                Log.e("DetalleAsistencia", "Fallo red historial: " + t.getMessage());
-            }
-        });
     }
 
     private void configurarBadge(TextView badge, String estado) {

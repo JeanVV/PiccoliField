@@ -273,4 +273,61 @@ public class SplashStorage {
         reg.setEstado("FALTA");
         guardarRegistroAsistenciaLocal(context, reg);
     }
+
+    public static void guardarEntradaHoy(Context context, int idUsuario) {
+        if (context == null) return;
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String hoy = sdf.format(new Date());
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("ultima_entrada_fecha_hoy_gen", hoy);
+        if (idUsuario > 0) {
+            editor.putString("ultima_entrada_fecha_hoy_" + idUsuario, hoy);
+        }
+        editor.apply();
+    }
+
+    public static boolean consultarEntradaHoy(Context context, int idUsuario) {
+        if (context == null) return false;
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return false;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String hoy = sdf.format(new Date());
+
+        if (idUsuario > 0) {
+            String fUser = sharedPreferences.getString("ultima_entrada_fecha_hoy_" + idUsuario, "");
+            if (hoy.equals(fUser)) return true;
+        }
+
+        String fGen = sharedPreferences.getString("ultima_entrada_fecha_hoy_gen", "");
+        return hoy.equals(fGen);
+    }
+
+    public static void limpiarEntradaHoy(Context context, int idUsuario) {
+        if (context == null) return;
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return;
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove("ultima_entrada_fecha_hoy_gen");
+        if (idUsuario > 0) {
+            editor.remove("ultima_entrada_fecha_hoy_" + idUsuario);
+        }
+        editor.apply();
+    }
+
+    public static void guardarEntradaHoy(Context context) {
+        int id = obtenerUsuarioId(context);
+        guardarEntradaHoy(context, id);
+    }
+
+    public static boolean consultarEntradaHoy(Context context) {
+        int id = obtenerUsuarioId(context);
+        return consultarEntradaHoy(context, id);
+    }
+
+    public static void limpiarEntradaHoy(Context context) {
+        int id = obtenerUsuarioId(context);
+        limpiarEntradaHoy(context, id);
+    }
 }
