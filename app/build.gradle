@@ -53,6 +53,9 @@ dependencies {
     // WorkManager para Sincronización Offline
     implementation 'androidx.work:work-runtime:2.9.1'
 
+    // Seguridad: Cifrado de Preferencias
+    implementation 'androidx.security:security-crypto:1.0.0'
+
     // CameraX
     implementation 'androidx.camera:camera-core:1.4.2'
     implementation 'androidx.camera:camera-camera2:1.4.2'

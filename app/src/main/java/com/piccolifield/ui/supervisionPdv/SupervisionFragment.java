@@ -29,6 +29,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -50,6 +51,7 @@ import com.piccolifield.data.model.PuntoVentaProducto;
 import com.piccolifield.data.model.ResumenDashboard;
 import com.piccolifield.data.model.TipoIncidenciaDto;
 import com.piccolifield.data.model.TiposIncidenciaResponse;
+import com.piccolifield.data.remote.Resource;
 import com.piccolifield.data.local.AppDatabase;
 import com.piccolifield.data.local.entity.IncidenciaOfflineEntity;
 import com.piccolifield.data.local.entity.ProductoCacheEntity;
@@ -107,6 +109,7 @@ public class SupervisionFragment extends Fragment {
     private SupervisionPuntoVentaAdapter puntoVentaAdapter;
     private AlertaAdapter alertaAdapter;
     private IncidenciaAdapter incidenciaAdapter;
+    private SupervisionViewModel viewModel;
 
     private EditText etBuscar;
     private Spinner spFiltroEstadoAlerta, spFiltroNivelAlerta;
@@ -182,6 +185,9 @@ public class SupervisionFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        viewModel = new ViewModelProvider(this).get(SupervisionViewModel.class);
+        observarViewModel();
 
         // 1. Vincular IDs
         tvMontoTotalVentas = view.findViewById(R.id.tvTotalVentasValue);
@@ -442,87 +448,58 @@ public class SupervisionFragment extends Fragment {
     // LLAMADAS A LA API
     // ==========================================
     private void cargarResumenDashboard() {
-        String token = SplashStorage.obtenerToken(requireContext());
-        if (token == null || token.isEmpty()) return;
-
-        RetrofitClient.API_TOKEN = token;
-        ApiService apiService = RetrofitClient.createService();
-
-        apiService.obtenerResumenDashboard().enqueue(new Callback<ApiResponse<ResumenDashboard>>() {
-            @Override
-            public void onResponse(Call<ApiResponse<ResumenDashboard>> call, Response<ApiResponse<ResumenDashboard>> response) {
-                if (!isAdded()) return;
-                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
-                    ResumenDashboard resumen = response.body().getData();
-                    tvMontoTotalVentas.setText("S/ " + String.format("%.2f", resumen.getMonto_total_ventas()));
-                    tvPdvActivos.setText(String.valueOf(resumen.getCantidad_pdv_activos()));
-                    tvAlertasPendientes.setText(String.valueOf(resumen.getCantidad_alertas()));
-                }
-            }
-            @Override public void onFailure(Call<ApiResponse<ResumenDashboard>> call, Throwable t) {}
-        });
+        if (viewModel != null) viewModel.cargarResumen();
     }
 
     private void cargarMejoresVendedores() {
-        if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.VISIBLE);
-        String token = SplashStorage.obtenerToken(requireContext());
-        if (token == null || token.isEmpty()) return;
-
-        ApiService apiService = RetrofitClient.createService();
-        apiService.listarMejoresVendedores().enqueue(new Callback<ApiResponse<List<Vendedor>>>() {
-            @Override
-            public void onResponse(Call<ApiResponse<List<Vendedor>>> call, Response<ApiResponse<List<Vendedor>>> response) {
-                if (!isAdded()) return;
-                if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.GONE);
-                if (response.isSuccessful() && response.body() != null) {
-                    List<Vendedor> listaVendedores = response.body().getData();
-                    if (listaVendedores == null) {
-                        listaVendedores = new ArrayList<>();
-                    }
-
-                    // Conectar la lista real con tu adaptador
-                    vendedorAdapter = new VendedorAdapter(listaVendedores, requireContext());
-                    rvVendedores.setAdapter(vendedorAdapter);
-                    rvVendedores.setVisibility(View.VISIBLE);
-                } else {
-                    String errorMsg = "Error";
-                    try {
-                        if (response.errorBody() != null) {
-                            errorMsg = response.errorBody().string();
-                        } else if (response.body() != null) {
-                            errorMsg = response.body().getMessage();
-                        }
-                    } catch (Exception ignored) {}
-                    Toast.makeText(getContext(), getString(R.string.error_cargar_vendedores) + ": " + response.code() + " " + errorMsg, Toast.LENGTH_LONG).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ApiResponse<List<Vendedor>>> call, Throwable t) {
-                if (!isAdded()) return;
-                if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.GONE);
-                Toast.makeText(getContext(), getString(R.string.error_red_vendedores) + ": " + t.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        });
+        if (viewModel != null) viewModel.cargarMejoresVendedores();
     }
 
-
-
     private void cargarAlertas() {
-        if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.VISIBLE);
-        String token = SplashStorage.obtenerToken(requireContext());
-        if (token == null || token.isEmpty()) return;
+        if (viewModel != null) viewModel.cargarAlertas();
+    }
 
-        ApiService apiService = RetrofitClient.createService();
-        apiService.listarAlertasSupervision().enqueue(new Callback<ApiResponse<List<Alerta>>>() {
-            @Override
-            public void onResponse(Call<ApiResponse<List<Alerta>>> call, Response<ApiResponse<List<Alerta>>> response) {
-                if (!isAdded()) return;
+    private void cargarPuntosVenta() {
+        if (viewModel != null) viewModel.cargarPuntosVenta();
+    }
+
+    private void cargarIncidencias() {
+        if (viewModel != null) viewModel.cargarIncidencias();
+    }
+
+    private void observarViewModel() {
+        viewModel.getResumenState().observe(getViewLifecycleOwner(), resource -> {
+            if (resource == null) return;
+            if (resource.status == Resource.Status.SUCCESS && resource.data != null) {
+                ResumenDashboard resumen = resource.data;
+                tvMontoTotalVentas.setText("S/ " + String.format("%.2f", resumen.getMonto_total_ventas()));
+                tvPdvActivos.setText(String.valueOf(resumen.getCantidad_pdv_activos()));
+                tvAlertasPendientes.setText(String.valueOf(resumen.getCantidad_alertas()));
+            }
+        });
+
+        viewModel.getVendedoresState().observe(getViewLifecycleOwner(), resource -> {
+            if (resource == null) return;
+            if (resource.status == Resource.Status.LOADING) {
+                if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.VISIBLE);
+            } else {
                 if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.GONE);
-                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
-                    List<Alerta> rawList = response.body().getData();
+                if (resource.status == Resource.Status.SUCCESS && resource.data != null) {
+                    vendedorAdapter = new VendedorAdapter(resource.data, requireContext());
+                    rvVendedores.setAdapter(vendedorAdapter);
+                    rvVendedores.setVisibility(View.VISIBLE);
+                }
+            }
+        });
 
-                    // Deduplicar alertas por id para evitar repetición en pantalla
+        viewModel.getAlertasState().observe(getViewLifecycleOwner(), resource -> {
+            if (resource == null) return;
+            if (resource.status == Resource.Status.LOADING) {
+                if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.VISIBLE);
+            } else {
+                if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.GONE);
+                if (resource.status == Resource.Status.SUCCESS && resource.data != null) {
+                    List<Alerta> rawList = resource.data;
                     List<Alerta> listaAlertas = new ArrayList<>();
                     Set<Integer> idsVistos = new HashSet<>();
                     for (Alerta a : rawList) {
@@ -530,50 +507,69 @@ public class SupervisionFragment extends Fragment {
                             listaAlertas.add(a);
                         }
                     }
-
                     alertaAdapter = new AlertaAdapter(listaAlertas, requireContext());
                     rvAlertas.setAdapter(alertaAdapter);
                     if (rvAlertas != null) rvAlertas.setVisibility(View.VISIBLE);
-                } else {
-                    Toast.makeText(getContext(), getString(R.string.error_cargar_alertas), Toast.LENGTH_SHORT).show();
                 }
-            }
-
-            @Override
-            public void onFailure(Call<ApiResponse<List<Alerta>>> call, Throwable t) {
-                if (!isAdded()) return;
-                if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.GONE);
-                Toast.makeText(getContext(), getString(R.string.error_red_alertas), Toast.LENGTH_SHORT).show();
             }
         });
-    }
 
-    private void cargarPuntosVenta() {
-        if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.VISIBLE);
-        String token = SplashStorage.obtenerToken(requireContext());
-        if (token == null || token.isEmpty()) return;
-
-        ApiService apiService = RetrofitClient.createService();
-        apiService.listarPuntosVentaSupervision(null).enqueue(new Callback<ApiResponse<List<SupervisionPuntoVenta>>>() {
-            @Override
-            public void onResponse(Call<ApiResponse<List<SupervisionPuntoVenta>>> call, Response<ApiResponse<List<SupervisionPuntoVenta>>> response) {
-                if (!isAdded()) return;
+        viewModel.getPuntosVentaState().observe(getViewLifecycleOwner(), resource -> {
+            if (resource == null) return;
+            if (resource.status == Resource.Status.LOADING) {
+                if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.VISIBLE);
+            } else {
                 if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.GONE);
-                if (response.isSuccessful() && response.body() != null) {
-                    List<SupervisionPuntoVenta> lista = response.body().getData();
-                    puntoVentaAdapter = new SupervisionPuntoVentaAdapter(lista, requireContext());
+                if (resource.status == Resource.Status.SUCCESS && resource.data != null) {
+                    puntoVentaAdapter = new SupervisionPuntoVentaAdapter(resource.data, requireContext());
                     rvPuntosVenta.setAdapter(puntoVentaAdapter);
                     if (rvPuntosVenta != null) rvPuntosVenta.setVisibility(View.VISIBLE);
-                } else {
-                    Toast.makeText(getContext(), getString(R.string.error_cargar_pdvs), Toast.LENGTH_SHORT).show();
                 }
             }
+        });
 
-            @Override
-            public void onFailure(Call<ApiResponse<List<SupervisionPuntoVenta>>> call, Throwable t) {
-                if (!isAdded()) return;
+        viewModel.getIncidenciasState().observe(getViewLifecycleOwner(), resource -> {
+            if (resource == null) return;
+            if (resource.status == Resource.Status.LOADING) {
+                if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.VISIBLE);
+            } else {
                 if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.GONE);
-                Toast.makeText(getContext(), getString(R.string.error_red_pdvs), Toast.LENGTH_SHORT).show();
+                if (resource.status == Resource.Status.SUCCESS && resource.data != null) {
+                    incidenciaAdapter = new IncidenciaAdapter(resource.data, requireContext(), item -> mostrarBottomSheetRevisarIncidencia(item));
+                    if (rvIncidencias != null) {
+                        rvIncidencias.setAdapter(incidenciaAdapter);
+                        rvIncidencias.setVisibility(View.VISIBLE);
+                    }
+                }
+            }
+        });
+
+        viewModel.getImpulsadorDashboardState().observe(getViewLifecycleOwner(), resource -> {
+            if (resource == null) return;
+            if (resource.status == Resource.Status.SUCCESS && resource.data != null) {
+                ImpulsadorDashboard data = resource.data;
+                if (data.getPuntoVenta() != null && data.getPuntoVenta().getNombre() != null) {
+                    tvLocalAsignado.setText(data.getPuntoVenta().getNombre());
+                } else {
+                    tvLocalAsignado.setText("Sin local asignado");
+                }
+
+                if (data.getHorario() != null && data.getHorario().getJornada() != null) {
+                    tvHorario.setText("Horario: " + data.getHorario().getJornada());
+                } else {
+                    tvHorario.setText("Horario: ---");
+                }
+
+                if (data.getProgresoVentas() != null) {
+                    tvMetaVentas.setText(String.format("S/ %.2f", data.getProgresoVentas().getMetaMensual()));
+                    tvAvanceVentas.setText(String.format("S/ %.2f", data.getProgresoVentas().getMontoMes()));
+                    int porcentaje = (int) data.getProgresoVentas().getPorcentajeAlcanzado();
+                    pbVentasImpulsador.setProgress(porcentaje);
+                } else if (data.getImpulsador() != null) {
+                    tvMetaVentas.setText(String.format("S/ %.2f", data.getImpulsador().getMetaVentas()));
+                    tvAvanceVentas.setText("S/ 0.00");
+                    pbVentasImpulsador.setProgress(0);
+                }
             }
         });
     }
@@ -741,37 +737,7 @@ public class SupervisionFragment extends Fragment {
         });
     }
 
-    private void cargarIncidencias() {
-        if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.VISIBLE);
-        String token = SplashStorage.obtenerToken(requireContext());
-        if (token == null || token.isEmpty()) return;
 
-        ApiService apiService = RetrofitClient.createService();
-        apiService.listarIncidenciasSupervision(null).enqueue(new Callback<ApiResponse<List<Incidencia>>>() {
-            @Override
-            public void onResponse(@NonNull Call<ApiResponse<List<Incidencia>>> call, @NonNull Response<ApiResponse<List<Incidencia>>> response) {
-                if (!isAdded()) return;
-                if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.GONE);
-                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
-                    List<Incidencia> listaIncidencias = response.body().getData();
-                    incidenciaAdapter = new IncidenciaAdapter(listaIncidencias, requireContext(), item -> mostrarBottomSheetRevisarIncidencia(item));
-                    if (rvIncidencias != null) {
-                        rvIncidencias.setAdapter(incidenciaAdapter);
-                        rvIncidencias.setVisibility(View.VISIBLE);
-                    }
-                } else {
-                    Toast.makeText(getContext(), "Error al cargar incidencias", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<ApiResponse<List<Incidencia>>> call, @NonNull Throwable t) {
-                if (!isAdded()) return;
-                if (pbLoadingListas != null) pbLoadingListas.setVisibility(View.GONE);
-                Toast.makeText(getContext(), "Error de red: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
 
     private void mostrarBottomSheetRevisarIncidencia(Incidencia item) {
         Context ctx = getContext();
@@ -1164,36 +1130,43 @@ public class SupervisionFragment extends Fragment {
         }
         
         btnConfirmarVenta.setOnClickListener(v -> {
-            btnConfirmarVenta.setEnabled(false);
             int cantidadVenta = cantidad[0];
-            if (NetworkUtils.isNetworkAvailable(getContext())) {
-                ApiService apiService = RetrofitClient.createService();
-                RegistrarVentaRequest request = new RegistrarVentaRequest(codigoBarras, cantidadVenta);
+            new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                    .setTitle("Confirmar Venta")
+                    .setMessage("¿Desea registrar la venta de " + cantidadVenta + " unidad(es) de " + (producto.getNombre() != null ? producto.getNombre() : "este producto") + "?")
+                    .setPositiveButton("Confirmar", (dialog, which) -> {
+                        btnConfirmarVenta.setEnabled(false);
+                        if (NetworkUtils.isNetworkAvailable(getContext())) {
+                            ApiService apiService = RetrofitClient.createService();
+                            RegistrarVentaRequest request = new RegistrarVentaRequest(codigoBarras, cantidadVenta);
 
-                apiService.registrarVenta(request).enqueue(new Callback<ApiResponse<Object>>() {
-                    @Override
-                    public void onResponse(Call<ApiResponse<Object>> call, Response<ApiResponse<Object>> response) {
-                        if (!isAdded()) return;
-                        btnConfirmarVenta.setEnabled(true);
-                        if (response.isSuccessful()) {
-                            Toast.makeText(getContext(), "Venta registrada exitosamente", Toast.LENGTH_SHORT).show();
-                            bottomSheetDialog.dismiss();
-                            cargarDashboardImpulsador();
+                            apiService.registrarVenta(request).enqueue(new Callback<ApiResponse<Object>>() {
+                                @Override
+                                public void onResponse(Call<ApiResponse<Object>> call, Response<ApiResponse<Object>> response) {
+                                    if (!isAdded()) return;
+                                    btnConfirmarVenta.setEnabled(true);
+                                    if (response.isSuccessful()) {
+                                        Toast.makeText(getContext(), "Venta registrada exitosamente", Toast.LENGTH_SHORT).show();
+                                        bottomSheetDialog.dismiss();
+                                        cargarDashboardImpulsador();
+                                    } else {
+                                        Toast.makeText(getContext(), "Error al registrar la venta", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(Call<ApiResponse<Object>> call, Throwable t) {
+                                    if (!isAdded()) return;
+                                    btnConfirmarVenta.setEnabled(true);
+                                    guardarVentaOffline(codigoBarras, cantidadVenta, bottomSheetDialog);
+                                }
+                            });
                         } else {
-                            Toast.makeText(getContext(), "Error al registrar la venta", Toast.LENGTH_SHORT).show();
+                            guardarVentaOffline(codigoBarras, cantidadVenta, bottomSheetDialog);
                         }
-                    }
-
-                    @Override
-                    public void onFailure(Call<ApiResponse<Object>> call, Throwable t) {
-                        if (!isAdded()) return;
-                        btnConfirmarVenta.setEnabled(true);
-                        guardarVentaOffline(codigoBarras, cantidadVenta, bottomSheetDialog);
-                    }
-                });
-            } else {
-                guardarVentaOffline(codigoBarras, cantidadVenta, bottomSheetDialog);
-            }
+                    })
+                    .setNegativeButton("Cancelar", (dialog, which) -> dialog.dismiss())
+                    .show();
         });
         
         bottomSheetDialog.show();

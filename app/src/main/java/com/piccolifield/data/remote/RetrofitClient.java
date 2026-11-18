@@ -24,7 +24,8 @@ public class RetrofitClient {
         public Response intercept(Chain chain) throws IOException {
             Request original = chain.request();
             Request.Builder requestBuilder = original.newBuilder()
-                    .header("Accept", "application/json, image/*, */*");
+                    .header("Accept", "application/json, image/*, */*")
+                    .header("X-Operation-Id", java.util.UUID.randomUUID().toString());
 
             boolean esMultipart = false;
             if (original.body() != null && original.body().contentType() != null) {

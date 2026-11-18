@@ -1,8 +1,14 @@
 package com.piccolifield;
 
+import android.content.Context;
+import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkRequest;
 import android.os.Bundle;
+import android.view.View;
 import android.view.ViewGroup;
-
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -16,6 +22,7 @@ import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
 
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.piccolifield.data.local.sync.SyncWorker;
 import com.piccolifield.data.model.Usuario;
 import com.piccolifield.data.remote.api.ApiService;
 import com.piccolifield.data.remote.RetrofitClient;
@@ -29,6 +36,7 @@ import com.piccolifield.ui.despacho.PuntosDespachoFragment;
 import com.piccolifield.ui.despacho.ProspectosFragment;
 import com.piccolifield.ui.perfil.PerfilFragment;
 import com.piccolifield.ui.supervisionPdv.SupervisionFragment;
+import com.piccolifield.util.NetworkUtils;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -74,6 +82,9 @@ public class MenuActivity extends AppCompatActivity {
 
         // Registrar / Sincronizar Token FCM
         registrarTokenFcm();
+
+        // Monitoreo visual del estado de red (Banner Offline/Online)
+        iniciarMonitoreoRed();
 
         // Solicitar permiso de notificaciones en Android 13+ (API 33+)
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
@@ -249,6 +260,69 @@ public class MenuActivity extends AppCompatActivity {
         }
     }
 
+    private ConnectivityManager.NetworkCallback networkCallback;
+    private boolean wasOffline = false;
+
+    private void iniciarMonitoreoRed() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivityManager == null) return;
+
+        NetworkRequest networkRequest = new NetworkRequest.Builder()
+                .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                .build();
+
+        networkCallback = new ConnectivityManager.NetworkCallback() {
+            @Override
+            public void onAvailable(@NonNull Network network) {
+                runOnUiThread(() -> {
+                    if (wasOffline) {
+                        if (binding != null && binding.tvBannerOffline != null) {
+                            binding.tvBannerOffline.setText("Conexión restablecida. Sincronizando datos...");
+                            binding.tvBannerOffline.setBackgroundColor(Color.parseColor("#388E3C"));
+                            binding.tvBannerOffline.setVisibility(View.VISIBLE);
+
+                            SyncWorker.programarSincronizacion(MenuActivity.this);
+
+                            binding.tvBannerOffline.postDelayed(() -> {
+                                if (binding != null && binding.tvBannerOffline != null) {
+                                    binding.tvBannerOffline.setVisibility(View.GONE);
+                                }
+                            }, 3500);
+                        }
+                        wasOffline = false;
+                    } else if (binding != null && binding.tvBannerOffline != null) {
+                        binding.tvBannerOffline.setVisibility(View.GONE);
+                    }
+                });
+            }
+
+            @Override
+            public void onLost(@NonNull Network network) {
+                runOnUiThread(() -> {
+                    wasOffline = true;
+                    if (binding != null && binding.tvBannerOffline != null) {
+                        binding.tvBannerOffline.setText("Sin conexión - Modo Offline (Se guardará localmente)");
+                        binding.tvBannerOffline.setBackgroundColor(Color.parseColor("#D32F2F"));
+                        binding.tvBannerOffline.setVisibility(View.VISIBLE);
+                    }
+                });
+            }
+        };
+
+        try {
+            connectivityManager.registerNetworkCallback(networkRequest, networkCallback);
+        } catch (Exception ignored) {}
+
+        if (!NetworkUtils.isNetworkAvailable(this)) {
+            wasOffline = true;
+            if (binding != null && binding.tvBannerOffline != null) {
+                binding.tvBannerOffline.setText("Sin conexión - Modo Offline (Se guardará localmente)");
+                binding.tvBannerOffline.setBackgroundColor(Color.parseColor("#D32F2F"));
+                binding.tvBannerOffline.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
     private void cargarFragmento(Fragment fragment) {
         getSupportFragmentManager()
                 .beginTransaction()
@@ -259,6 +333,14 @@ public class MenuActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (networkCallback != null) {
+            ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (connectivityManager != null) {
+                try {
+                    connectivityManager.unregisterNetworkCallback(networkCallback);
+                } catch (Exception ignored) {}
+            }
+        }
         binding = null;
     }
 }
