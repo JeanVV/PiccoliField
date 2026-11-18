@@ -55,6 +55,18 @@ public class AsistenciaRepository {
                         msg = "Asistencia registrada correctamente";
                     }
                     if (apiResponse.isStatus()) {
+                        if (context != null) {
+                            RegistroAsistencia reg = new RegistroAsistencia();
+                            reg.setIdUsuario(request.getIdUsuario());
+                            reg.setTipo(request.getTipo());
+                            reg.setLatitud(request.getLatitud());
+                            reg.setLongitud(request.getLongitud());
+                            reg.setSede(request.getSede());
+                            reg.setFechaHoraServidor(request.getFechaHoraDispositivo());
+                            reg.setHoraMarcado(request.getFechaHoraDispositivo());
+                            reg.setEstado("A_TIEMPO");
+                            SplashStorage.guardarRegistroAsistenciaLocal(context, reg);
+                        }
                         result.setValue(Resource.success(msg));
                     } else {
                         result.setValue(Resource.error(msg, null));
