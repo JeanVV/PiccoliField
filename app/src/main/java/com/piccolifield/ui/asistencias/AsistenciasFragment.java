@@ -645,12 +645,9 @@ public class AsistenciasFragment extends Fragment {
                 SplashStorage.guardarEntradaHoy(requireContext(), idUsuarioActual);
                 horaStr = ultima.getHora();
             } else if (!esDeHoy && !marcadoEntradaEnSesion) {
-                // Solo si la respuesta explícita del servidor es de un día anterior
+                // Solo si la respuesta explícita del servidor es de un día anterior (ayer o antes)
                 SplashStorage.limpiarEntradaHoy(requireContext(), idUsuarioActual);
             }
-        } else if (ultima == null && !marcadoEntradaEnSesion) {
-            // El servidor confirma que este usuario no tiene ninguna asistencia registrada en la BD
-            SplashStorage.limpiarEntradaHoy(requireContext(), idUsuarioActual);
         }
 
         boolean yaIngreso = marcadoEntradaEnSesion || yaRegistroIngresoHoy();
