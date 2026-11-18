@@ -112,6 +112,7 @@ public class DetalleAsistenciaFragment extends Fragment {
         }
 
         viewModel = new ViewModelProvider(requireActivity()).get(AsistenciaViewModel.class);
+        viewModel.resetRevisionJustificacionLiveData();
         observarViewModel();
 
         cargarMapaEstatico();
@@ -144,10 +145,16 @@ public class DetalleAsistenciaFragment extends Fragment {
             });
 
             String horaDisp = registro.getHoraMarcado();
-            binding.tvAttendanceTime.setText(formatearHoraCorta(horaDisp));
-
             String horaServidor = registro.getFechaHoraServidor();
-            binding.tvServerTime.setText(formatearHoraCorta(horaServidor));
+
+            String fmtDisp = formatearHoraCorta(horaDisp);
+            String fmtServ = formatearHoraCorta(horaServidor);
+
+            if ("--:--".equals(fmtDisp) && !"--:--".equals(fmtServ)) fmtDisp = fmtServ;
+            if ("--:--".equals(fmtServ) && !"--:--".equals(fmtDisp)) fmtServ = fmtDisp;
+
+            binding.tvAttendanceTime.setText(fmtDisp);
+            binding.tvServerTime.setText(fmtServ);
 
             String tipo = registro.getTipo();
             binding.tvStatusTitle.setText(tipo != null && !tipo.isEmpty() ? tipo : "INGRESO");
@@ -194,11 +201,16 @@ public class DetalleAsistenciaFragment extends Fragment {
             if (!isAdded() || binding == null || resource == null) return;
             if (resource.status == Resource.Status.SUCCESS && resource.data != null) {
                 RegistroAsistencia resJust = resource.data;
-                if (resJust.getJustificacion() != null && !resJust.getJustificacion().isEmpty()) {
+                if (resJust.getJustificacion() != null && !resJust.getJustificacion().trim().isEmpty()) {
                     binding.cardJustificacionAdmin.setVisibility(View.VISIBLE);
                     binding.tvMotivoJustificacionAdmin.setText("Motivo: " + (resJust.getMotivoJustificacion() != null ? resJust.getMotivoJustificacion() : "Inasistencia"));
                     binding.tvDetalleJustificacionAdmin.setText("Detalle: " + resJust.getJustificacion());
+                    String estJ = resJust.getEstadoJustificacion();
+                    actualizarEstadoBadgeJustificacion(estJ != null ? estJ : "PENDIENTE");
                     mostrarFotoSustento(resJust.getRutaSustento());
+
+                    registro.setEstadoJustificacion(estJ);
+                    configurarControlesRevisionAdmin();
                 } else {
                     mostrarJustificacionPorDefectoOEstado();
                 }
@@ -218,8 +230,13 @@ public class DetalleAsistenciaFragment extends Fragment {
         });
     }
 
+    private static final java.util.TimeZone TIME_ZONE_LIMA = java.util.TimeZone.getTimeZone("America/Lima");
+    private static final java.util.Locale LOCALE_PERU = new java.util.Locale("es", "PE");
+
     private String formatearHoraCorta(String str) {
-        if (str == null || str.trim().isEmpty()) return "--:--";
+        if (str == null || str.trim().isEmpty() || str.contains("%H") || str.contains("%i") || str.contains("%s")) {
+            return "--:--";
+        }
         try {
             String s = str.trim();
             if (s.contains(" ")) {
@@ -229,6 +246,14 @@ public class DetalleAsistenciaFragment extends Fragment {
                 }
             }
             if (s.length() >= 5) {
+                java.text.SimpleDateFormat inFormat = new java.text.SimpleDateFormat("HH:mm", LOCALE_PERU);
+                inFormat.setTimeZone(TIME_ZONE_LIMA);
+                java.text.SimpleDateFormat outFormat = new java.text.SimpleDateFormat("hh:mm a", LOCALE_PERU);
+                outFormat.setTimeZone(TIME_ZONE_LIMA);
+                java.util.Date date = inFormat.parse(s.substring(0, 5));
+                if (date != null) {
+                    return outFormat.format(date);
+                }
                 return s.substring(0, 5);
             }
             return s;
@@ -242,7 +267,12 @@ public class DetalleAsistenciaFragment extends Fragment {
         if (binding == null || registro == null) return;
 
         String rol = SplashStorage.obtenerRol(requireContext());
-        if ("ADMINISTRADOR".equalsIgnoreCase(rol)) {
+        boolean esAdminOSuper = "ADMINISTRADOR".equalsIgnoreCase(rol) || "SUPERVISOR".equalsIgnoreCase(rol);
+
+        String estJ = registro.getEstadoJustificacion();
+        boolean yaRevisada = "APROBADA".equalsIgnoreCase(estJ) || "RECHAZADA".equalsIgnoreCase(estJ);
+
+        if (esAdminOSuper && !yaRevisada && binding.cardJustificacionAdmin.getVisibility() == View.VISIBLE) {
             binding.layoutControlesRevisionAdmin.setVisibility(View.VISIBLE);
 
             binding.btnAprobarJustificacion.setOnClickListener(v -> procesarRevision("APROBADA"));
@@ -272,6 +302,9 @@ public class DetalleAsistenciaFragment extends Fragment {
 
     private void mostrarDialogoExitoRevision(String titulo, String mensaje) {
         if (!isAdded() || getContext() == null) return;
+        if (viewModel != null) {
+            viewModel.resetRevisionJustificacionLiveData();
+        }
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_confirmacion_minimal, null);
 
         TextView tvTitle = dialogView.findViewById(R.id.tvDialogTitle);

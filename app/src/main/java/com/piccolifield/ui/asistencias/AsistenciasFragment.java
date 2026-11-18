@@ -173,17 +173,23 @@ public class AsistenciasFragment extends Fragment {
                         marcadoEntradaEnSesion = true;
                         int idU = SplashStorage.obtenerUsuarioId(requireContext());
                         SplashStorage.guardarEntradaHoy(requireContext(), idU);
+
+                        SimpleDateFormat shortSdf = new SimpleDateFormat("hh:mm a", LOCALE_PERU);
+                        shortSdf.setTimeZone(TIME_ZONE_LIMA);
+                        String horaFormateada = shortSdf.format(new Date());
+                        SplashStorage.guardarHoraEntradaHoy(requireContext(), idU, horaFormateada);
+
                         binding.btnMarcarEntrada.setEnabled(false);
                         binding.btnMarcarEntrada.setText("REGISTRADO");
                         if (binding.cardJustificacionContainer != null) {
                             binding.cardJustificacionContainer.setVisibility(View.GONE);
                         }
+                        binding.tvEstadoHoy.setText("Última marca: Entrada a las " + horaFormateada + " (Lima)");
                     }
                     int idU = SplashStorage.obtenerUsuarioId(requireContext());
                     if (idU > 0) {
                         viewModel.cargarUltimaAsistencia(idU);
                     }
-                    actualizarTextoUltimaMarca(tipoMarcaActual);
                     String msgExito = state.getMensaje() != null ? state.getMensaje() : ("Tu " + tipoTexto + " ha sido registrada exitosamente.");
                     mostrarDialogoExitoMinimal("¡Asistencia Registrada!", msgExito);
                     viewModel.resetUiState();
@@ -663,16 +669,44 @@ public class AsistenciasFragment extends Fragment {
 
         if (yaIngreso) {
             if (horaStr != null && !horaStr.trim().isEmpty() && !horaStr.contains("--:--")) {
-                if (horaStr.length() >= 5) {
-                    horaStr = horaStr.substring(0, 5);
-                }
-                binding.tvEstadoHoy.setText("Última marca: Entrada a las " + horaStr + " (Lima)");
+                String horaFormatted = formatearHoraAmPm(horaStr);
+                binding.tvEstadoHoy.setText("Última marca: Entrada a las " + horaFormatted + " (Lima)");
+                SplashStorage.guardarHoraEntradaHoy(requireContext(), idUsuarioActual, horaFormatted);
             } else {
-                binding.tvEstadoHoy.setText("Última marca: Entrada registrada hoy");
+                String hLocal = SplashStorage.obtenerHoraEntradaHoy(requireContext(), idUsuarioActual);
+                if (hLocal != null && !hLocal.trim().isEmpty()) {
+                    binding.tvEstadoHoy.setText("Última marca: Entrada a las " + hLocal + " (Lima)");
+                } else {
+                    binding.tvEstadoHoy.setText("Última marca: Entrada registrada hoy");
+                }
             }
         } else {
             binding.tvEstadoHoy.setText("Sin marcas registradas hoy");
         }
+    }
+
+    private String formatearHoraAmPm(String str) {
+        if (str == null || str.trim().isEmpty()) return "";
+        try {
+            String s = str.trim();
+            if (s.contains(" ")) {
+                String[] parts = s.split(" ");
+                if (parts.length > 1) s = parts[1];
+            }
+            if (s.length() >= 5) {
+                SimpleDateFormat inFormat = new SimpleDateFormat("HH:mm", LOCALE_PERU);
+                inFormat.setTimeZone(TIME_ZONE_LIMA);
+                SimpleDateFormat outFormat = new SimpleDateFormat("hh:mm a", LOCALE_PERU);
+                outFormat.setTimeZone(TIME_ZONE_LIMA);
+                Date date = inFormat.parse(s.substring(0, 5));
+                if (date != null) {
+                    return outFormat.format(date);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return str;
     }
 
     private void setBotonesEstado(boolean enabled, @Nullable String loadingText) {

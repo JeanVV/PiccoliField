@@ -283,6 +283,20 @@ public class SplashStorage {
         sharedPreferences.edit().putString("ultima_entrada_fecha_hoy_" + idUsuario, hoy).apply();
     }
 
+    public static void guardarHoraEntradaHoy(Context context, int idUsuario, String hora) {
+        if (context == null || idUsuario <= 0 || hora == null) return;
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return;
+        sharedPreferences.edit().putString("hora_entrada_hoy_" + idUsuario, hora).apply();
+    }
+
+    public static String obtenerHoraEntradaHoy(Context context, int idUsuario) {
+        if (context == null || idUsuario <= 0) return "";
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return "";
+        return sharedPreferences.getString("hora_entrada_hoy_" + idUsuario, "");
+    }
+
     public static boolean consultarEntradaHoy(Context context, int idUsuario) {
         if (context == null || idUsuario <= 0) return false;
         SharedPreferences sharedPreferences = getSharedPreferences(context);
@@ -297,7 +311,10 @@ public class SplashStorage {
         if (context == null || idUsuario <= 0) return;
         SharedPreferences sharedPreferences = getSharedPreferences(context);
         if (sharedPreferences == null) return;
-        sharedPreferences.edit().remove("ultima_entrada_fecha_hoy_" + idUsuario).apply();
+        sharedPreferences.edit()
+                .remove("ultima_entrada_fecha_hoy_" + idUsuario)
+                .remove("hora_entrada_hoy_" + idUsuario)
+                .apply();
     }
 
     public static void guardarEntradaHoy(Context context) {

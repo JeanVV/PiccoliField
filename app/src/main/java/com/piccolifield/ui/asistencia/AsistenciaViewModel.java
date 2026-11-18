@@ -149,4 +149,8 @@ public class AsistenciaViewModel extends ViewModel {
     public void resetUiState() {
         uiState.setValue(AsistenciaUiState.idle());
     }
+
+    public void resetRevisionJustificacionLiveData() {
+        revisionJustificacionLiveData.setValue(null);
+    }
 }
