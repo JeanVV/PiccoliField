@@ -116,8 +116,8 @@ public class ProspectosFragment extends Fragment {
     private void cargarMock() {
         listaProspectos.clear();
         listaProspectos.add(new Prospecto(1, "Bodega Don Pepe", "Av. Grau 123", "NUEVO", "Lima Centro", "Bodega"));
-        listaProspectos.add(new Prospecto(2, "Minimarket El Sol", "Av. Arequipa 456", "CONTACTADO", "Miraflores", "Minimarket"));
-        listaProspectos.add(new Prospecto(3, "Licorería 24 Horas", "Calle las Flores 12", "NEGOCIACION", "San Isidro", "Licorería"));
+        listaProspectos.add(new Prospecto(2, "Minimarket El Sol", "Av. Arequipa 456", "EN_NEGOCIACION", "Miraflores", "Minimarket"));
+        listaProspectos.add(new Prospecto(3, "Licorería 24 Horas", "Calle las Flores 12", "EN_NEGOCIACION", "San Isidro", "Licorería"));
         listaFiltrada.clear();
         listaFiltrada.addAll(listaProspectos);
         adapter.notifyDataSetChanged();

@@ -331,8 +331,32 @@ public interface ApiService {
     @POST("prospectos")
     Call<ApiResponse<Prospecto>> registrarProspecto(@Body Prospecto prospecto);
 
+    @Multipart
+    @POST("prospectos")
+    Call<ApiResponse<Prospecto>> registrarProspectoMultipart(
+            @Part("nombre_comercial") okhttp3.RequestBody nombreComercial,
+            @Part("tipo_local") okhttp3.RequestBody tipoLocal,
+            @Part("direccion") okhttp3.RequestBody direccion,
+            @Part("contacto") okhttp3.RequestBody contacto,
+            @Part("telefono") okhttp3.RequestBody telefono,
+            @Part("potencial") okhttp3.RequestBody potencial,
+            @Part("estado") okhttp3.RequestBody estado,
+            @Part("notas") okhttp3.RequestBody notas,
+            @Part("latitud") okhttp3.RequestBody latitud,
+            @Part("longitud") okhttp3.RequestBody longitud,
+            @Part("idDistrito") okhttp3.RequestBody idDistrito,
+            @Part("idUsuario") okhttp3.RequestBody idUsuario,
+            @Part MultipartBody.Part foto
+    );
+
     @PUT("prospectos/{id}/estado")
     Call<ApiResponse<Object>> actualizarEstadoProspecto(
+            @Path("id") int id,
+            @Body com.piccolifield.data.remote.dto.request.EstadoRequest request
+    );
+
+    @PUT("prospectos/{id}")
+    Call<ApiResponse<Object>> actualizarProspecto(
             @Path("id") int id,
             @Body com.piccolifield.data.remote.dto.request.EstadoRequest request
     );

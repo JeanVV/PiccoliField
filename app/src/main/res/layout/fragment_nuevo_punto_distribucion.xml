@@ -35,7 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:fontFamily="serif"
-            android:text="Nuevo Punto de Distribución"
+            android:text="Nuevo Prospecto / Punto"
             android:textColor="@color/cafe_profundo"
             android:textSize="17sp"
             android:textStyle="bold" />
@@ -53,22 +53,22 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingHorizontal="20dp"
-            android:paddingTop="12dp"
+            android:paddingTop="10dp"
             android:paddingBottom="40dp">
 
-            <!-- Nombre del Punto de Distribución -->
+            <!-- Nombre comercial (nombre_comercial) -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="6dp"
-                android:text="Nombre del punto de distribución"
+                android:text="Nombre comercial *"
                 android:textColor="@color/chocolate"
                 android:textStyle="bold" />
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="14dp"
                 app:cardBackgroundColor="@color/white"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="0dp"
@@ -80,7 +80,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="@null"
-                    android:hint="Ej. Licorería El Buen Sabor"
+                    android:hint="Ej. Bodega El Chinito"
                     android:inputType="textCapWords"
                     android:paddingHorizontal="16dp"
                     android:textColor="@color/cafe_profundo"
@@ -88,78 +88,93 @@
                     android:textSize="14sp" />
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Código del Punto de Distribución -->
+            <!-- Tipo de local (tipo_local) y Potencial (potencial) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="14dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1.2"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="6dp"
+                        android:text="Tipo de local"
+                        android:textColor="@color/chocolate"
+                        android:textStyle="bold" />
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        app:cardBackgroundColor="@color/white"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="0dp"
+                        app:strokeColor="#E5D5C0"
+                        app:strokeWidth="1dp">
+
+                        <Spinner
+                            android:id="@+id/spCriterioNegocio"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@null"
+                            android:paddingHorizontal="10dp" />
+                    </com.google.android.material.card.MaterialCardView>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:layout_weight="0.8"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="6dp"
+                        android:text="Potencial *"
+                        android:textColor="@color/chocolate"
+                        android:textStyle="bold" />
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        app:cardBackgroundColor="@color/white"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="0dp"
+                        app:strokeColor="#E5D5C0"
+                        app:strokeWidth="1dp">
+
+                        <Spinner
+                            android:id="@+id/spPotencialProspecto"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@null"
+                            android:paddingHorizontal="10dp" />
+                    </com.google.android.material.card.MaterialCardView>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Dirección (direccion) -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="6dp"
-                android:text="Código del punto de distribución"
+                android:text="Dirección del local *"
                 android:textColor="@color/chocolate"
                 android:textStyle="bold" />
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:layout_marginBottom="16dp"
-                app:cardBackgroundColor="@color/white"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="0dp"
-                app:strokeColor="#E5D5C0"
-                app:strokeWidth="1dp">
-
-                <EditText
-                    android:id="@+id/etCodigoPunto"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@null"
-                    android:hint="Ej. PDV-035"
-                    android:inputType="textCapCharacters"
-                    android:paddingHorizontal="16dp"
-                    android:textColor="@color/cafe_profundo"
-                    android:textColorHint="@color/color_text_muted"
-                    android:textSize="14sp" />
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Criterio de Negocio: Minorista o Mayorista -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="6dp"
-                android:text="Criterio del negocio (Tipo de cliente)"
-                android:textColor="@color/chocolate"
-                android:textStyle="bold" />
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginBottom="16dp"
-                app:cardBackgroundColor="@color/white"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="0dp"
-                app:strokeColor="#E5D5C0"
-                app:strokeWidth="1dp">
-
-                <Spinner
-                    android:id="@+id/spCriterioNegocio"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@null"
-                    android:paddingHorizontal="12dp" />
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Dirección -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="6dp"
-                android:text="Dirección del local"
-                android:textColor="@color/chocolate"
-                android:textStyle="bold" />
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="14dp"
                 app:cardBackgroundColor="@color/white"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="0dp"
@@ -171,7 +186,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="@null"
-                    android:hint="Ej. Av. Principal 123, Miraflores"
+                    android:hint="Ej. Av. Principal 123"
                     android:inputType="textPostalAddress"
                     android:paddingHorizontal="16dp"
                     android:textColor="@color/cafe_profundo"
@@ -179,11 +194,11 @@
                     android:textSize="14sp" />
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Distrito y Estado en una fila con Spinners -->
+            <!-- Contacto y Teléfono en una fila -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
+                android:layout_marginBottom="14dp"
                 android:orientation="horizontal">
 
                 <LinearLayout
@@ -197,7 +212,92 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="6dp"
-                        android:text="Distrito"
+                        android:text="Contacto"
+                        android:textColor="@color/chocolate"
+                        android:textStyle="bold" />
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        app:cardBackgroundColor="@color/white"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="0dp"
+                        app:strokeColor="#E5D5C0"
+                        app:strokeWidth="1dp">
+
+                        <EditText
+                            android:id="@+id/etContactoProspecto"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@null"
+                            android:hint="Ej. Juan Pérez"
+                            android:inputType="textPersonName"
+                            android:paddingHorizontal="12dp"
+                            android:textColor="@color/cafe_profundo"
+                            android:textColorHint="@color/color_text_muted"
+                            android:textSize="14sp" />
+                    </com.google.android.material.card.MaterialCardView>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="6dp"
+                        android:text="Teléfono"
+                        android:textColor="@color/chocolate"
+                        android:textStyle="bold" />
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        app:cardBackgroundColor="@color/white"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="0dp"
+                        app:strokeColor="#E5D5C0"
+                        app:strokeWidth="1dp">
+
+                        <EditText
+                            android:id="@+id/etTelefonoProspecto"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@null"
+                            android:hint="Ej. 987654321"
+                            android:inputType="phone"
+                            android:maxLength="20"
+                            android:paddingHorizontal="12dp"
+                            android:textColor="@color/cafe_profundo"
+                            android:textColorHint="@color/color_text_muted"
+                            android:textSize="14sp" />
+                    </com.google.android.material.card.MaterialCardView>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Distrito y Estado en una fila con Spinners -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="14dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="6dp"
+                        android:text="Distrito *"
                         android:textColor="@color/chocolate"
                         android:textStyle="bold" />
 
@@ -230,14 +330,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="6dp"
-                        android:text="Estado"
+                        android:text="Estado inicial"
                         android:textColor="@color/chocolate"
                         android:textStyle="bold" />
 
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
-                        app:cardBackgroundColor="@color/white"
+                        app:cardBackgroundColor="#FDF8ED"
                         app:cardCornerRadius="12dp"
                         app:cardElevation="0dp"
                         app:strokeColor="#E5D5C0"
@@ -253,18 +353,134 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <!-- Notas (notas) -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="6dp"
+                android:text="Notas / Observaciones"
+                android:textColor="@color/chocolate"
+                android:textStyle="bold" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="18dp"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#E5D5C0"
+                app:strokeWidth="1dp">
+
+                <EditText
+                    android:id="@+id/etNotasProspecto"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:gravity="top"
+                    android:hint="Ej. Interesado en línea de pisco y cremas"
+                    android:inputType="textMultiLine"
+                    android:minLines="3"
+                    android:padding="14dp"
+                    android:textColor="@color/cafe_profundo"
+                    android:textColorHint="@color/color_text_muted"
+                    android:textSize="14sp" />
+            </com.google.android.material.card.MaterialCardView>
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginBottom="20dp"
+                android:layout_marginBottom="16dp"
                 android:background="#E8DCC8" />
+
+            <!-- Foto de fachada del negocio (url_foto) -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="Foto del negocio (fachada)"
+                android:textColor="@color/cafe_profundo"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="18dp"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#E5D5C0"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="12dp">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="76dp"
+                        android:layout_height="64dp"
+                        app:cardBackgroundColor="#F5E4CA"
+                        app:cardCornerRadius="10dp"
+                        app:cardElevation="0dp">
+
+                        <ImageView
+                            android:id="@+id/ivFotoFachadaProspecto"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:contentDescription="@null"
+                            android:padding="14dp"
+                            android:scaleType="centerInside"
+                            android:src="@drawable/ic_camera_icon"
+                            app:tint="@color/cafe_profundo" />
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tvEstadoFotoProspecto"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Sin foto adjunta (opcional)"
+                            android:textColor="@color/color_text_muted"
+                            android:textSize="12sp" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnSeleccionarFotoProspecto"
+                            style="?attr/materialButtonOutlinedStyle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="38dp"
+                            android:layout_marginTop="6dp"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            android:text="Tomar o elegir foto"
+                            android:textAllCaps="false"
+                            android:textColor="@color/cafe_profundo"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            app:cornerRadius="19dp"
+                            app:icon="@drawable/ic_camera_icon"
+                            app:iconSize="16dp"
+                            app:iconTint="@color/cafe_profundo"
+                            app:strokeColor="@color/cafe_profundo" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <!-- Ubicación GPS -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
-                android:text="Ubicación GPS"
+                android:text="Ubicación GPS *"
                 android:textColor="@color/cafe_profundo"
                 android:textSize="15sp"
                 android:textStyle="bold" />
@@ -272,7 +488,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="28dp"
+                android:layout_marginBottom="24dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
@@ -293,7 +509,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="12dp"
                     android:layout_weight="1"
-                    android:text="-12.04637, -77.04279"
+                    android:text="-6.77140, -79.84090"
                     android:textColor="@color/color_text_muted"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -303,7 +519,7 @@
                 android:id="@+id/btnGuardarNuevoPunto"
                 android:layout_width="match_parent"
                 android:layout_height="54dp"
-                android:text="Registrar Punto de Distribución"
+                android:text="Registrar Prospecto"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
                 android:textSize="15sp"

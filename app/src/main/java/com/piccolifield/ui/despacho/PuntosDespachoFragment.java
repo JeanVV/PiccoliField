@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -26,17 +27,22 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.piccolifield.DetallePuntoDistribucionActivity;
 import com.piccolifield.R;
+import com.piccolifield.adapter.ProspectoAdapter;
 import com.piccolifield.adapter.PuntoDistribucionAdapter;
 import com.piccolifield.data.remote.RetrofitClient;
 import com.piccolifield.data.remote.api.ApiService;
+import com.piccolifield.data.remote.dto.request.EstadoRequest;
 import com.piccolifield.data.remote.dto.response.ApiResponse;
 import com.piccolifield.databinding.FragmentPuntosDespachoBinding;
+import com.piccolifield.model.Prospecto;
 import com.piccolifield.model.PuntoDistribucion;
 import com.piccolifield.sharedpreferences.PuntosDistribucionStorage;
+import com.piccolifield.sharedpreferences.SplashStorage;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import retrofit2.Call;
@@ -47,12 +53,16 @@ public class PuntosDespachoFragment extends Fragment implements OnMapReadyCallba
 
     private FragmentPuntosDespachoBinding binding;
     private PuntoDistribucionAdapter adapter;
+    private ProspectoAdapter prospectoAdapter;
     private final List<PuntoDistribucion> listaPuntosOriginal = new ArrayList<>();
     private final List<PuntoDistribucion> listaPuntosFiltrada = new ArrayList<>();
+    private final List<Prospecto> listaProspectosOriginal = new ArrayList<>();
+    private final List<Prospecto> listaProspectosFiltrada = new ArrayList<>();
 
     private GoogleMap googleMap;
     private String filtroCriterioActual = "TODOS";
     private String filtroEstadoActual = "TODOS";
+    private int tabActual = 1; // 0 = Mapa, 1 = Lista, 2 = Prospectos
 
     public PuntosDespachoFragment() {
         // Required empty public constructor
@@ -70,12 +80,13 @@ public class PuntosDespachoFragment extends Fragment implements OnMapReadyCallba
         super.onViewCreated(view, savedInstanceState);
 
         if (RetrofitClient.API_TOKEN == null || RetrofitClient.API_TOKEN.isEmpty()) {
-            RetrofitClient.API_TOKEN = com.piccolifield.sharedpreferences.SplashStorage.obtenerToken(requireContext());
+            RetrofitClient.API_TOKEN = SplashStorage.obtenerToken(requireContext());
         }
 
         setupRecyclerView();
         setupSpinnersFiltros();
         cargarDatosDesdeApi();
+        cargarProspectosDesdeApi();
         setupToggleViews();
         setupListeners();
 
@@ -136,6 +147,133 @@ public class PuntosDespachoFragment extends Fragment implements OnMapReadyCallba
             startActivity(intent);
         });
         binding.rvListaPuntos.setAdapter(adapter);
+
+        binding.rvProspectosPuntos.setLayoutManager(new LinearLayoutManager(requireContext()));
+        prospectoAdapter = new ProspectoAdapter(
+                listaProspectosFiltrada,
+                this::mostrarDialogoCambiarEstadoProspecto,
+                this::mostrarDialogoCambiarEstadoProspecto
+        );
+        binding.rvProspectosPuntos.setAdapter(prospectoAdapter);
+    }
+
+    private void mostrarDialogoCambiarEstadoProspecto(Prospecto prospecto) {
+        if (!isAdded() || prospecto == null) return;
+
+        String estadoActual = prospecto.getEstado() != null ? prospecto.getEstado().toUpperCase(Locale.ROOT) : "NUEVO";
+        if ("CONVERTIDO".equals(estadoActual)) {
+            Toast.makeText(requireContext(), "Este prospecto ya fue convertido a Punto de Distribución", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        final String[] estadosDisponibles = {"NUEVO", "EN_NEGOCIACION", "CONVERTIDO", "DESCARTADO"};
+        final String[] etiquetas = {
+                "NUEVO",
+                "EN NEGOCIACIÓN",
+                "CONVERTIDO (Pasa a Punto de Distribución)",
+                "DESCARTADO"
+        };
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Estado de " + (prospecto.getNombre() != null ? prospecto.getNombre() : "Prospecto"))
+                .setItems(etiquetas, (dialog, which) -> {
+                    String nuevoEstado = estadosDisponibles[which];
+                    actualizarEstadoProspectoApi(prospecto, nuevoEstado);
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    private void actualizarEstadoProspectoApi(Prospecto prospecto, String nuevoEstado) {
+        if (RetrofitClient.API_TOKEN == null || RetrofitClient.API_TOKEN.isEmpty()) {
+            RetrofitClient.API_TOKEN = SplashStorage.obtenerToken(requireContext());
+        }
+
+        ApiService apiService = RetrofitClient.createService();
+        apiService.actualizarEstadoProspecto(prospecto.getId(), new EstadoRequest(nuevoEstado))
+                .enqueue(new Callback<ApiResponse<Object>>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ApiResponse<Object>> call, @NonNull Response<ApiResponse<Object>> response) {
+                        if (!isAdded()) return;
+                        if (response.isSuccessful() && response.body() != null && response.body().isStatus()) {
+                            aplicarCambioEstadoExitoso(prospecto, nuevoEstado);
+                        } else if (response.code() == 400) {
+                            intentarActualizarViaPutGeneral(apiService, prospecto, nuevoEstado, extraerMensajeError(response));
+                        } else {
+                            Toast.makeText(requireContext(),
+                                    extraerMensajeError(response),
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ApiResponse<Object>> call, @NonNull Throwable t) {
+                        if (!isAdded()) return;
+                        Toast.makeText(requireContext(),
+                                "Error de red al cambiar estado: " + t.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void intentarActualizarViaPutGeneral(ApiService apiService, Prospecto prospecto, String nuevoEstado, String errorOriginal) {
+        apiService.actualizarProspecto(prospecto.getId(), new EstadoRequest(nuevoEstado))
+                .enqueue(new Callback<ApiResponse<Object>>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ApiResponse<Object>> call, @NonNull Response<ApiResponse<Object>> response) {
+                        if (!isAdded()) return;
+                        if (response.isSuccessful() && response.body() != null && response.body().isStatus()) {
+                            aplicarCambioEstadoExitoso(prospecto, nuevoEstado);
+                        } else {
+                            String detalle = errorOriginal != null && !errorOriginal.isEmpty()
+                                    ? errorOriginal
+                                    : extraerMensajeError(response);
+                            Toast.makeText(requireContext(), detalle, Toast.LENGTH_LONG).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ApiResponse<Object>> call, @NonNull Throwable t) {
+                        if (!isAdded()) return;
+                        Toast.makeText(requireContext(),
+                                errorOriginal != null && !errorOriginal.isEmpty() ? errorOriginal : "Error al actualizar estado",
+                                Toast.LENGTH_LONG).show();
+                    }
+                });
+    }
+
+    private void aplicarCambioEstadoExitoso(Prospecto prospecto, String nuevoEstado) {
+        prospecto.setEstado(nuevoEstado);
+        prospectoAdapter.notifyDataSetChanged();
+
+        if ("CONVERTIDO".equalsIgnoreCase(nuevoEstado)) {
+            Toast.makeText(requireContext(),
+                    "Prospecto convertido exitosamente a Punto de Venta y Distribución",
+                    Toast.LENGTH_LONG).show();
+            cargarDatosDesdeApi();
+            cargarProspectosDesdeApi();
+        } else {
+            Toast.makeText(requireContext(),
+                    "Estado actualizado a " + nuevoEstado,
+                    Toast.LENGTH_SHORT).show();
+            cargarProspectosDesdeApi();
+        }
+    }
+
+    private String extraerMensajeError(Response<?> response) {
+        String fallback = "No se pudo actualizar el estado (HTTP " + response.code() + ")";
+        try {
+            if (response.errorBody() != null) {
+                String raw = response.errorBody().string();
+                android.util.Log.e("PuntosDespacho", "Error HTTP " + response.code() + ": " + raw);
+                org.json.JSONObject json = new org.json.JSONObject(raw);
+                String msg = json.optString("message", json.optString("error", json.optString("msg", "")));
+                if (!msg.isEmpty()) {
+                    return msg + " (HTTP " + response.code() + ")";
+                }
+            }
+        } catch (Exception ignored) {}
+        return fallback;
     }
 
     private void setupSpinnersFiltros() {
@@ -178,30 +316,78 @@ public class PuntosDespachoFragment extends Fragment implements OnMapReadyCallba
 
     private void cargarDatosDesdeApi() {
         if (RetrofitClient.API_TOKEN == null || RetrofitClient.API_TOKEN.isEmpty()) {
-            RetrofitClient.API_TOKEN = com.piccolifield.sharedpreferences.SplashStorage.obtenerToken(requireContext());
+            RetrofitClient.API_TOKEN = SplashStorage.obtenerToken(requireContext());
         }
         ApiService apiService = RetrofitClient.createService();
-        // Solo obtener puntos del tipo DISTRIBUCION para que no salgan los VENTA
-        apiService.listarPuntosVenta(null, "DISTRIBUCION", null, null).enqueue(new Callback<ApiResponse<List<PuntoDistribucion>>>() {
+        apiService.listarPuntosVenta(null, null, null, null).enqueue(new Callback<ApiResponse<List<PuntoDistribucion>>>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse<List<PuntoDistribucion>>> call, @NonNull Response<ApiResponse<List<PuntoDistribucion>>> response) {
                 if (!isAdded() || binding == null) return;
+
                 if (response.isSuccessful() && response.body() != null && response.body().getData() != null && !response.body().getData().isEmpty()) {
                     listaPuntosOriginal.clear();
                     listaPuntosOriginal.addAll(response.body().getData());
                     sincronizarPuntosLocales();
                     actualizarUI();
                 } else {
-                    cargarPuntosRespaldo();
+                    cargarPuntosConFiltroDistribucion(apiService);
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<ApiResponse<List<PuntoDistribucion>>> call, @NonNull Throwable t) {
                 if (!isAdded() || binding == null) return;
+                cargarPuntosConFiltroDistribucion(apiService);
+            }
+        });
+    }
+
+    private void cargarPuntosConFiltroDistribucion(ApiService apiService) {
+        apiService.listarPuntosVenta(null, "DISTRIBUCION", null, null).enqueue(new Callback<ApiResponse<List<PuntoDistribucion>>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<List<PuntoDistribucion>>> call, @NonNull Response<ApiResponse<List<PuntoDistribucion>>> response) {
+                if (!isAdded() || binding == null) return;
+                listaPuntosOriginal.clear();
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null && !response.body().getData().isEmpty()) {
+                    listaPuntosOriginal.addAll(response.body().getData());
+                } else {
+                    cargarPuntosRespaldo();
+                }
+                sincronizarPuntosLocales();
+                actualizarUI();
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<List<PuntoDistribucion>>> call, @NonNull Throwable t) {
+                if (!isAdded() || binding == null) return;
+                listaPuntosOriginal.clear();
                 cargarPuntosRespaldo();
                 sincronizarPuntosLocales();
                 actualizarUI();
+            }
+        });
+    }
+
+    private void cargarProspectosDesdeApi() {
+        if (RetrofitClient.API_TOKEN == null || RetrofitClient.API_TOKEN.isEmpty()) {
+            RetrofitClient.API_TOKEN = SplashStorage.obtenerToken(requireContext());
+        }
+        ApiService apiService = RetrofitClient.createService();
+        apiService.listarProspectos(null, null, null).enqueue(new Callback<ApiResponse<List<Prospecto>>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<List<Prospecto>>> call, @NonNull Response<ApiResponse<List<Prospecto>>> response) {
+                if (!isAdded() || binding == null) return;
+                listaProspectosOriginal.clear();
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                    listaProspectosOriginal.addAll(response.body().getData());
+                }
+                aplicarFiltrosProspectos();
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<List<Prospecto>>> call, @NonNull Throwable t) {
+                if (!isAdded() || binding == null) return;
+                aplicarFiltrosProspectos();
             }
         });
     }
@@ -264,35 +450,45 @@ public class PuntosDespachoFragment extends Fragment implements OnMapReadyCallba
     }
 
     private void setupToggleViews() {
+        binding.btnToggleMapa.setOnClickListener(v -> seleccionarTab(0));
+        binding.btnToggleLista.setOnClickListener(v -> seleccionarTab(1));
+        binding.btnToggleProspectos.setOnClickListener(v -> {
+            seleccionarTab(2);
+            cargarProspectosDesdeApi();
+        });
+    }
+
+    private void seleccionarTab(int tab) {
+        if (binding == null) return;
+        tabActual = tab;
+
         int colorCafe = ContextCompat.getColor(requireContext(), R.color.cafe_profundo);
         int colorBlanco = ContextCompat.getColor(requireContext(), R.color.white);
-        int colorTransparente = ContextCompat.getColor(requireContext(), android.R.color.transparent);
 
-        binding.btnToggleMapa.setOnClickListener(v -> {
-            binding.layoutMapView.setVisibility(View.VISIBLE);
-            binding.rvListaPuntos.setVisibility(View.GONE);
-            binding.cardHero.setVisibility(View.VISIBLE);
-            binding.layoutStats.setVisibility(View.VISIBLE);
+        // Reset all 3 toggle buttons to inactive white pill
+        binding.btnToggleMapa.setBackgroundTintList(ColorStateList.valueOf(colorBlanco));
+        binding.btnToggleMapa.setTextColor(colorCafe);
+        binding.btnToggleLista.setBackgroundTintList(ColorStateList.valueOf(colorBlanco));
+        binding.btnToggleLista.setTextColor(colorCafe);
+        binding.btnToggleProspectos.setBackgroundTintList(ColorStateList.valueOf(colorBlanco));
+        binding.btnToggleProspectos.setTextColor(colorCafe);
 
+        binding.layoutMapView.setVisibility(tab == 0 ? View.VISIBLE : View.GONE);
+        binding.cardHero.setVisibility(tab == 0 ? View.VISIBLE : View.GONE);
+        binding.layoutStats.setVisibility(tab == 0 ? View.VISIBLE : View.GONE);
+        binding.rvListaPuntos.setVisibility(tab == 1 ? View.VISIBLE : View.GONE);
+        binding.rvProspectosPuntos.setVisibility(tab == 2 ? View.VISIBLE : View.GONE);
+
+        if (tab == 0) {
             binding.btnToggleMapa.setBackgroundTintList(ColorStateList.valueOf(colorCafe));
             binding.btnToggleMapa.setTextColor(colorBlanco);
-
-            binding.btnToggleLista.setBackgroundTintList(ColorStateList.valueOf(colorTransparente));
-            binding.btnToggleLista.setTextColor(colorCafe);
-        });
-
-        binding.btnToggleLista.setOnClickListener(v -> {
-            binding.layoutMapView.setVisibility(View.GONE);
-            binding.rvListaPuntos.setVisibility(View.VISIBLE);
-            binding.cardHero.setVisibility(View.GONE);
-            binding.layoutStats.setVisibility(View.GONE);
-
+        } else if (tab == 1) {
             binding.btnToggleLista.setBackgroundTintList(ColorStateList.valueOf(colorCafe));
             binding.btnToggleLista.setTextColor(colorBlanco);
-
-            binding.btnToggleMapa.setBackgroundTintList(ColorStateList.valueOf(colorTransparente));
-            binding.btnToggleMapa.setTextColor(colorCafe);
-        });
+        } else {
+            binding.btnToggleProspectos.setBackgroundTintList(ColorStateList.valueOf(colorCafe));
+            binding.btnToggleProspectos.setTextColor(colorBlanco);
+        }
     }
 
     private void setupListeners() {
@@ -329,6 +525,7 @@ public class PuntosDespachoFragment extends Fragment implements OnMapReadyCallba
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 aplicarFiltros();
+                aplicarFiltrosProspectos();
             }
 
             @Override
@@ -340,7 +537,8 @@ public class PuntosDespachoFragment extends Fragment implements OnMapReadyCallba
         int siguienteNum = listaPuntosOriginal.size() + 1;
         NuevoPuntoDistribucionFragment fragment = new NuevoPuntoDistribucionFragment(siguienteNum, () -> {
             if (isAdded()) {
-                cargarDatosDesdeApi();
+                seleccionarTab(2);
+                cargarProspectosDesdeApi();
             }
         });
         requireActivity().getSupportFragmentManager()
@@ -375,6 +573,27 @@ public class PuntosDespachoFragment extends Fragment implements OnMapReadyCallba
             }
         }
         adapter.notifyDataSetChanged();
+    }
+
+    private void aplicarFiltrosProspectos() {
+        if (binding == null || prospectoAdapter == null) return;
+        String query = binding.etBuscarPuntos.getText() != null
+                ? binding.etBuscarPuntos.getText().toString().trim().toLowerCase()
+                : "";
+
+        listaProspectosFiltrada.clear();
+        for (Prospecto pr : listaProspectosOriginal) {
+            boolean coincideTexto = query.isEmpty()
+                    || (pr.getNombre() != null && pr.getNombre().toLowerCase().contains(query))
+                    || (pr.getDireccion() != null && pr.getDireccion().toLowerCase().contains(query))
+                    || (pr.getZona() != null && pr.getZona().toLowerCase().contains(query))
+                    || (pr.getEstado() != null && pr.getEstado().toLowerCase().contains(query));
+
+            if (coincideTexto) {
+                listaProspectosFiltrada.add(pr);
+            }
+        }
+        prospectoAdapter.notifyDataSetChanged();
     }
 
     @Override

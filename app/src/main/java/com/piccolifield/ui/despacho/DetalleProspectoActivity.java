@@ -153,7 +153,7 @@ public class DetalleProspectoActivity extends AppCompatActivity {
         tvEstadoProspecto.setText(prospectoInfo.getEstado() != null ? prospectoInfo.getEstado() : "NUEVO");
         
         // Mostrar botón de conversión solo si está en NEGOCIACION
-        if ("NEGOCIACION".equalsIgnoreCase(prospectoInfo.getEstado())) {
+        if ("EN_NEGOCIACION".equalsIgnoreCase(prospectoInfo.getEstado())) {
             btnConvertirPDV.setVisibility(View.VISIBLE);
         } else {
             btnConvertirPDV.setVisibility(View.GONE);
@@ -161,7 +161,7 @@ public class DetalleProspectoActivity extends AppCompatActivity {
     }
 
     private void cargarMockProspecto() {
-        prospectoInfo = new Prospecto(idProspecto, tvNombreProspecto.getText().toString(), "Dir Mock", "NEGOCIACION", "Lima", "Bodega");
+        prospectoInfo = new Prospecto(idProspecto, tvNombreProspecto.getText().toString(), "Dir Mock", "EN_NEGOCIACION", "Lima", "Bodega");
         prospectoInfo.setLatitud(-12.046374);
         prospectoInfo.setLongitud(-77.042793);
         actualizarUiProspecto();

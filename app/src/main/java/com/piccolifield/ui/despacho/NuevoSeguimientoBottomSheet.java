@@ -51,15 +51,22 @@ public class NuevoSeguimientoBottomSheet extends BottomSheetDialogFragment {
         Spinner spinnerEstado = view.findViewById(R.id.spinnerEstadoSeguimiento);
         EditText etNotas = view.findViewById(R.id.etNotasSeguimiento);
 
-        String[] estados = {"NUEVO", "CONTACTADO", "NEGOCIACION", "RECHAZADO", "CONVERTIDO"};
+        String[] estados = {"NUEVO", "EN_NEGOCIACION", "DESCARTADO", "CONVERTIDO"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, estados);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerEstado.setAdapter(adapter);
 
         // Preseleccionar el estado actual
         if (prospecto.getEstado() != null) {
+            String estadoNormalizado = prospecto.getEstado();
+            if (estadoNormalizado.equalsIgnoreCase("CONTACTADO") || estadoNormalizado.equalsIgnoreCase("NEGOCIACION")) {
+                estadoNormalizado = "EN_NEGOCIACION";
+            } else if (estadoNormalizado.equalsIgnoreCase("RECHAZADO")) {
+                estadoNormalizado = "DESCARTADO";
+            }
+            
             for (int i = 0; i < estados.length; i++) {
-                if (estados[i].equals(prospecto.getEstado())) {
+                if (estados[i].equalsIgnoreCase(estadoNormalizado)) {
                     spinnerEstado.setSelection(i);
                     break;
                 }
@@ -96,18 +103,39 @@ public class NuevoSeguimientoBottomSheet extends BottomSheetDialogFragment {
             public void onResponse(@NonNull Call<ApiResponse<Seguimiento>> call, @NonNull Response<ApiResponse<Seguimiento>> response) {
                 if (response.isSuccessful()) {
                     Toast.makeText(requireContext(), "Seguimiento guardado", Toast.LENGTH_SHORT).show();
-                    // Si el estado cambió, también podríamos actualizar el Prospecto aquí 
-                    // o dejar que el backend lo haga.
-                    if (onSuccess != null) onSuccess.run();
-                    dismiss();
+                    // Si el estado cambió, enviar petición para actualizar el estado del prospecto
+                    if (!seguimiento.getEstadoAnterior().equalsIgnoreCase(seguimiento.getEstadoNuevo())) {
+                        actualizarEstadoProspectoApi(seguimiento.getEstadoNuevo());
+                    } else {
+                        if (onSuccess != null) onSuccess.run();
+                        dismiss();
+                    }
                 } else {
-                    Toast.makeText(requireContext(), "Error al guardar seguimiento", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), "Error al guardar seguimiento (Error " + response.code() + ")", Toast.LENGTH_LONG).show();
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<ApiResponse<Seguimiento>> call, @NonNull Throwable t) {
-                Toast.makeText(requireContext(), "Simulando guardado exitoso", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), "Fallo red al guardar seguimiento", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void actualizarEstadoProspectoApi(String nuevoEstado) {
+        ApiService apiService = RetrofitClient.createService();
+        com.piccolifield.data.remote.dto.request.EstadoRequest request = new com.piccolifield.data.remote.dto.request.EstadoRequest();
+        request.setEstado(nuevoEstado);
+        
+        apiService.actualizarEstadoProspecto(prospecto.getId(), request).enqueue(new Callback<ApiResponse<Object>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<Object>> call, @NonNull Response<ApiResponse<Object>> response) {
+                if (onSuccess != null) onSuccess.run();
+                dismiss();
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<Object>> call, @NonNull Throwable t) {
                 if (onSuccess != null) onSuccess.run();
                 dismiss();
             }
