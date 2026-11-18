@@ -82,8 +82,11 @@ public class MenuActivity extends AppCompatActivity {
             }
         }
 
-        // Cargar por defecto la primera pantalla (Inicio)
-        if (savedInstanceState == null) {
+        // Cargar por defecto la primera pantalla (Inicio) o la pantalla de asistencia/justificación solicitada por la notificación
+        String pantallaExtra = getIntent() != null ? getIntent().getStringExtra("PANTALLA") : null;
+        if ("RESUMEN_ASISTENCIA".equalsIgnoreCase(pantallaExtra) || "JUSTIFICACION".equalsIgnoreCase(pantallaExtra)) {
+            cargarFragmentoAsistenciaSegunRol();
+        } else if (savedInstanceState == null) {
             cargarFragmento(new PerfilFragment());
         }
 
@@ -121,6 +124,14 @@ public class MenuActivity extends AppCompatActivity {
         });
     }
 
+    public void navegarAPantallaPrincipal() {
+        if (binding != null && binding.curvedBottomNav != null) {
+            binding.curvedBottomNav.selectTab(0, true);
+        } else {
+            cargarFragmento(new PerfilFragment());
+        }
+    }
+
     private void precargarPerfil() {
         if (RetrofitClient.API_TOKEN == null || RetrofitClient.API_TOKEN.isEmpty()) {
             RetrofitClient.API_TOKEN = SplashStorage.obtenerToken(this);
@@ -147,6 +158,16 @@ public class MenuActivity extends AppCompatActivity {
                 // Se intentará nuevamente cuando el usuario navegue
             }
         });
+    }
+
+    @Override
+    protected void onNewIntent(@NonNull android.content.Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        String pantallaExtra = intent.getStringExtra("PANTALLA");
+        if ("RESUMEN_ASISTENCIA".equalsIgnoreCase(pantallaExtra) || "JUSTIFICACION".equalsIgnoreCase(pantallaExtra)) {
+            cargarFragmentoAsistenciaSegunRol();
+        }
     }
 
     private void registrarTokenFcm() {

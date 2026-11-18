@@ -50,7 +50,7 @@ public class AsistenciaViewModel extends ViewModel {
 
                     if (apiResponse.isStatus()) {
                         uiState.setValue(AsistenciaUiState.success(msg));
-                        cargarUltimaAsistencia();
+                        cargarUltimaAsistencia(request.getIdUsuario());
                     } else {
                         uiState.setValue(AsistenciaUiState.error(msg));
                     }
@@ -68,8 +68,8 @@ public class AsistenciaViewModel extends ViewModel {
         });
     }
 
-    public void cargarUltimaAsistencia() {
-        repository.obtenerUltimaAsistencia(new Callback<ApiResponse<AsistenciaResponse>>() {
+    public void cargarUltimaAsistencia(int idUsuario) {
+        repository.obtenerUltimaAsistencia(idUsuario, new Callback<ApiResponse<AsistenciaResponse>>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse<AsistenciaResponse>> call, @NonNull Response<ApiResponse<AsistenciaResponse>> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {

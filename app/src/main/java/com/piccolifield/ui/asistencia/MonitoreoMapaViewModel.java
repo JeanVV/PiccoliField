@@ -55,7 +55,7 @@ public class MonitoreoMapaViewModel extends ViewModel {
 
     private void inicializarSedeAsignada() {
         // Sede por defecto: Sede Principal Chiclayo
-        SedeInfo sede = new SedeInfo("Sede Principal Chiclayo - Piccoli Cocktail", -6.7714, -79.8409, 100f);
+        SedeInfo sede = new SedeInfo("Sede Principal Chiclayo - Piccoli Cocktail", -6.7711982, -79.8385571, 100f);
         sedeAsignada.setValue(sede);
     }
 

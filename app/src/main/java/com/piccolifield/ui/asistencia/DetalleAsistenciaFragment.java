@@ -147,22 +147,10 @@ public class DetalleAsistenciaFragment extends Fragment {
             });
 
             String horaDisp = registro.getHoraMarcado();
-            if (horaDisp != null && horaDisp.length() >= 16) {
-                binding.tvAttendanceTime.setText(horaDisp.substring(11, 16));
-            } else if (horaDisp != null) {
-                binding.tvAttendanceTime.setText(horaDisp);
-            } else {
-                binding.tvAttendanceTime.setText("--:--");
-            }
+            binding.tvAttendanceTime.setText(formatearHoraCorta(horaDisp));
 
             String horaServidor = registro.getFechaHoraServidor();
-            if (horaServidor != null && horaServidor.length() >= 19) {
-                binding.tvServerTime.setText(horaServidor.substring(11, 19));
-            } else if (horaServidor != null) {
-                binding.tvServerTime.setText(horaServidor);
-            } else {
-                binding.tvServerTime.setText("--:--");
-            }
+            binding.tvServerTime.setText(formatearHoraCorta(horaServidor));
 
             String tipo = registro.getTipo();
             binding.tvStatusTitle.setText(tipo != null && !tipo.isEmpty() ? tipo : "INGRESO");
@@ -175,6 +163,26 @@ public class DetalleAsistenciaFragment extends Fragment {
             configurarControlesRevisionAdmin();
             cargarHistorialTurnos(registro.getIdUsuario());
         }
+    }
+
+    private String formatearHoraCorta(String str) {
+        if (str == null || str.trim().isEmpty()) return "--:--";
+        try {
+            String s = str.trim();
+            if (s.contains(" ")) {
+                String[] parts = s.split(" ");
+                if (parts.length > 1) {
+                    s = parts[1];
+                }
+            }
+            if (s.length() >= 5) {
+                return s.substring(0, 5);
+            }
+            return s;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return str;
     }
 
     private void configurarControlesRevisionAdmin() {
@@ -199,13 +207,15 @@ public class DetalleAsistenciaFragment extends Fragment {
 
         int idRevisor = SplashStorage.obtenerUsuarioId(requireContext());
         int idUsuarioColaborador = registro.getIdUsuario();
+        int idAsistencia = registro.getIdAsistencias();
 
         RevisionJustificacionRequest request = new RevisionJustificacionRequest(
-                idUsuarioColaborador, idRevisor, estadoNuevo, comentario
+                idUsuarioColaborador, idAsistencia, idRevisor, estadoNuevo, comentario
         );
 
         binding.btnAprobarJustificacion.setEnabled(false);
         binding.btnRechazarJustificacion.setEnabled(false);
+        if (binding.pbLoadingDetalle != null) binding.pbLoadingDetalle.setVisibility(View.VISIBLE);
 
         actualizarEstadoBadgeJustificacion(estadoNuevo);
 
@@ -214,24 +224,68 @@ public class DetalleAsistenciaFragment extends Fragment {
                 @Override
                 public void onResponse(@NonNull Call<ApiResponse<Object>> call, @NonNull Response<ApiResponse<Object>> response) {
                     if (!isAdded() || binding == null) return;
+                    if (binding.pbLoadingDetalle != null) binding.pbLoadingDetalle.setVisibility(View.GONE);
                     binding.btnAprobarJustificacion.setEnabled(true);
                     binding.btnRechazarJustificacion.setEnabled(true);
 
-                    String msj = "APROBADA".equalsIgnoreCase(estadoNuevo) ? "Justificación Aprobada" : "Justificación Rechazada";
-                    Toast.makeText(getContext(), msj + " exitosamente", Toast.LENGTH_SHORT).show();
+                    if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                        String estadoStr = "APROBADA".equalsIgnoreCase(estadoNuevo) ? "Aprobada" : "Rechazada";
+                        String msj = "La justificación del colaborador ha sido " + estadoStr.toLowerCase() + " exitosamente en la base de datos.";
+                        mostrarDialogoExitoRevision("¡Justificación " + estadoStr + "!", msj);
+                    } else {
+                        String err = (response.body() != null && response.body().getMessage() != null)
+                                ? response.body().getMessage()
+                                : "Error del servidor (Código " + response.code() + ")";
+                        Log.e("DetalleAsistencia", "Error al revisar justificación: " + err);
+                        Toast.makeText(getContext(), err, Toast.LENGTH_LONG).show();
+                    }
                 }
 
                 @Override
                 public void onFailure(@NonNull Call<ApiResponse<Object>> call, @NonNull Throwable t) {
                     if (!isAdded() || binding == null) return;
+                    if (binding.pbLoadingDetalle != null) binding.pbLoadingDetalle.setVisibility(View.GONE);
                     binding.btnAprobarJustificacion.setEnabled(true);
                     binding.btnRechazarJustificacion.setEnabled(true);
 
-                    String msj = "APROBADA".equalsIgnoreCase(estadoNuevo) ? "Justificación Aprobada localmente" : "Justificación Rechazada localmente";
-                    Toast.makeText(getContext(), msj, Toast.LENGTH_SHORT).show();
+                    Log.e("DetalleAsistencia", "Fallo red al revisar: " + t.getMessage());
+                    String estadoStr = "APROBADA".equalsIgnoreCase(estadoNuevo) ? "Aprobada" : "Rechazada";
+                    mostrarDialogoExitoRevision("¡Justificación " + estadoStr + "!", "Justificación registrada localmente.");
                 }
             });
         }
+    }
+
+    private void mostrarDialogoExitoRevision(String titulo, String mensaje) {
+        if (!isAdded() || getContext() == null) return;
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_confirmacion_minimal, null);
+
+        TextView tvTitle = dialogView.findViewById(R.id.tvDialogTitle);
+        TextView tvMessage = dialogView.findViewById(R.id.tvDialogMessage);
+        View btnEntendido = dialogView.findViewById(R.id.btnEntendido);
+
+        if (tvTitle != null) tvTitle.setText(titulo);
+        if (tvMessage != null) tvMessage.setText(mensaje);
+
+        androidx.appcompat.app.AlertDialog dialog = new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setView(dialogView)
+                .setCancelable(false)
+                .create();
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        if (btnEntendido != null) {
+            btnEntendido.setOnClickListener(v -> {
+                dialog.dismiss();
+                if (isAdded() && getParentFragmentManager() != null) {
+                    getParentFragmentManager().popBackStack();
+                }
+            });
+        }
+
+        dialog.show();
     }
 
     private void actualizarEstadoBadgeJustificacion(String estadoNuevo) {

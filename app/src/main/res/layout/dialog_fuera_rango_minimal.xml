@@ -35,7 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:fontFamily="serif"
-            android:text="Fuera del Rango"
+            android:text="@string/title_fuera_rango"
             android:textColor="@color/cafe_profundo"
             android:textSize="20sp"
             android:textStyle="bold" />
@@ -59,7 +59,7 @@
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginTop="20dp"
-            android:text="Entendido"
+            android:text="@string/btn_entendido"
             app:cornerRadius="14dp" />
 
     </LinearLayout>

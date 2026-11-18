@@ -47,6 +47,19 @@
 
     </RelativeLayout>
 
+    <!-- ProgressBar de carga sutil para Detalle -->
+    <ProgressBar
+        android:id="@+id/pbLoadingDetalle"
+        style="?android:attr/progressBarStyleSmall"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:indeterminateTint="@color/cafe_profundo"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbarHeader"
+        tools:visibility="visible" />
+
     <!-- ScrollView de Contenido -->
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scrollViewContent"

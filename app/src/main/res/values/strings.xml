@@ -193,4 +193,14 @@
     <string name="chip_todo_nivel">Todo Nivel</string>
     <string name="chip_stock_bajo">Stock Bajo</string>
     <string name="chip_agotados">Agotados</string>
+
+    <!-- Strings para Diálogos y Textos de Asistencia -->
+    <string name="title_asistencia_diaria">Asistencia Diaria</string>
+    <string name="title_fuera_rango">Fuera del Rango de Asistencia</string>
+    <string name="msg_fuera_rango">Te encuentras a %1$d m de la sede. Debes estar dentro del rango (%2$d m) para registrar asistencia.</string>
+    <string name="btn_entendido">Entendido</string>
+    <string name="hint_selecciona_motivo">Selecciona el motivo de justificación</string>
+    <string name="hint_detalle_justificacion">Escribe aquí una explicación detallada de la falta o tardanza...</string>
+    <string name="btn_registrar_justificacion">Registrar Justificación</string>
+    <string name="btn_ver_monitoreo_mapa">Ver Monitoreo en Mapa</string>
 </resources>

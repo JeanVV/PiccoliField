@@ -31,6 +31,7 @@ import retrofit2.Response;
 
 public class ColaboradoresFragment extends Fragment {
 
+    private static final String ARG_FILTRO_INICIAL = "filtro_inicial";
     private FragmentColaboradoresBinding binding;
     private ApiService apiService;
     private ColaboradorAdapter adapter;
@@ -38,6 +39,25 @@ public class ColaboradoresFragment extends Fragment {
 
     public ColaboradoresFragment() {
         // Required empty public constructor
+    }
+
+    public static ColaboradoresFragment newInstance(String filtroInicial) {
+        ColaboradoresFragment fragment = new ColaboradoresFragment();
+        Bundle args = new Bundle();
+        args.putString(ARG_FILTRO_INICIAL, filtroInicial);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null && getArguments().containsKey(ARG_FILTRO_INICIAL)) {
+            String filtroArg = getArguments().getString(ARG_FILTRO_INICIAL);
+            if (filtroArg != null && !filtroArg.isEmpty()) {
+                estadoFiltroActual = filtroArg;
+            }
+        }
     }
 
     @Override
@@ -65,7 +85,13 @@ public class ColaboradoresFragment extends Fragment {
     private void setupListeners() {
         // Botón Retroceder (Flecha arriba izquierda)
         if (binding.btnBack != null) {
-            binding.btnBack.setOnClickListener(v -> getParentFragmentManager().popBackStack());
+            binding.btnBack.setOnClickListener(v -> {
+                if (getParentFragmentManager().getBackStackEntryCount() > 0) {
+                    getParentFragmentManager().popBackStack();
+                } else if (getActivity() instanceof com.piccolifield.MenuActivity) {
+                    ((com.piccolifield.MenuActivity) getActivity()).navegarAPantallaPrincipal();
+                }
+            });
         }
 
         // Búsqueda en tiempo real
@@ -126,21 +152,21 @@ public class ColaboradoresFragment extends Fragment {
     }
 
     private void cargarColaboradores() {
-        if (apiService == null) return;
+        if (apiService == null || binding == null) return;
+
+        if (binding.pbLoadingColaboradores != null) binding.pbLoadingColaboradores.setVisibility(View.VISIBLE);
 
         apiService.obtenerColaboradoresConAsistencia().enqueue(new Callback<ApiResponse<List<RegistroAsistencia>>>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse<List<RegistroAsistencia>>> call, @NonNull Response<ApiResponse<List<RegistroAsistencia>>> response) {
                 if (!isAdded() || binding == null) return;
+                if (binding.pbLoadingColaboradores != null) binding.pbLoadingColaboradores.setVisibility(View.GONE);
 
-                List<RegistroAsistencia> listaRemote = null;
-                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
-                    listaRemote = response.body().getData();
-                }
+                List<RegistroAsistencia> listaRemote = (response.isSuccessful() && response.body() != null && response.body().getData() != null)
+                        ? response.body().getData()
+                        : new java.util.ArrayList<>();
 
-                List<RegistroAsistencia> listaCombinada = combinarConLocales(listaRemote);
-
-                if (listaCombinada.isEmpty()) {
+                if (listaRemote.isEmpty()) {
                     binding.layoutEmptyCollaboratorsState.setVisibility(View.VISIBLE);
                     binding.rvCollaborators.setVisibility(View.GONE);
                 } else {
@@ -148,7 +174,8 @@ public class ColaboradoresFragment extends Fragment {
                     binding.rvCollaborators.setVisibility(View.VISIBLE);
                     binding.rvCollaborators.setLayoutManager(new LinearLayoutManager(getContext()));
 
-                    adapter = new ColaboradorAdapter(listaCombinada);
+                    adapter = new ColaboradorAdapter(listaRemote);
+                    adapter.filtrar("", estadoFiltroActual);
                     adapter.setOnItemClickListener(item -> {
                         DetalleAsistenciaFragment fragment = DetalleAsistenciaFragment.newInstance(item);
                         getParentFragmentManager().beginTransaction()
@@ -163,57 +190,15 @@ public class ColaboradoresFragment extends Fragment {
             @Override
             public void onFailure(@NonNull Call<ApiResponse<List<RegistroAsistencia>>> call, @NonNull Throwable t) {
                 if (!isAdded() || binding == null) return;
+                if (binding.pbLoadingColaboradores != null) binding.pbLoadingColaboradores.setVisibility(View.GONE);
                 Log.e("ColaboradoresFragment", "Error red: " + t.getMessage());
-
-                List<RegistroAsistencia> listaLocales = combinarConLocales(null);
-                if (!listaLocales.isEmpty()) {
-                    binding.layoutEmptyCollaboratorsState.setVisibility(View.GONE);
-                    binding.rvCollaborators.setVisibility(View.VISIBLE);
-                    binding.rvCollaborators.setLayoutManager(new LinearLayoutManager(getContext()));
-
-                    adapter = new ColaboradorAdapter(listaLocales);
-                    adapter.setOnItemClickListener(item -> {
-                        DetalleAsistenciaFragment fragment = DetalleAsistenciaFragment.newInstance(item);
-                        getParentFragmentManager().beginTransaction()
-                                .replace(R.id.fragmentContainer, fragment)
-                                .addToBackStack(null)
-                                .commit();
-                    });
-                    binding.rvCollaborators.setAdapter(adapter);
-                } else {
-                    binding.layoutEmptyCollaboratorsState.setVisibility(View.VISIBLE);
-                }
+                binding.layoutEmptyCollaboratorsState.setVisibility(View.VISIBLE);
+                binding.rvCollaborators.setVisibility(View.GONE);
             }
         });
     }
 
-    private java.util.List<RegistroAsistencia> combinarConLocales(java.util.List<RegistroAsistencia> listaRemote) {
-        java.util.List<RegistroAsistencia> combinada = new java.util.ArrayList<>();
-        if (listaRemote != null) {
-            combinada.addAll(listaRemote);
-        }
 
-        java.util.List<RegistroAsistencia> locales = SplashStorage.obtenerRegistrosAsistenciaLocales(getContext());
-        if (locales != null && !locales.isEmpty()) {
-            for (RegistroAsistencia loc : locales) {
-                boolean existe = false;
-                for (RegistroAsistencia rem : combinada) {
-                    if (rem.getIdUsuario() == loc.getIdUsuario()) {
-                        if (loc.getJustificacion() != null && !loc.getJustificacion().isEmpty()) {
-                            rem.setJustificacion(loc.getJustificacion());
-                            rem.setMotivoJustificacion(loc.getMotivoJustificacion());
-                        }
-                        existe = true;
-                        break;
-                    }
-                }
-                if (!existe) {
-                    combinada.add(0, loc);
-                }
-            }
-        }
-        return combinada;
-    }
 
     @Override
     public void onDestroyView() {

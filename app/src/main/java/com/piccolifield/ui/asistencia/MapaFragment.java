@@ -62,8 +62,8 @@ public class MapaFragment extends Fragment {
     private ApiService apiService;
     private RecentPersonnelAdapter listAdapter;
 
-    private double latSede = -6.7714;
-    private double lngSede = -79.8409;
+    private double latSede = -6.7711982;
+    private double lngSede = -79.8385571;
     private String nombreSede = "Sede Principal Chiclayo - Piccoli Cocktail";
     private float radioGeocerca = 100f;
     private boolean esAdmin = false;
@@ -193,8 +193,15 @@ public class MapaFragment extends Fragment {
             return;
         }
 
+        if (binding != null && binding.pbLoadingMapa != null) {
+            binding.pbLoadingMapa.setVisibility(View.VISIBLE);
+        }
+
         fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
                 .addOnSuccessListener(location -> {
+                    if (binding != null && binding.pbLoadingMapa != null) {
+                        binding.pbLoadingMapa.setVisibility(View.GONE);
+                    }
                     if (location != null) {
                         userLocationLatLng = new LatLng(location.getLatitude(), location.getLongitude());
                         viewModel.actualizarUbicacionUsuario(location.getLatitude(), location.getLongitude());
@@ -204,7 +211,12 @@ public class MapaFragment extends Fragment {
                         Toast.makeText(getContext(), "No se pudo obtener la ubicación actual", Toast.LENGTH_SHORT).show();
                     }
                 })
-                .addOnFailureListener(e -> Toast.makeText(getContext(), "Error al obtener ubicación", Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> {
+                    if (binding != null && binding.pbLoadingMapa != null) {
+                        binding.pbLoadingMapa.setVisibility(View.GONE);
+                    }
+                    Toast.makeText(getContext(), "Error al obtener ubicación", Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void obtenerDireccionTexto(double lat, double lng) {
@@ -291,7 +303,13 @@ public class MapaFragment extends Fragment {
 
         // Botón Retroceder (Flecha arriba izquierda)
         if (binding.btnBack != null) {
-            binding.btnBack.setOnClickListener(v -> getParentFragmentManager().popBackStack());
+            binding.btnBack.setOnClickListener(v -> {
+                if (getParentFragmentManager().getBackStackEntryCount() > 0) {
+                    getParentFragmentManager().popBackStack();
+                } else if (getActivity() instanceof com.piccolifield.MenuActivity) {
+                    ((com.piccolifield.MenuActivity) getActivity()).navegarAPantallaPrincipal();
+                }
+            });
         }
 
         // Toggle Mapa / Lista
@@ -300,15 +318,6 @@ public class MapaFragment extends Fragment {
 
         // Botón "Cómo llegar" (Intent a Google Maps Navigation)
         binding.btnHowToGetThere.setOnClickListener(v -> abrirNavegacionGoogleMaps());
-
-        // Botón "Ver detalles"
-        binding.btnViewDetails.setText(esAdmin ? "Ver colaboradores" : "Ver detalles");
-        binding.btnViewDetails.setOnClickListener(v ->
-                getParentFragmentManager().beginTransaction()
-                        .replace(R.id.fragmentContainer, new DetalleAsistenciaFragment())
-                        .addToBackStack(null)
-                        .commit()
-        );
 
         // FAB Mi Ubicación
         if (binding.fabMyLocation != null) {
@@ -329,7 +338,7 @@ public class MapaFragment extends Fragment {
         binding.btnToggleMap.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), R.color.cafe_profundo));
         binding.btnToggleMap.setTextColor(ContextCompat.getColor(requireContext(), R.color.white));
 
-        binding.btnToggleList.setBackgroundTintList(null);
+        binding.btnToggleList.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), android.R.color.transparent));
         binding.btnToggleList.setTextColor(ContextCompat.getColor(requireContext(), R.color.cafe_profundo));
     }
 
@@ -341,7 +350,7 @@ public class MapaFragment extends Fragment {
         binding.btnToggleList.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), R.color.cafe_profundo));
         binding.btnToggleList.setTextColor(ContextCompat.getColor(requireContext(), R.color.white));
 
-        binding.btnToggleMap.setBackgroundTintList(null);
+        binding.btnToggleMap.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), android.R.color.transparent));
         binding.btnToggleMap.setTextColor(ContextCompat.getColor(requireContext(), R.color.cafe_profundo));
     }
 

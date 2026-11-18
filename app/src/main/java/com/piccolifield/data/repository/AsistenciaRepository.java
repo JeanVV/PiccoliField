@@ -24,7 +24,11 @@ public class AsistenciaRepository {
         apiService.registrarAsistencia(request).enqueue(callback);
     }
 
+    public void obtenerUltimaAsistencia(int idUsuario, Callback<ApiResponse<AsistenciaResponse>> callback) {
+        apiService.obtenerUltimaAsistencia(idUsuario).enqueue(callback);
+    }
+
     public void obtenerUltimaAsistencia(Callback<ApiResponse<AsistenciaResponse>> callback) {
-        apiService.obtenerUltimaAsistencia().enqueue(callback);
+        apiService.obtenerUltimaAsistencia(0).enqueue(callback);
     }
 }

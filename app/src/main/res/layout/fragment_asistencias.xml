@@ -275,13 +275,24 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="Estado: Pendiente de marcado"
+                        android:text="Ingreso: 09:30 AM (Tolerancia hasta 09:40 AM)"
                         android:textColor="@color/caramelo"
-                        android:textSize="13sp"
+                        android:textSize="12sp"
                         android:textStyle="bold" />
+
+                    <ProgressBar
+                        android:id="@+id/pbLoadingAsistencia"
+                        style="?android:attr/progressBarStyleSmall"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:layout_marginTop="8dp"
+                        android:indeterminateTint="@color/cafe_profundo"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
                 </LinearLayout>
 
                 <!-- BOTONES DE MARCADOR -->
+                <!-- BOTONES DE MARCADOR: ENTRADA Y SALIDA -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -292,34 +303,29 @@
                         android:id="@+id/btnMarcarEntrada"
                         style="@style/Widget.Piccoli.Button.Primary"
                         android:layout_width="0dp"
-                        android:layout_height="52dp"
-                        android:layout_marginEnd="4dp"
+                        android:layout_height="50dp"
+                        android:layout_marginEnd="6dp"
                         android:layout_weight="1"
-                        android:text="Entrada"
-                        app:icon="@drawable/ic_clock"
-                        app:iconTint="@color/marfil_suave" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnMarcarRefrigerio"
-                        style="@style/Widget.Piccoli.Button.Outlined"
-                        android:layout_width="0dp"
-                        android:layout_height="52dp"
-                        android:layout_marginHorizontal="4dp"
-                        android:layout_weight="1"
-                        android:text="Refrigerio"
-                        app:icon="@drawable/ic_clock"
-                        app:iconTint="@color/cafe_profundo" />
+                        android:maxLines="1"
+                        android:text="ENTRADA"
+                        android:textAllCaps="true"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        app:cornerRadius="12dp" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnMarcarSalida"
                         style="@style/Widget.Piccoli.Button.Accent"
                         android:layout_width="0dp"
-                        android:layout_height="52dp"
-                        android:layout_marginStart="4dp"
+                        android:layout_height="50dp"
+                        android:layout_marginStart="6dp"
                         android:layout_weight="1"
-                        android:text="Salida"
-                        app:icon="@drawable/ic_clock"
-                        app:iconTint="@color/cafe_profundo" />
+                        android:maxLines="1"
+                        android:text="SALIDA"
+                        android:textAllCaps="true"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        app:cornerRadius="12dp" />
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -327,6 +333,7 @@
 
         <!-- SECCIÓN 2: BOTÓN Y CARD PARA JUSTIFICAR FALTA (LIMPIO Y ORDENADO) -->
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardJustificacionContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"

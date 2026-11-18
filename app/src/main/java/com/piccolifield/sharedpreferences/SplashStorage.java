@@ -8,8 +8,11 @@ import com.google.gson.reflect.TypeToken;
 import com.piccolifield.data.model.RegistroAsistencia;
 
 import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class SplashStorage {
     private static final String PREFS_NAME = "campusgo_ingreso_app";
@@ -200,8 +203,12 @@ public class SplashStorage {
     public static void guardarJustificacionLocal(Context context, int idUsuario, String motivo, String descripcion, String rutaSustento) {
         if (context == null || idUsuario == 0) return;
         List<RegistroAsistencia> lista = obtenerRegistrosAsistenciaLocales(context);
+        String nombreUsuario = SplashStorage.obtenerNombreUsuario(context);
         for (RegistroAsistencia reg : lista) {
             if (reg.getIdUsuario() == idUsuario) {
+                if (nombreUsuario != null && !nombreUsuario.isEmpty()) {
+                    reg.setNombres(nombreUsuario);
+                }
                 reg.setMotivoJustificacion(motivo);
                 reg.setJustificacion(descripcion);
                 reg.setRutaSustento(rutaSustento);
@@ -211,10 +218,17 @@ public class SplashStorage {
             }
         }
         RegistroAsistencia reg = new RegistroAsistencia();
-        reg.setJustificacion(descripcion);
+        reg.setIdUsuario(idUsuario);
+        reg.setNombres(nombreUsuario != null && !nombreUsuario.isEmpty() ? nombreUsuario : "Colaborador " + idUsuario);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        String fechaHoraActual = sdf.format(new Date());
+        reg.setHoraMarcado(fechaHoraActual);
+        reg.setFechaHoraServidor(fechaHoraActual);
         reg.setMotivoJustificacion(motivo);
+        reg.setJustificacion(descripcion);
         reg.setRutaSustento(rutaSustento);
         reg.setEstadoJustificacion("ENVIADA");
+        reg.setEstado("FALTA");
         guardarRegistroAsistenciaLocal(context, reg);
     }
 }

@@ -25,7 +25,11 @@ import com.piccolifield.data.remote.dto.response.ApiResponse;
 import com.piccolifield.databinding.FragmentAsistenciaInicioBinding;
 import com.piccolifield.sharedpreferences.SplashStorage;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -69,7 +73,13 @@ public class AsistenciaHomeFragment extends Fragment {
     private void setupListeners() {
         // Botón Retroceder (Flecha arriba izquierda)
         if (binding.btnBack != null) {
-            binding.btnBack.setOnClickListener(v -> getParentFragmentManager().popBackStack());
+            binding.btnBack.setOnClickListener(v -> {
+                if (getParentFragmentManager().getBackStackEntryCount() > 0) {
+                    getParentFragmentManager().popBackStack();
+                } else if (getActivity() instanceof com.piccolifield.MenuActivity) {
+                    ((com.piccolifield.MenuActivity) getActivity()).navegarAPantallaPrincipal();
+                }
+            });
         }
 
         // Botón/Card Ver Mapa
@@ -122,6 +132,38 @@ public class AsistenciaHomeFragment extends Fragment {
         if (btnFiltroTarget != null) {
             btnFiltroTarget.setOnClickListener(this::mostrarPopupMenuFiltros);
         }
+
+        // Filtros dinámicos al hacer clic en las tarjetas de métricas
+        if (binding.cardOnTime != null) {
+            binding.cardOnTime.setOnClickListener(v -> {
+                estadoFiltroActual = "A_TIEMPO";
+                if (adapter != null) adapter.filtrar(binding.etSearchCollaborator != null ? binding.etSearchCollaborator.getText().toString() : "", estadoFiltroActual);
+            });
+        }
+        if (binding.cardLate != null) {
+            binding.cardLate.setOnClickListener(v -> {
+                estadoFiltroActual = "TARDANZA";
+                if (adapter != null) adapter.filtrar(binding.etSearchCollaborator != null ? binding.etSearchCollaborator.getText().toString() : "", estadoFiltroActual);
+            });
+        }
+        if (binding.cardFaltas != null) {
+            binding.cardFaltas.setOnClickListener(v -> {
+                estadoFiltroActual = "FALTA";
+                if (adapter != null) adapter.filtrar(binding.etSearchCollaborator != null ? binding.etSearchCollaborator.getText().toString() : "", estadoFiltroActual);
+            });
+        }
+        if (binding.cardSinMarcar != null) {
+            binding.cardSinMarcar.setOnClickListener(v -> {
+                estadoFiltroActual = "SIN_REGISTRO";
+                if (adapter != null) adapter.filtrar(binding.etSearchCollaborator != null ? binding.etSearchCollaborator.getText().toString() : "", estadoFiltroActual);
+            });
+        }
+        if (binding.cardTodaySummary != null) {
+            binding.cardTodaySummary.setOnClickListener(v -> {
+                estadoFiltroActual = "TODOS";
+                if (adapter != null) adapter.filtrar(binding.etSearchCollaborator != null ? binding.etSearchCollaborator.getText().toString() : "", estadoFiltroActual);
+            });
+        }
     }
 
     private void mostrarPopupMenuFiltros(View view) {
@@ -157,48 +199,25 @@ public class AsistenciaHomeFragment extends Fragment {
     }
 
     private void cargarDatos() {
-        if (apiService == null) return;
+        if (apiService == null || binding == null) return;
 
-        // 1. Cargar Resumen del Día
-        apiService.obtenerResumenAsistencias().enqueue(new Callback<ApiResponse<AsistenciaResumen>>() {
-            @Override
-            public void onResponse(@NonNull Call<ApiResponse<AsistenciaResumen>> call, @NonNull Response<ApiResponse<AsistenciaResumen>> response) {
-                if (!isAdded() || binding == null) return;
+        if (binding.pbLoadingHome != null) binding.pbLoadingHome.setVisibility(View.VISIBLE);
 
-                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
-                    AsistenciaResumen resumen = response.body().getData();
-                    binding.pbAttendancePercentage.setProgress(resumen.getPorcentaje());
-                    binding.tvAttendancePercentage.setText(resumen.getPorcentaje() + "%");
-                    binding.tvPresentesFraction.setText(resumen.getPresentes() + "/" + resumen.getTotal());
-                    binding.tvOnTimeCount.setText("(" + resumen.getATiempo() + ")");
-                    binding.tvLateCount.setText("(" + resumen.getTardanzas() + ")");
-                } else {
-                    Log.e("AsistenciaHome", "Error en respuesta resumen: " + response.code());
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<ApiResponse<AsistenciaResumen>> call, @NonNull Throwable t) {
-                if (!isAdded() || binding == null) return;
-                Log.e("AsistenciaHome", "Fallo red resumen: " + t.getMessage());
-            }
-        });
-
-        // 2. Cargar Personal Reciente
-        apiService.obtenerPersonalReciente().enqueue(new Callback<ApiResponse<List<RegistroAsistencia>>>() {
+        // Cargar Lista de Colaboradores del Día y calcular Métricas en tiempo real
+        apiService.obtenerColaboradoresConAsistencia().enqueue(new Callback<ApiResponse<List<RegistroAsistencia>>>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse<List<RegistroAsistencia>>> call, @NonNull Response<ApiResponse<List<RegistroAsistencia>>> response) {
                 if (!isAdded() || binding == null) return;
+                if (binding.pbLoadingHome != null) binding.pbLoadingHome.setVisibility(View.GONE);
 
-                List<RegistroAsistencia> listaRemote = null;
-                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
-                    listaRemote = response.body().getData();
-                }
+                List<RegistroAsistencia> listaRemote = response.isSuccessful() && response.body() != null && response.body().getData() != null
+                        ? response.body().getData()
+                        : new java.util.ArrayList<>();
 
-                List<RegistroAsistencia> listaCombinada = combinarConLocales(listaRemote);
-                verificarJustificacionesPendientes(listaCombinada);
+                verificarJustificacionesPendientes(listaRemote);
+                actualizarMetricasFaltas(listaRemote);
 
-                if (listaCombinada.isEmpty()) {
+                if (listaRemote.isEmpty()) {
                     binding.layoutEmptyRecentState.setVisibility(View.VISIBLE);
                     binding.rvRecentPersonnel.setVisibility(View.GONE);
                 } else {
@@ -206,7 +225,7 @@ public class AsistenciaHomeFragment extends Fragment {
                     binding.rvRecentPersonnel.setVisibility(View.VISIBLE);
                     binding.rvRecentPersonnel.setLayoutManager(new LinearLayoutManager(getContext()));
 
-                    adapter = new RecentPersonnelAdapter(listaCombinada);
+                    adapter = new RecentPersonnelAdapter(listaRemote);
                     adapter.setOnItemClickListener(item -> {
                         DetalleAsistenciaFragment fragment = DetalleAsistenciaFragment.newInstance(item);
                         getParentFragmentManager().beginTransaction()
@@ -221,58 +240,12 @@ public class AsistenciaHomeFragment extends Fragment {
             @Override
             public void onFailure(@NonNull Call<ApiResponse<List<RegistroAsistencia>>> call, @NonNull Throwable t) {
                 if (!isAdded() || binding == null) return;
+                if (binding.pbLoadingHome != null) binding.pbLoadingHome.setVisibility(View.GONE);
                 Log.e("AsistenciaHome", "Fallo red personal: " + t.getMessage());
-
-                List<RegistroAsistencia> listaLocales = combinarConLocales(null);
-                verificarJustificacionesPendientes(listaLocales);
-
-                if (!listaLocales.isEmpty()) {
-                    binding.layoutEmptyRecentState.setVisibility(View.GONE);
-                    binding.rvRecentPersonnel.setVisibility(View.VISIBLE);
-                    binding.rvRecentPersonnel.setLayoutManager(new LinearLayoutManager(getContext()));
-
-                    adapter = new RecentPersonnelAdapter(listaLocales);
-                    adapter.setOnItemClickListener(item -> {
-                        DetalleAsistenciaFragment fragment = DetalleAsistenciaFragment.newInstance(item);
-                        getParentFragmentManager().beginTransaction()
-                                .replace(R.id.fragmentContainer, fragment)
-                                .addToBackStack(null)
-                                .commit();
-                    });
-                    binding.rvRecentPersonnel.setAdapter(adapter);
-                } else {
-                    binding.layoutEmptyRecentState.setVisibility(View.VISIBLE);
-                }
+                binding.layoutEmptyRecentState.setVisibility(View.VISIBLE);
+                binding.rvRecentPersonnel.setVisibility(View.GONE);
             }
         });
-    }
-
-    private java.util.List<RegistroAsistencia> combinarConLocales(java.util.List<RegistroAsistencia> listaRemote) {
-        java.util.List<RegistroAsistencia> combinada = new java.util.ArrayList<>();
-        if (listaRemote != null) {
-            combinada.addAll(listaRemote);
-        }
-
-        java.util.List<RegistroAsistencia> locales = SplashStorage.obtenerRegistrosAsistenciaLocales(getContext());
-        if (locales != null && !locales.isEmpty()) {
-            for (RegistroAsistencia loc : locales) {
-                boolean existe = false;
-                for (RegistroAsistencia rem : combinada) {
-                    if (rem.getIdUsuario() == loc.getIdUsuario()) {
-                        if (loc.getJustificacion() != null && !loc.getJustificacion().isEmpty()) {
-                            rem.setJustificacion(loc.getJustificacion());
-                            rem.setMotivoJustificacion(loc.getMotivoJustificacion());
-                        }
-                        existe = true;
-                        break;
-                    }
-                }
-                if (!existe) {
-                    combinada.add(0, loc);
-                }
-            }
-        }
-        return combinada;
     }
 
     private void verificarJustificacionesPendientes(List<RegistroAsistencia> lista) {
@@ -281,7 +254,12 @@ public class AsistenciaHomeFragment extends Fragment {
 
         if (lista != null) {
             for (RegistroAsistencia item : lista) {
-                if (item.getJustificacion() != null && !item.getJustificacion().isEmpty()) {
+                boolean tieneJustificacion = (item.getJustificacion() != null && !item.getJustificacion().trim().isEmpty())
+                        || (item.getMotivoJustificacion() != null && !item.getMotivoJustificacion().trim().isEmpty());
+                String estJ = item.getEstadoJustificacion();
+                boolean esPendiente = estJ == null || estJ.trim().isEmpty() || "PENDIENTE".equalsIgnoreCase(estJ) || "ENVIADA".equalsIgnoreCase(estJ);
+
+                if (tieneJustificacion && esPendiente) {
                     countPendientes++;
                 }
             }
@@ -289,15 +267,102 @@ public class AsistenciaHomeFragment extends Fragment {
 
         if (countPendientes > 0) {
             binding.cardPendingJustificationsBanner.setVisibility(View.VISIBLE);
-            binding.tvPendingJustificationsCount.setText("Tienes " + countPendientes + " colaborador(es) con justificación de falta por revisar.");
-            binding.btnFiltrarPendientes.setOnClickListener(v -> {
-                if (adapter != null) {
-                    adapter.filtrar("", "FALTA");
-                }
-            });
+            binding.tvPendingJustificationsTitle.setText("Revisar Justificaciones (" + countPendientes + ")");
+            binding.tvPendingJustificationsCount.setText("Tienes " + countPendientes + " colaborador(es) con justificación por revisar.");
+            View.OnClickListener abrirModuloRevision = v -> {
+                ColaboradoresFragment fragment = ColaboradoresFragment.newInstance("JUSTIFICACIONES");
+                getParentFragmentManager().beginTransaction()
+                        .replace(R.id.fragmentContainer, fragment)
+                        .addToBackStack(null)
+                        .commit();
+            };
+            binding.btnFiltrarPendientes.setOnClickListener(abrirModuloRevision);
+            binding.cardPendingJustificationsBanner.setOnClickListener(abrirModuloRevision);
         } else {
             binding.cardPendingJustificationsBanner.setVisibility(View.GONE);
         }
+    }
+
+    private static final TimeZone TIME_ZONE_LIMA = TimeZone.getTimeZone("America/Lima");
+    private static final Locale LOCALE_PERU = new Locale("es", "PE");
+
+    private void actualizarMetricasFaltas(List<RegistroAsistencia> lista) {
+        if (binding == null || lista == null) return;
+
+        SimpleDateFormat sdfFecha = new SimpleDateFormat("yyyy-MM-dd", LOCALE_PERU);
+        sdfFecha.setTimeZone(TIME_ZONE_LIMA);
+        String hoyStr = sdfFecha.format(new Date());
+
+        String fechaReferencia = hoyStr;
+        for (RegistroAsistencia item : lista) {
+            String f = item.getFechaHoraServidor();
+            if (f == null || f.trim().isEmpty()) f = item.getHoraMarcado();
+            if (f != null && f.length() >= 10 && !f.contains("--:--")) {
+                fechaReferencia = f.substring(0, 10);
+                break;
+            }
+        }
+
+        int countATiempo = 0;
+        int countTardanzas = 0;
+        int countFaltas = 0;
+        int countSinMarcar = 0;
+
+        for (RegistroAsistencia item : lista) {
+            String fechaReg = item.getFechaHoraServidor();
+            if (fechaReg == null || fechaReg.trim().isEmpty()) {
+                fechaReg = item.getHoraMarcado();
+            }
+
+            boolean tieneFecha = (fechaReg != null && !fechaReg.trim().isEmpty() && !fechaReg.contains("--:--"));
+            boolean esDeHoy = tieneFecha && (fechaReg.startsWith(fechaReferencia) || fechaReg.startsWith(hoyStr));
+
+            if (esDeHoy) {
+                String estadoReal = item.getEstado();
+                if (fechaReg.length() >= 19) {
+                    String horaOnly = fechaReg.substring(11, 19);
+                    if (horaOnly.compareTo("10:30:00") > 0) {
+                        estadoReal = "FALTA";
+                    } else if (horaOnly.compareTo("09:40:00") > 0) {
+                        estadoReal = "TARDANZA";
+                    } else {
+                        estadoReal = "A_TIEMPO";
+                    }
+                } else if (estadoReal == null || estadoReal.trim().isEmpty()) {
+                    estadoReal = "A_TIEMPO";
+                }
+                item.setEstado(estadoReal);
+
+                if ("A_TIEMPO".equalsIgnoreCase(estadoReal)) {
+                    countATiempo++;
+                } else if ("TARDANZA".equalsIgnoreCase(estadoReal)) {
+                    countTardanzas++;
+                } else if ("FALTA".equalsIgnoreCase(estadoReal)) {
+                    countFaltas++;
+                } else {
+                    countSinMarcar++;
+                }
+            } else {
+                item.setEstado("SIN_REGISTRO");
+                countSinMarcar++;
+            }
+        }
+
+        int presentes = countATiempo + countTardanzas;
+        int total = Math.max(30, lista.size());
+        if (countSinMarcar == 0 && total > (presentes + countFaltas)) {
+            countSinMarcar = total - presentes - countFaltas;
+        }
+
+        int porcentaje = total > 0 ? ((presentes * 100) / total) : 0;
+        binding.pbAttendancePercentage.setProgress(porcentaje);
+        binding.tvAttendancePercentage.setText(porcentaje + "%");
+        binding.tvPresentesFraction.setText(presentes + "/" + total);
+
+        if (binding.tvOnTimeCount != null) binding.tvOnTimeCount.setText("(" + countATiempo + ")");
+        if (binding.tvLateCount != null) binding.tvLateCount.setText("(" + countTardanzas + ")");
+        if (binding.tvFaltasCount != null) binding.tvFaltasCount.setText("(" + countFaltas + ")");
+        if (binding.tvSinMarcarCount != null) binding.tvSinMarcarCount.setText("(" + countSinMarcar + ")");
     }
 
     @Override

@@ -54,6 +54,21 @@ public class RecentPersonnelAdapter extends RecyclerView.Adapter<RecentPersonnel
         notifyDataSetChanged();
     }
 
+    public void filtrarConJustificacion() {
+        lista.clear();
+        for (RegistroAsistencia item : listaOriginal) {
+            boolean tieneJustificacion = (item.getJustificacion() != null && !item.getJustificacion().trim().isEmpty())
+                    || (item.getMotivoJustificacion() != null && !item.getMotivoJustificacion().trim().isEmpty());
+            String estJ = item.getEstadoJustificacion();
+            boolean esPendiente = estJ == null || estJ.trim().isEmpty() || "PENDIENTE".equalsIgnoreCase(estJ) || "ENVIADA".equalsIgnoreCase(estJ);
+
+            if (tieneJustificacion && esPendiente) {
+                lista.add(item);
+            }
+        }
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -135,6 +150,11 @@ public class RecentPersonnelAdapter extends RecyclerView.Adapter<RecentPersonnel
                 badge.setBackgroundResource(R.drawable.bg_badge_absent);
                 badge.setTextColor(badge.getContext().getColor(R.color.status_absent_text));
                 badge.setText("Falta");
+                break;
+            case "SIN_REGISTRO":
+                badge.setBackgroundResource(R.drawable.bg_badge_permission);
+                badge.setTextColor(badge.getContext().getColor(R.color.status_permission_text));
+                badge.setText("Sin registro");
                 break;
             default:
                 badge.setBackgroundResource(R.drawable.bg_badge_permission);
