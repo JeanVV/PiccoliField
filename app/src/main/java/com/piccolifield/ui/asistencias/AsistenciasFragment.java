@@ -140,6 +140,9 @@ public class AsistenciasFragment extends Fragment {
         observarUiState();
 
         viewModel.getUltimaAsistencia().observe(getViewLifecycleOwner(), ultima -> {
+            if (binding != null && binding.swipeRefreshLayout != null) {
+                binding.swipeRefreshLayout.setRefreshing(false);
+            }
             actualizarEstadoSegunUltimaMarca(ultima);
         });
 
@@ -342,6 +345,16 @@ public class AsistenciasFragment extends Fragment {
     }
 
     private void setupListeners() {
+        // Swipe Refresh Layout para Deslizar y Actualizar
+        if (binding.swipeRefreshLayout != null) {
+            binding.swipeRefreshLayout.setColorSchemeResources(R.color.cafe_profundo, R.color.caramelo);
+            binding.swipeRefreshLayout.setOnRefreshListener(() -> {
+                int idUser = SplashStorage.obtenerUsuarioId(requireContext());
+                viewModel.cargarUltimaAsistencia(idUser);
+                viewModel.cargarJustificacionUsuario(idUser);
+            });
+        }
+
         // Botón Retroceder (Flecha arriba izquierda)
         if (binding.btnBack != null) {
             binding.btnBack.setOnClickListener(v -> {

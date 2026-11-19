@@ -106,6 +106,19 @@ public class MiPerfilFragment extends Fragment {
         cargarDatos();
         sincronizarPerfilConApi();
 
+        androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
+        if (swipeRefreshLayout != null) {
+            swipeRefreshLayout.setColorSchemeResources(R.color.cafe_profundo, R.color.caramelo);
+            swipeRefreshLayout.setOnRefreshListener(() -> {
+                cargarDatos();
+                sincronizarPerfilConApi();
+                if (getView() != null) {
+                    androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipe = getView().findViewById(R.id.swipeRefreshLayout);
+                    if (swipe != null) swipe.setRefreshing(false);
+                }
+            });
+        }
+
         View.OnClickListener selectorFotoListener = v -> mostrarOpcionesCambiarFoto();
         if (ivFotoPerfil != null) ivFotoPerfil.setOnClickListener(selectorFotoListener);
         if (btnEditarFotoBadge != null) btnEditarFotoBadge.setOnClickListener(selectorFotoListener);

@@ -361,15 +361,12 @@ public class AsistenciaHomeFragment extends Fragment {
         }
 
         int presentes = countATiempo + countTardanzas;
-        int total = Math.max(30, lista.size());
-        if (countSinMarcar == 0 && total > (presentes + countFaltas)) {
-            countSinMarcar = total - presentes - countFaltas;
-        }
+        int totalReal = lista.size();
 
-        int porcentaje = total > 0 ? ((presentes * 100) / total) : 0;
+        int porcentaje = totalReal > 0 ? ((presentes * 100) / totalReal) : 0;
         binding.pbAttendancePercentage.setProgress(porcentaje);
         binding.tvAttendancePercentage.setText(porcentaje + "%");
-        binding.tvPresentesFraction.setText(presentes + "/" + total);
+        binding.tvPresentesFraction.setText(presentes + "/" + totalReal);
 
         if (binding.tvOnTimeCount != null) binding.tvOnTimeCount.setText("(" + countATiempo + ")");
         if (binding.tvLateCount != null) binding.tvLateCount.setText("(" + countTardanzas + ")");
