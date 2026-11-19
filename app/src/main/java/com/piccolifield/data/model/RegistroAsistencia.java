@@ -14,7 +14,7 @@ public class RegistroAsistencia implements Serializable {
     @SerializedName(value = "idUsuario", alternate = {"idUsuarios", "id_usuario", "id_usuarios", "usuarioId", "id", "idColaborador", "id_colaborador"})
     private int idUsuario;
 
-    @SerializedName(value = "nombres", alternate = {"nombre", "nombre_completo"})
+    @SerializedName(value = "nombres", alternate = {"nombre", "nombre_completo", "nombreCompleto", "nombre_colaborador", "colaborador"})
     private String nombres;
 
     @SerializedName(value = "apePaterno", alternate = {"ape_paterno", "apellidoPaterno"})
@@ -28,7 +28,11 @@ public class RegistroAsistencia implements Serializable {
 
     private String sede;
     private String estado;
+
+    @SerializedName(value = "fecha_hora_dispositivo", alternate = {"fechaHoraDispositivo", "horaMarcado", "hora_marcado", "hora_dispositivo", "hora"})
     private String fecha_hora_dispositivo;
+
+    @SerializedName(value = "fecha_hora_servidor", alternate = {"fechaHoraServidor", "fecha_servidor", "hora_servidor", "fecha"})
     private String fecha_hora_servidor;
     private int minutos_tardanza;
     private double latitud;
@@ -37,7 +41,10 @@ public class RegistroAsistencia implements Serializable {
     private String justificacion;
     private String motivoJustificacion;
     private String fechaJustificacion;
+
+    @SerializedName(value = "estadoJustificacion", alternate = {"estado_justificacion", "estado_revision", "estadoJustificacionAdmin"})
     private String estadoJustificacion;
+
     private String rutaSustento;
 
     public double getLatitud() {

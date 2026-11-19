@@ -26,6 +26,7 @@ import com.piccolifield.sharedpreferences.SplashStorage;
 import com.piccolifield.ui.asistencia.AsistenciaHomeFragment;
 import com.piccolifield.ui.asistencias.AsistenciasFragment;
 import com.piccolifield.ui.despacho.PuntosDespachoFragment;
+import com.piccolifield.ui.despacho.ProspectosFragment;
 import com.piccolifield.ui.perfil.PerfilFragment;
 import com.piccolifield.ui.supervisionPdv.SupervisionFragment;
 
@@ -113,22 +114,11 @@ public class MenuActivity extends AppCompatActivity {
                     cargarFragmento(new com.piccolifield.ui.perfil.MiPerfilFragment());
                     break;
                 case 5:
-                    // Prospectos -> Puntos de Distribución en pestaña Prospectos
-                    abrirPuntosDistribucionEnProspectos();
+                    // Prospectos
+                    cargarFragmento(new ProspectosFragment());
                     break;
             }
         });
-    }
-
-    public void abrirPuntosDistribucionEnProspectos() {
-        if ("IMPULSADOR".equalsIgnoreCase(SplashStorage.obtenerRol(MenuActivity.this))) {
-            Toast.makeText(MenuActivity.this, "Los Puntos de Distribución no están disponibles para Impulsadores", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (binding != null) {
-            binding.curvedBottomNav.selectTab(3, false);
-        }
-        cargarFragmento(PuntosDespachoFragment.newInstance(2));
     }
 
     private void precargarPerfil() {

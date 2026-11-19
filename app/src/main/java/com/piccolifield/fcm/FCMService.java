@@ -35,16 +35,45 @@ public class FCMService extends FirebaseMessagingService {
     public void onMessageReceived(@NonNull RemoteMessage message) {
         super.onMessageReceived(message);
 
+        String title = null;
+        String body = null;
+        String tipoNotificacion = null;
+
+        // 1. Extraer título y cuerpo desde la notificación de Firebase
         if (message.getNotification() != null) {
-            Log.e("FCM message title", message.getNotification().getTitle());
-            Log.e("FCM message body", message.getNotification().getBody());
-
-            String title = message.getNotification().getTitle();
-            String body = message.getNotification().getBody();
-            String timestamp = message.getData().get("timestamp");
-
-            Intent intent = new Intent(getApplicationContext(), MenuActivity.class);
-            new NotificationUtils(getApplicationContext()).showNotificationMessage(title, body, timestamp, intent);
+            title = message.getNotification().getTitle();
+            body = message.getNotification().getBody();
         }
+
+        // 2. Extraer datos personalizados en data si existen
+        if (!message.getData().isEmpty()) {
+            if (title == null || title.trim().isEmpty()) {
+                title = message.getData().get("title");
+            }
+            if (body == null || body.trim().isEmpty()) {
+                body = message.getData().get("body");
+            }
+            tipoNotificacion = message.getData().get("tipo");
+            if (tipoNotificacion == null) {
+                tipoNotificacion = message.getData().get("type");
+            }
+        }
+
+        // Título genérico neutro por defecto sólo si viene completamente vacío
+        if (title == null) title = "PiccoliField";
+        if (body == null) body = "Tienes una nueva notificación";
+
+        String timestamp = message.getData().get("timestamp");
+
+        Intent intent = new Intent(getApplicationContext(), MenuActivity.class);
+
+        // SOLO si el tipo es explícitamente de Asistencias o Justificaciones, agregamos el extra de navegación
+        if ("RESUMEN_ASISTENCIA".equalsIgnoreCase(tipoNotificacion) || "RESUMEN_DIARIO".equalsIgnoreCase(tipoNotificacion)) {
+            intent.putExtra("PANTALLA", "RESUMEN_ASISTENCIA");
+        } else if ("JUSTIFICACION_RECIBIDA".equalsIgnoreCase(tipoNotificacion) || "JUSTIFICACION".equalsIgnoreCase(tipoNotificacion)) {
+            intent.putExtra("PANTALLA", "JUSTIFICACION");
+        }
+
+        new NotificationUtils(getApplicationContext()).showNotificationMessage(title, body, timestamp, intent);
     }
 }

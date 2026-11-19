@@ -22,6 +22,12 @@ public class AsistenciaResponse {
     @SerializedName("direccion")
     private String direccion;
 
+    @SerializedName("tipo")
+    private String tipo;
+
+    @SerializedName("estado")
+    private String estado;
+
     public AsistenciaResponse() {}
 
     public AsistenciaResponse(int id, String fecha, String hora, double latitud, double longitud, String direccion) {
@@ -79,5 +85,21 @@ public class AsistenciaResponse {
 
     public void setDireccion(String direccion) {
         this.direccion = direccion;
+    }
+
+    public String getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
     }
 }

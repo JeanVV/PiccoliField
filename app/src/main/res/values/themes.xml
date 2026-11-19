@@ -14,4 +14,10 @@
     <style name="ShapeAppearanceOverlay.App.CornerSize16dp" parent="">
         <item name="cornerSize">16dp</item>
     </style>
+
+    <style name="Theme.PiccoliField.PopupMenu" parent="Widget.AppCompat.PopupMenu">
+        <item name="android:popupBackground">@drawable/bg_popup_menu_piccoli</item>
+        <item name="android:textColor">@color/cafe_profundo</item>
+        <item name="android:itemBackground">?android:attr/selectableItemBackground</item>
+    </style>
 </resources>

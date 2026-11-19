@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/filter_todos"
+        android:icon="@drawable/ic_asistencias"
+        android:title="Todos los estados" />
+    <item
+        android:id="@+id/filter_a_tiempo"
+        android:icon="@drawable/ic_check_circle_green"
+        android:title="A tiempo" />
+    <item
+        android:id="@+id/filter_tardanza"
+        android:icon="@drawable/ic_warning_alert"
+        android:title="Tardanza" />
+    <item
+        android:id="@+id/filter_falta"
+        android:icon="@drawable/ic_warning_alert"
+        android:title="Falta" />
+</menu>

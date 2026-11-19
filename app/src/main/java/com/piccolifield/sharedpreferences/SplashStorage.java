@@ -3,38 +3,65 @@ package com.piccolifield.sharedpreferences;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.security.crypto.EncryptedSharedPreferences;
+import androidx.security.crypto.MasterKeys;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.piccolifield.data.model.RegistroAsistencia;
 
 import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class SplashStorage {
     private static final String PREFS_NAME = "campusgo_ingreso_app";
 
+    public static SharedPreferences getSharedPreferences(Context context) {
+        if (context == null) return null;
+        try {
+            String masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
+
+            return EncryptedSharedPreferences.create(
+                    PREFS_NAME,
+                    masterKeyAlias,
+                    context.getApplicationContext(),
+                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.values()[0],
+                    EncryptedSharedPreferences.PrefValueEncryptionScheme.values()[0]
+            );
+        } catch (Exception e) {
+            return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        }
+    }
+
     public static void registrarIngreso(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return;
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean("ingreso", true);
         editor.apply();
     }
 
     public static void limpiarIngreso(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return;
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.clear();
         editor.apply();
     }
 
     public static boolean consultarIngreso(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return false;
         return sharedPreferences.getBoolean("ingreso", false);
     }
 
     public static void registrarSesionActiva(Context context, String rol) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return;
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean("sesion_iniciada", true);
         editor.putString("user_rol", rol != null ? rol : "");
@@ -47,12 +74,14 @@ public class SplashStorage {
     }
 
     public static boolean consultarSesionActiva(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return false;
         return sharedPreferences.getBoolean("sesion_iniciada", false);
     }
 
     public static void limpiarSesionActiva(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return;
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean("sesion_iniciada", false);
         editor.remove("auth_token");
@@ -66,19 +95,22 @@ public class SplashStorage {
     }
 
     public static void guardarToken(Context context, String token) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return;
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("auth_token", token);
         editor.apply();
     }
 
     public static String obtenerToken(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return "";
         return sharedPreferences.getString("auth_token", "");
     }
 
     public static void guardarRol(Context context, String rol) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return;
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("user_role", rol != null ? rol : "");
         editor.putString("user_rol", rol != null ? rol : "");
@@ -86,7 +118,8 @@ public class SplashStorage {
     }
 
     public static String obtenerRol(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return "";
         String rolRole = sharedPreferences.getString("user_role", "");
         if (!rolRole.isEmpty()) {
             return rolRole;
@@ -95,68 +128,79 @@ public class SplashStorage {
     }
 
     public static void guardarUsuarioId(Context context, int idUsuario) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return;
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt("user_id", idUsuario);
         editor.apply();
     }
 
     public static int obtenerUsuarioId(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return 0;
         return sharedPreferences.getInt("user_id", 0);
     }
 
     public static void guardarNombreUsuario(Context context, String nombre) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return;
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("user_name", nombre != null ? nombre : "");
         editor.apply();
     }
 
     public static String obtenerNombreUsuario(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return "";
         return sharedPreferences.getString("user_name", "");
     }
 
     public static void guardarCorreoUsuario(Context context, String correo) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return;
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("user_email", correo != null ? correo : "");
         editor.apply();
     }
 
     public static String obtenerCorreoUsuario(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return "";
         return sharedPreferences.getString("user_email", "");
     }
 
     public static void guardarFotoUsuario(Context context, String urlFoto) {
         if (context == null) return;
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return;
         sharedPreferences.edit().putString("user_photo_url", urlFoto != null ? urlFoto : "").apply();
     }
 
     public static String obtenerFotoUsuario(Context context) {
         if (context == null) return "";
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return "";
         return sharedPreferences.getString("user_photo_url", "");
     }
 
     public static void guardarFotoUsuarioBase64Cache(Context context, int idUsuario, String base64Data) {
         if (context == null || idUsuario <= 0) return;
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return;
         sharedPreferences.edit().putString("user_photo_b64_" + idUsuario, base64Data != null ? base64Data : "").apply();
     }
 
     public static String obtenerFotoUsuarioBase64Cache(Context context, int idUsuario) {
         if (context == null || idUsuario <= 0) return "";
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return "";
         return sharedPreferences.getString("user_photo_b64_" + idUsuario, "");
     }
 
     public static void guardarRegistroAsistenciaLocal(Context context, RegistroAsistencia registro) {
         if (context == null || registro == null) return;
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return;
         Gson gson = new Gson();
         List<RegistroAsistencia> lista = obtenerRegistrosAsistenciaLocales(context);
 
@@ -182,7 +226,8 @@ public class SplashStorage {
 
     public static List<RegistroAsistencia> obtenerRegistrosAsistenciaLocales(Context context) {
         if (context == null) return new ArrayList<>();
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return new ArrayList<>();
         String json = sharedPreferences.getString("registros_asistencia_locales", "");
         if (json.isEmpty()) {
             return new ArrayList<>();
@@ -200,8 +245,12 @@ public class SplashStorage {
     public static void guardarJustificacionLocal(Context context, int idUsuario, String motivo, String descripcion, String rutaSustento) {
         if (context == null || idUsuario == 0) return;
         List<RegistroAsistencia> lista = obtenerRegistrosAsistenciaLocales(context);
+        String nombreUsuario = SplashStorage.obtenerNombreUsuario(context);
         for (RegistroAsistencia reg : lista) {
             if (reg.getIdUsuario() == idUsuario) {
+                if (nombreUsuario != null && !nombreUsuario.isEmpty()) {
+                    reg.setNombres(nombreUsuario);
+                }
                 reg.setMotivoJustificacion(motivo);
                 reg.setJustificacion(descripcion);
                 reg.setRutaSustento(rutaSustento);
@@ -211,10 +260,75 @@ public class SplashStorage {
             }
         }
         RegistroAsistencia reg = new RegistroAsistencia();
-        reg.setJustificacion(descripcion);
+        reg.setIdUsuario(idUsuario);
+        reg.setNombres(nombreUsuario != null && !nombreUsuario.isEmpty() ? nombreUsuario : "Colaborador " + idUsuario);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        String fechaHoraActual = sdf.format(new Date());
+        reg.setHoraMarcado(fechaHoraActual);
+        reg.setFechaHoraServidor(fechaHoraActual);
         reg.setMotivoJustificacion(motivo);
+        reg.setJustificacion(descripcion);
         reg.setRutaSustento(rutaSustento);
         reg.setEstadoJustificacion("ENVIADA");
+        reg.setEstado("FALTA");
         guardarRegistroAsistenciaLocal(context, reg);
+    }
+
+    public static void guardarEntradaHoy(Context context, int idUsuario) {
+        if (context == null || idUsuario <= 0) return;
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String hoy = sdf.format(new Date());
+        sharedPreferences.edit().putString("ultima_entrada_fecha_hoy_" + idUsuario, hoy).apply();
+    }
+
+    public static void guardarHoraEntradaHoy(Context context, int idUsuario, String hora) {
+        if (context == null || idUsuario <= 0 || hora == null) return;
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return;
+        sharedPreferences.edit().putString("hora_entrada_hoy_" + idUsuario, hora).apply();
+    }
+
+    public static String obtenerHoraEntradaHoy(Context context, int idUsuario) {
+        if (context == null || idUsuario <= 0) return "";
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return "";
+        return sharedPreferences.getString("hora_entrada_hoy_" + idUsuario, "");
+    }
+
+    public static boolean consultarEntradaHoy(Context context, int idUsuario) {
+        if (context == null || idUsuario <= 0) return false;
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return false;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String hoy = sdf.format(new Date());
+        String fUser = sharedPreferences.getString("ultima_entrada_fecha_hoy_" + idUsuario, "");
+        return hoy.equals(fUser);
+    }
+
+    public static void limpiarEntradaHoy(Context context, int idUsuario) {
+        if (context == null || idUsuario <= 0) return;
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return;
+        sharedPreferences.edit()
+                .remove("ultima_entrada_fecha_hoy_" + idUsuario)
+                .remove("hora_entrada_hoy_" + idUsuario)
+                .apply();
+    }
+
+    public static void guardarEntradaHoy(Context context) {
+        int id = obtenerUsuarioId(context);
+        if (id > 0) guardarEntradaHoy(context, id);
+    }
+
+    public static boolean consultarEntradaHoy(Context context) {
+        int id = obtenerUsuarioId(context);
+        return id > 0 && consultarEntradaHoy(context, id);
+    }
+
+    public static void limpiarEntradaHoy(Context context) {
+        int id = obtenerUsuarioId(context);
+        if (id > 0) limpiarEntradaHoy(context, id);
     }
 }

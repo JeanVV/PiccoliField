@@ -9,12 +9,18 @@
     android:background="@color/color_fondo"
     tools:context=".ui.asistencia.AsistenciaHomeFragment">
 
-    <!-- ScrollView para acomodar todos los elementos suavemente -->
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/scrollViewContent"
+    <!-- SwipeRefreshLayout para Deslizar y Actualizar -->
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:layout_height="match_parent">
+
+        <!-- ScrollView para acomodar todos los elementos suavemente -->
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/scrollViewContent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -54,19 +60,19 @@
                     android:textColor="@color/cafe_profundo"
                     android:textSize="20sp"
                     android:textStyle="bold" />
-
-                <ImageView
-                    android:id="@+id/btnNotification"
-                    android:layout_width="26dp"
-                    android:layout_height="26dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:clickable="true"
-                    android:contentDescription="@string/cd_notification"
-                    android:focusable="true"
-                    android:src="@drawable/ic_notification_bell" />
             </RelativeLayout>
+
+            <!-- ProgressBar de Carga Sutil para Inicio -->
+            <ProgressBar
+                android:id="@+id/pbLoadingHome"
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="12dp"
+                android:indeterminateTint="@color/cafe_profundo"
+                android:visibility="gone"
+                tools:visibility="visible" />
 
             <!-- BANNER DE JUSTIFICACIONES PENDIENTES DE REVISIÓN -->
             <com.google.android.material.card.MaterialCardView
@@ -319,12 +325,12 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- 4. Fila de Métricas: "A tiempo" y "Tardanzas" -->
+            <!-- 4. Fila de Métricas 1: "A tiempo" y "Tardanzas" -->
             <LinearLayout
-                android:id="@+id/layoutMetricsContainer"
+                android:id="@+id/layoutMetricsContainer1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="10dp"
                 android:baselineAligned="false"
                 android:orientation="horizontal">
 
@@ -333,7 +339,7 @@
                     android:id="@+id/cardOnTime"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="6dp"
+                    android:layout_marginEnd="5dp"
                     android:layout_weight="1"
                     app:cardBackgroundColor="#F5E8D0"
                     app:cardCornerRadius="16dp"
@@ -346,7 +352,7 @@
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="14dp">
+                        android:padding="12dp">
 
                         <TextView
                             android:id="@+id/tvOnTimeTitle"
@@ -354,17 +360,17 @@
                             android:layout_height="wrap_content"
                             android:text="@string/label_a_tiempo"
                             android:textColor="@color/cafe_profundo"
-                            android:textSize="14sp"
+                            android:textSize="13sp"
                             android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/tvOnTimeCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
+                            android:layout_marginTop="2dp"
                             android:fontFamily="serif"
                             android:textColor="@color/cafe_profundo"
-                            android:textSize="18sp"
+                            android:textSize="17sp"
                             android:textStyle="bold"
                             tools:text="(64)" />
 
@@ -377,7 +383,7 @@
                     android:id="@+id/cardLate"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="6dp"
+                    android:layout_marginStart="5dp"
                     android:layout_weight="1"
                     app:cardBackgroundColor="#F5E8D0"
                     app:cardCornerRadius="16dp"
@@ -390,7 +396,7 @@
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="14dp">
+                        android:padding="12dp">
 
                         <TextView
                             android:id="@+id/tvLateTitle"
@@ -398,19 +404,118 @@
                             android:layout_height="wrap_content"
                             android:text="@string/label_tardanzas"
                             android:textColor="@color/cafe_profundo"
-                            android:textSize="14sp"
+                            android:textSize="13sp"
                             android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/tvLateCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
+                            android:layout_marginTop="2dp"
                             android:fontFamily="serif"
                             android:textColor="@color/cafe_profundo"
-                            android:textSize="18sp"
+                            android:textSize="17sp"
                             android:textStyle="bold"
                             tools:text="(12)" />
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+
+            <!-- Fila de Métricas 2: "Faltas" y "Sin Marcar" -->
+            <LinearLayout
+                android:id="@+id/layoutMetricsContainer2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:baselineAligned="false"
+                android:orientation="horizontal">
+
+                <!-- Card 3: Faltas -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardFaltas"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="#FDF0ED"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="#F5C6CB"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="12dp">
+
+                        <TextView
+                            android:id="@+id/tvFaltasTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Faltas"
+                            android:textColor="#B91C1C"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvFaltasCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:fontFamily="serif"
+                            android:textColor="#B91C1C"
+                            android:textSize="17sp"
+                            android:textStyle="bold"
+                            tools:text="(2)" />
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Card 4: Sin Marcar / Pendientes -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardSinMarcar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="#F8F4EC"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="#E3CEAA"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="12dp">
+
+                        <TextView
+                            android:id="@+id/tvSinMarcarTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Sin Marcar"
+                            android:textColor="@color/chocolate"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvSinMarcarCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:fontFamily="serif"
+                            android:textColor="@color/chocolate"
+                            android:textSize="17sp"
+                            android:textStyle="bold"
+                            tools:text="(5)" />
 
                     </LinearLayout>
 
@@ -572,5 +677,7 @@
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -187,7 +187,7 @@ public interface ApiService {
     Call<ApiResponse<Object>> registrarAsistencia(@Body MarcarAsistenciaRequest request);
 
     @GET("asistencias/ultima")
-    Call<ApiResponse<AsistenciaResponse>> obtenerUltimaAsistencia();
+    Call<ApiResponse<AsistenciaResponse>> obtenerUltimaAsistencia(@retrofit2.http.Query("idUsuario") int idUsuario);
 
     @POST("asistencias/justificar")
     Call<ApiResponse<Object>> registrarJustificacion(@Body JustificationRequest request);

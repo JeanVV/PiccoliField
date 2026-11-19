@@ -8,6 +8,25 @@
     android:background="@color/color_fondo"
     tools:context=".MenuActivity">
 
+    <!-- Banner de Estado de Conexión (Offline / Online) -->
+    <TextView
+        android:id="@+id/tvBannerOffline"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="#D32F2F"
+        android:text="Sin conexión - Modo Offline (Se guardará localmente)"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:paddingVertical="6dp"
+        android:paddingHorizontal="16dp"
+        android:elevation="10dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <!-- Contenedor para las pantallas / fragmentos -->
     <FrameLayout
         android:id="@+id/fragmentContainer"
@@ -16,7 +35,7 @@
         app:layout_constraintBottom_toTopOf="@id/curvedBottomNav"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/tvBannerOffline" />
 
     <!-- Barra inferior curva con animación y colores de la paleta -->
     <com.piccolifield.ui.CurvedBottomNavigationView

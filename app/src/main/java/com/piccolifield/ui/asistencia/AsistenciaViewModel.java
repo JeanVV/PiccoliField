@@ -1,24 +1,32 @@
 package com.piccolifield.ui.asistencia;
 
-import androidx.annotation.NonNull;
+import android.content.Context;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.piccolifield.data.model.RegistroAsistencia;
+import com.piccolifield.data.model.TurnoHistorial;
+import com.piccolifield.data.remote.Resource;
+import com.piccolifield.data.remote.dto.request.JustificationRequest;
 import com.piccolifield.data.remote.dto.request.MarcarAsistenciaRequest;
-import com.piccolifield.data.remote.dto.response.ApiResponse;
+import com.piccolifield.data.remote.dto.request.RevisionJustificacionRequest;
 import com.piccolifield.data.remote.dto.response.AsistenciaResponse;
 import com.piccolifield.data.repository.AsistenciaRepository;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import java.util.List;
 
 public class AsistenciaViewModel extends ViewModel {
 
     private final AsistenciaRepository repository;
     private final MutableLiveData<AsistenciaUiState> uiState = new MutableLiveData<>(AsistenciaUiState.idle());
     private final MutableLiveData<AsistenciaResponse> ultimaAsistencia = new MutableLiveData<>();
+    private final MutableLiveData<Resource<List<RegistroAsistencia>>> colaboradoresLiveData = new MutableLiveData<>();
+    private final MutableLiveData<Resource<String>> justificacionResultLiveData = new MutableLiveData<>();
+    private final MutableLiveData<Resource<String>> revisionJustificacionLiveData = new MutableLiveData<>();
+    private final MutableLiveData<Resource<RegistroAsistencia>> justificacionUsuarioLiveData = new MutableLiveData<>();
+    private final MutableLiveData<Resource<List<TurnoHistorial>>> historialTurnosLiveData = new MutableLiveData<>();
 
     public AsistenciaViewModel() {
         this.repository = new AsistenciaRepository();
@@ -36,57 +44,113 @@ public class AsistenciaViewModel extends ViewModel {
         return ultimaAsistencia;
     }
 
-    public void marcarAsistencia(MarcarAsistenciaRequest request) {
+    public LiveData<Resource<List<RegistroAsistencia>>> getColaboradoresLiveData() {
+        return colaboradoresLiveData;
+    }
+
+    public LiveData<Resource<String>> getJustificacionResultLiveData() {
+        return justificacionResultLiveData;
+    }
+
+    public LiveData<Resource<String>> getRevisionJustificacionLiveData() {
+        return revisionJustificacionLiveData;
+    }
+
+    public LiveData<Resource<RegistroAsistencia>> getJustificacionUsuarioLiveData() {
+        return justificacionUsuarioLiveData;
+    }
+
+    public LiveData<Resource<List<TurnoHistorial>>> getHistorialTurnosLiveData() {
+        return historialTurnosLiveData;
+    }
+
+    public void marcarAsistencia(MarcarAsistenciaRequest request, Context context) {
         uiState.setValue(AsistenciaUiState.loading());
-        repository.registrarAsistencia(request, new Callback<ApiResponse<Object>>() {
-            @Override
-            public void onResponse(@NonNull Call<ApiResponse<Object>> call, @NonNull Response<ApiResponse<Object>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    ApiResponse<Object> apiResponse = response.body();
-                    String msg = apiResponse.getMessage();
-                    if (msg == null || msg.trim().isEmpty()) {
-                        msg = "Asistencia registrada correctamente";
-                    }
-
-                    if (apiResponse.isStatus()) {
-                        uiState.setValue(AsistenciaUiState.success(msg));
-                        cargarUltimaAsistencia();
-                    } else {
-                        uiState.setValue(AsistenciaUiState.error(msg));
-                    }
-                } else {
-                    String errorMsg = "Error al registrar asistencia (" + response.code() + ")";
-                    uiState.setValue(AsistenciaUiState.error(errorMsg));
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<ApiResponse<Object>> call, @NonNull Throwable t) {
-                String errorMsg = t.getMessage() != null ? t.getMessage() : "Error de red al registrar asistencia";
-                uiState.setValue(AsistenciaUiState.error(errorMsg));
+        LiveData<Resource<String>> res = repository.registrarAsistencia(request, context);
+        res.observeForever(resource -> {
+            if (resource == null) return;
+            switch (resource.status) {
+                case LOADING:
+                    uiState.setValue(AsistenciaUiState.loading());
+                    break;
+                case SUCCESS:
+                    String msg = resource.data != null ? resource.data : "Asistencia registrada correctamente";
+                    uiState.setValue(AsistenciaUiState.success(msg));
+                    cargarUltimaAsistencia(request.getIdUsuario());
+                    break;
+                case ERROR:
+                    String err = resource.message != null ? resource.message : "Error al registrar asistencia";
+                    uiState.setValue(AsistenciaUiState.error(err));
+                    break;
             }
         });
     }
 
-    public void cargarUltimaAsistencia() {
-        repository.obtenerUltimaAsistencia(new Callback<ApiResponse<AsistenciaResponse>>() {
-            @Override
-            public void onResponse(@NonNull Call<ApiResponse<AsistenciaResponse>> call, @NonNull Response<ApiResponse<AsistenciaResponse>> response) {
-                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
-                    ultimaAsistencia.setValue(response.body().getData());
-                } else {
-                    ultimaAsistencia.setValue(null);
-                }
-            }
+    public void marcarAsistencia(MarcarAsistenciaRequest request) {
+        marcarAsistencia(request, null);
+    }
 
-            @Override
-            public void onFailure(@NonNull Call<ApiResponse<AsistenciaResponse>> call, @NonNull Throwable t) {
+    public void cargarUltimaAsistencia(int idUsuario) {
+        LiveData<Resource<AsistenciaResponse>> res = repository.obtenerUltimaAsistencia(idUsuario);
+        res.observeForever(resource -> {
+            if (resource != null && resource.status == Resource.Status.SUCCESS) {
+                ultimaAsistencia.setValue(resource.data);
+            } else if (resource != null && resource.status == Resource.Status.ERROR) {
                 ultimaAsistencia.setValue(null);
+            }
+        });
+    }
+
+    public void cargarColaboradoresConAsistencia(Context context) {
+        LiveData<Resource<List<RegistroAsistencia>>> res = repository.obtenerColaboradoresConAsistencia(context);
+        res.observeForever(resource -> {
+            if (resource != null) {
+                colaboradoresLiveData.setValue(resource);
+            }
+        });
+    }
+
+    public void registrarJustificacion(JustificationRequest request, Context context) {
+        LiveData<Resource<String>> res = repository.registrarJustificacion(request, context);
+        res.observeForever(resource -> {
+            if (resource != null) {
+                justificacionResultLiveData.setValue(resource);
+            }
+        });
+    }
+
+    public void revisarJustificacion(RevisionJustificacionRequest request) {
+        LiveData<Resource<String>> res = repository.revisarJustificacion(request);
+        res.observeForever(resource -> {
+            if (resource != null) {
+                revisionJustificacionLiveData.setValue(resource);
+            }
+        });
+    }
+
+    public void cargarJustificacionUsuario(int idUsuario) {
+        LiveData<Resource<RegistroAsistencia>> res = repository.obtenerJustificacionUsuario(idUsuario);
+        res.observeForever(resource -> {
+            if (resource != null) {
+                justificacionUsuarioLiveData.setValue(resource);
+            }
+        });
+    }
+
+    public void cargarHistorialTurnos(int idUsuario) {
+        LiveData<Resource<List<TurnoHistorial>>> res = repository.obtenerHistorialTurnos(idUsuario);
+        res.observeForever(resource -> {
+            if (resource != null) {
+                historialTurnosLiveData.setValue(resource);
             }
         });
     }
 
     public void resetUiState() {
         uiState.setValue(AsistenciaUiState.idle());
+    }
+
+    public void resetRevisionJustificacionLiveData() {
+        revisionJustificacionLiveData.setValue(null);
     }
 }

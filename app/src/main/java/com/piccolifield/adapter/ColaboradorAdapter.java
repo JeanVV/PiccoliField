@@ -44,8 +44,13 @@ public class ColaboradorAdapter extends RecyclerView.Adapter<ColaboradorAdapter.
                     (item.getNombreCompleto() != null && item.getNombreCompleto().toLowerCase().contains(q)) ||
                     (item.getSede() != null && item.getSede().toLowerCase().contains(q));
 
+            boolean tieneJustificacion = (item.getJustificacion() != null && !item.getJustificacion().trim().isEmpty())
+                    || (item.getMotivoJustificacion() != null && !item.getMotivoJustificacion().trim().isEmpty());
+            String estJ = item.getEstadoJustificacion();
+            boolean esPendiente = estJ == null || estJ.trim().isEmpty() || "PENDIENTE".equalsIgnoreCase(estJ) || "ENVIADA".equalsIgnoreCase(estJ);
+
             boolean coincideEstado = estado.isEmpty() || "TODOS".equals(estado) ||
-                    (item.getEstado() != null && item.getEstado().equalsIgnoreCase(estado));
+                    ("JUSTIFICACIONES".equals(estado) ? (tieneJustificacion && esPendiente) : (item.getEstado() != null && item.getEstado().equalsIgnoreCase(estado)));
 
             if (coincideNombre && coincideEstado) {
                 lista.add(item);
@@ -87,9 +92,12 @@ public class ColaboradorAdapter extends RecyclerView.Adapter<ColaboradorAdapter.
             binding.tvCollaboratorLocation.setText(item.getSede());
 
             String hora = item.getHoraMarcado();
-            if (hora != null && hora.length() >= 16) {
+            if (hora == null || hora.trim().isEmpty() || "--:--".equals(hora)) {
+                hora = item.getFechaHoraServidor();
+            }
+            if (hora != null && hora.length() >= 16 && hora.contains(" ")) {
                 binding.tvCollaboratorTime.setText(hora.substring(11, 16));
-            } else if (hora != null) {
+            } else if (hora != null && !hora.trim().isEmpty()) {
                 binding.tvCollaboratorTime.setText(hora);
             } else {
                 binding.tvCollaboratorTime.setText("--:--");
@@ -135,6 +143,11 @@ public class ColaboradorAdapter extends RecyclerView.Adapter<ColaboradorAdapter.
                 badge.setBackgroundResource(R.drawable.bg_badge_absent);
                 badge.setTextColor(badge.getContext().getColor(R.color.status_absent_text));
                 badge.setText("Falta");
+                break;
+            case "SIN_REGISTRO":
+                badge.setBackgroundResource(R.drawable.bg_badge_permission);
+                badge.setTextColor(badge.getContext().getColor(R.color.status_permission_text));
+                badge.setText("Sin registro");
                 break;
             default:
                 badge.setBackgroundResource(R.drawable.bg_badge_permission);

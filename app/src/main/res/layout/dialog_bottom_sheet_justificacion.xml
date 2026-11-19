@@ -64,7 +64,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:hint="Selecciona el motivo"
+        android:hint="@string/hint_selecciona_motivo"
         app:boxStrokeColor="@color/cafe_profundo">
 
         <AutoCompleteTextView
@@ -83,7 +83,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:hint="Detalle / Explicación de la falta"
+        android:hint="@string/hint_detalle_justificacion"
         app:boxStrokeColor="@color/cafe_profundo">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -168,7 +168,7 @@
         android:layout_width="match_parent"
         android:layout_height="52dp"
         android:layout_marginTop="16dp"
-        android:text="Enviar Justificación"
+        android:text="@string/btn_registrar_justificacion"
         app:icon="@drawable/ic_warning_alert"
         app:iconTint="@color/marfil_suave" />
 

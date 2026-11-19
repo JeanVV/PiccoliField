@@ -11,12 +11,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -74,6 +76,7 @@ public class AsistenciasFragment extends Fragment {
     private String fotoSustentoBase64;
     private String tipoMarcaActual = "INGRESO";
     private String tipoMarcaPendiente;
+    private boolean marcadoEntradaEnSesion = false;
 
     // Referencias para actualizar el preview en la ventana emergente / BottomSheetDialog
     private ImageView currentDialogIvPreview;
@@ -132,9 +135,17 @@ public class AsistenciasFragment extends Fragment {
         }
         apiService = RetrofitClient.createService();
 
-        // Inicializar ViewModel
+        // Inicializar ViewModel y observar estado
         viewModel = new ViewModelProvider(requireActivity()).get(AsistenciaViewModel.class);
         observarUiState();
+
+        viewModel.getUltimaAsistencia().observe(getViewLifecycleOwner(), ultima -> {
+            actualizarEstadoSegunUltimaMarca(ultima);
+        });
+
+        // Cargar última asistencia guardada en la base de datos para el usuario activo
+        int idUserStart = SplashStorage.obtenerUsuarioId(requireContext());
+        viewModel.cargarUltimaAsistencia(idUserStart);
 
         // 1. Mostrar información del usuario
         mostrarInfoUsuario();
@@ -154,21 +165,81 @@ public class AsistenciasFragment extends Fragment {
                     setBotonesEstado(false, "Guardando...");
                     break;
                 case SUCCESS:
-                    String msgSuccess = state.getMensaje() != null ? state.getMensaje() : "Asistencia registrada correctamente";
-                    Toast.makeText(getContext(), msgSuccess, Toast.LENGTH_SHORT).show();
-                    setBotonesEstado(true, null);
-                    actualizarTextoUltimaMarca(tipoMarcaActual);
+                    if (binding.pbLoadingAsistencia != null) {
+                        binding.pbLoadingAsistencia.setVisibility(View.GONE);
+                    }
+                    String tipoTexto = "INGRESO".equalsIgnoreCase(tipoMarcaActual) ? "entrada" : "salida";
+                    if ("INGRESO".equalsIgnoreCase(tipoMarcaActual)) {
+                        marcadoEntradaEnSesion = true;
+                        int idU = SplashStorage.obtenerUsuarioId(requireContext());
+                        SplashStorage.guardarEntradaHoy(requireContext(), idU);
+
+                        SimpleDateFormat shortSdf = new SimpleDateFormat("hh:mm a", LOCALE_PERU);
+                        shortSdf.setTimeZone(TIME_ZONE_LIMA);
+                        String horaFormateada = shortSdf.format(new Date());
+                        SplashStorage.guardarHoraEntradaHoy(requireContext(), idU, horaFormateada);
+
+                        binding.btnMarcarEntrada.setEnabled(false);
+                        binding.btnMarcarEntrada.setText("REGISTRADO");
+                        if (binding.cardJustificacionContainer != null) {
+                            binding.cardJustificacionContainer.setVisibility(View.GONE);
+                        }
+                        binding.tvEstadoHoy.setText("Última marca: Entrada a las " + horaFormateada + " (Lima)");
+                    }
+                    int idU = SplashStorage.obtenerUsuarioId(requireContext());
+                    if (idU > 0) {
+                        viewModel.cargarUltimaAsistencia(idU);
+                    }
+                    String msgExito = state.getMensaje() != null ? state.getMensaje() : ("Tu " + tipoTexto + " ha sido registrada exitosamente.");
+                    mostrarDialogoExitoMinimal("¡Asistencia Registrada!", msgExito);
                     viewModel.resetUiState();
                     break;
                 case ERROR:
+                    if (binding.pbLoadingAsistencia != null) {
+                        binding.pbLoadingAsistencia.setVisibility(View.GONE);
+                    }
                     String msgError = state.getMensaje() != null ? state.getMensaje() : "Error al registrar asistencia";
                     Toast.makeText(getContext(), msgError, Toast.LENGTH_LONG).show();
-                    setBotonesEstado(true, null);
+                    restaurarBotonesEnError();
                     viewModel.resetUiState();
                     break;
                 case IDLE:
                 default:
                     break;
+            }
+        });
+
+        viewModel.getJustificacionResultLiveData().observe(getViewLifecycleOwner(), resource -> {
+            if (!isAdded() || binding == null || resource == null) return;
+            if (resource.status == com.piccolifield.data.remote.Resource.Status.LOADING) {
+                if (binding.pbLoadingJustificacion != null) {
+                    binding.pbLoadingJustificacion.setVisibility(View.VISIBLE);
+                }
+                if (binding.btnAbrirJustificacionBS != null) {
+                    binding.btnAbrirJustificacionBS.setEnabled(false);
+                    binding.btnAbrirJustificacionBS.setText("Guardando justificación...");
+                }
+            } else if (resource.status == com.piccolifield.data.remote.Resource.Status.SUCCESS) {
+                if (binding.pbLoadingJustificacion != null) {
+                    binding.pbLoadingJustificacion.setVisibility(View.GONE);
+                }
+                if (binding.btnAbrirJustificacionBS != null) {
+                    binding.btnAbrirJustificacionBS.setEnabled(true);
+                    binding.btnAbrirJustificacionBS.setText("Registrar Justificación");
+                }
+                String msg = resource.data != null ? resource.data : "Justificación registrada exitosamente.";
+                mostrarDialogoExitoMinimal("¡Justificación Registrada!", msg);
+                limpiarFormularioJustificacion();
+            } else if (resource.status == com.piccolifield.data.remote.Resource.Status.ERROR) {
+                if (binding.pbLoadingJustificacion != null) {
+                    binding.pbLoadingJustificacion.setVisibility(View.GONE);
+                }
+                if (binding.btnAbrirJustificacionBS != null) {
+                    binding.btnAbrirJustificacionBS.setEnabled(true);
+                    binding.btnAbrirJustificacionBS.setText("Registrar Justificación");
+                }
+                String err = resource.message != null ? resource.message : "Error al registrar justificación";
+                Toast.makeText(getContext(), err, Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -229,34 +300,57 @@ public class AsistenciasFragment extends Fragment {
     }
 
     private void calcularDistanciaGeocerca() {
-        if (binding == null) return;
+        if (binding == null || !isAdded()) return;
 
-        double latSede = -6.7714;
-        double lngSede = -79.8409;
-        double latWorker = -6.7716;
-        double lngWorker = -79.8410;
+        double latSede = -6.7711982;
+        double lngSede = -79.8385571;
 
-        float[] results = new float[1];
-        android.location.Location.distanceBetween(latSede, lngSede, latWorker, lngWorker, results);
-        int distanciaMetros = Math.round(results[0]);
-
-        if (distanciaMetros <= 100) {
-            binding.tvDistanciaSede.setText("Distancia: " + distanciaMetros + " m (Zona Lima/Perú)");
-            binding.tvGeofenceBadge.setText("EN RANGO");
-            binding.tvGeofenceBadge.setBackgroundResource(R.drawable.bg_badge_on_time);
-            binding.tvGeofenceBadge.setTextColor(requireContext().getColor(R.color.status_on_time_text));
-        } else {
-            binding.tvDistanciaSede.setText("Distancia: " + distanciaMetros + " m (Fuera de rango)");
-            binding.tvGeofenceBadge.setText("OBSERVADO");
-            binding.tvGeofenceBadge.setBackgroundResource(R.drawable.bg_badge_late);
-            binding.tvGeofenceBadge.setTextColor(requireContext().getColor(R.color.status_late_text));
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            binding.tvDistanciaSede.setText("Distancia: Permiso de GPS no concedido");
+            return;
         }
+
+        FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext());
+        fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
+                .addOnSuccessListener(location -> {
+                    if (binding == null || !isAdded()) return;
+                    if (location == null) {
+                        binding.tvDistanciaSede.setText("Distancia: GPS buscando señal...");
+                        return;
+                    }
+
+                    double userLat = location.getLatitude();
+                    double userLng = location.getLongitude();
+
+                    float[] results = new float[1];
+                    android.location.Location.distanceBetween(latSede, lngSede, userLat, userLng, results);
+                    int distanciaMetros = Math.round(results[0]);
+
+                    if (distanciaMetros <= 100) {
+                        binding.tvDistanciaSede.setText("Distancia: " + distanciaMetros + " m (En zona)");
+                        binding.tvGeofenceBadge.setText("EN RANGO");
+                        binding.tvGeofenceBadge.setBackgroundResource(R.drawable.bg_badge_on_time);
+                        binding.tvGeofenceBadge.setTextColor(requireContext().getColor(R.color.status_on_time_text));
+                    } else {
+                        binding.tvDistanciaSede.setText("Distancia: " + distanciaMetros + " m (Fuera de rango)");
+                        binding.tvGeofenceBadge.setText("FUERA DE RANGO");
+                        binding.tvGeofenceBadge.setBackgroundResource(R.drawable.bg_badge_late);
+                        binding.tvGeofenceBadge.setTextColor(requireContext().getColor(R.color.status_late_text));
+                    }
+                });
     }
 
     private void setupListeners() {
         // Botón Retroceder (Flecha arriba izquierda)
         if (binding.btnBack != null) {
-            binding.btnBack.setOnClickListener(v -> getParentFragmentManager().popBackStack());
+            binding.btnBack.setOnClickListener(v -> {
+                if (getParentFragmentManager().getBackStackEntryCount() > 0) {
+                    getParentFragmentManager().popBackStack();
+                } else if (getActivity() instanceof com.piccolifield.MenuActivity) {
+                    ((com.piccolifield.MenuActivity) getActivity()).navegarAPantallaPrincipal();
+                }
+            });
         }
 
         // Navegación a la pantalla de Monitoreo en Mapa al pulsar el botón o la tarjeta de geocerca
@@ -267,11 +361,8 @@ public class AsistenciasFragment extends Fragment {
             binding.cardGeofenceInfo.setOnClickListener(v -> abrirPantallaMonitoreoMapa());
         }
 
-        // Botones de marcado de entrada / refrigerio / salida
+        // Botones de marcado de entrada / salida
         binding.btnMarcarEntrada.setOnClickListener(v -> solicitarMarcaConUbicacion("INGRESO"));
-        if (binding.btnMarcarRefrigerio != null) {
-            binding.btnMarcarRefrigerio.setOnClickListener(v -> solicitarMarcaConUbicacion("REFRIGERIO"));
-        }
         binding.btnMarcarSalida.setOnClickListener(v -> solicitarMarcaConUbicacion("SALIDA"));
 
         // Botón para abrir la ventana emergente / BottomSheet de Justificación
@@ -357,7 +448,48 @@ public class AsistenciasFragment extends Fragment {
         dialog.show();
     }
 
+    private boolean yaRegistroIngresoHoy() {
+        if (!isAdded() || getContext() == null) return false;
+
+        if (marcadoEntradaEnSesion) {
+            return true;
+        }
+
+        int idUsuario = SplashStorage.obtenerUsuarioId(requireContext());
+        if (SplashStorage.consultarEntradaHoy(requireContext(), idUsuario)) {
+            return true;
+        }
+
+        SimpleDateFormat sdfFecha = new SimpleDateFormat("yyyy-MM-dd", LOCALE_PERU);
+        sdfFecha.setTimeZone(TIME_ZONE_LIMA);
+        String hoyStr = sdfFecha.format(new Date());
+
+        try {
+            if (viewModel != null && viewModel.getUltimaAsistencia() != null && viewModel.getUltimaAsistencia().getValue() != null) {
+                com.piccolifield.data.remote.dto.response.AsistenciaResponse ultima = viewModel.getUltimaAsistencia().getValue();
+                if (ultima != null) {
+                    String fecha = ultima.getFecha();
+                    String tipo = ultima.getTipo();
+                    boolean esDeHoy = fecha != null && (hoyStr.equalsIgnoreCase(fecha) || fecha.startsWith(hoyStr) || fecha.contains(hoyStr));
+                    boolean esIngreso = tipo != null && (tipo.equalsIgnoreCase("INGRESO") || tipo.equalsIgnoreCase("ENTRADA"));
+
+                    if (esDeHoy && esIngreso) {
+                        SplashStorage.guardarEntradaHoy(requireContext(), idUsuario);
+                        return true;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     private void solicitarMarcaConUbicacion(String tipo) {
+        if ("INGRESO".equalsIgnoreCase(tipo) && yaRegistroIngresoHoy()) {
+            Toast.makeText(getContext(), "Ya registraste tu entrada el día de hoy.", Toast.LENGTH_LONG).show();
+            return;
+        }
         this.tipoMarcaActual = tipo;
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             obtenerUbicacionYMarcarAsistencia(tipo);
@@ -387,9 +519,9 @@ public class AsistenciasFragment extends Fragment {
                         return;
                     }
 
-                    // Validación de Geocerca (Radio máximo 100m)
-                    double latSede = -6.7714;
-                    double lngSede = -79.8409;
+                    // Validación de Geocerca (Radio máximo 100m - USAT Chiclayo)
+                    double latSede = -6.7711982;
+                    double lngSede = -79.8385571;
                     float radioMaximoMetros = 100f;
 
                     float[] results = new float[1];
@@ -482,8 +614,11 @@ public class AsistenciasFragment extends Fragment {
 
     private void enviarSolicitudAsistencia(double lat, double lng, @Nullable String direccion, String tipo) {
         int idUsuario = SplashStorage.obtenerUsuarioId(requireContext());
+        if (idUsuario <= 0) {
+            idUsuario = 1;
+        }
 
-        SimpleDateFormat fullSdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", LOCALE_PERU);
+        SimpleDateFormat fullSdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US);
         fullSdf.setTimeZone(TIME_ZONE_LIMA);
         String fechaHora = fullSdf.format(new Date());
 
@@ -498,29 +633,129 @@ public class AsistenciasFragment extends Fragment {
         request.setSede(sede);
         request.setFechaHoraDispositivo(fechaHora);
 
-        guardarMarcaEnLocal(idUsuario, tipo, fechaHora, lat, lng, sede);
+        viewModel.marcarAsistencia(request, requireContext());
+    }
 
-        viewModel.marcarAsistencia(request);
+    private void restaurarBotonesEnError() {
+        if (binding == null) return;
+        if (binding.pbLoadingAsistencia != null) {
+            binding.pbLoadingAsistencia.setVisibility(View.GONE);
+        }
+        boolean yaIngreso = yaRegistroIngresoHoy();
+        binding.btnMarcarEntrada.setEnabled(!yaIngreso);
+        binding.btnMarcarEntrada.setText(yaIngreso ? "REGISTRADO" : "ENTRADA");
+        binding.btnMarcarSalida.setEnabled(true);
+        binding.btnMarcarSalida.setText("SALIDA");
+    }
+
+    private void actualizarEstadoSegunUltimaMarca(@Nullable com.piccolifield.data.remote.dto.response.AsistenciaResponse ultima) {
+        if (binding == null) return;
+
+        if (binding.pbLoadingAsistencia != null) {
+            binding.pbLoadingAsistencia.setVisibility(View.GONE);
+        }
+
+        SimpleDateFormat sdfFecha = new SimpleDateFormat("yyyy-MM-dd", LOCALE_PERU);
+        sdfFecha.setTimeZone(TIME_ZONE_LIMA);
+        String hoyStr = sdfFecha.format(new Date());
+
+        int idUsuarioActual = SplashStorage.obtenerUsuarioId(requireContext());
+        boolean esDeHoy = false;
+        String horaStr = null;
+
+        if (ultima != null && ultima.getFecha() != null && !ultima.getFecha().trim().isEmpty()) {
+            String fechaServidor = ultima.getFecha();
+            esDeHoy = hoyStr.equalsIgnoreCase(fechaServidor) || fechaServidor.startsWith(hoyStr) || fechaServidor.contains(hoyStr);
+            boolean esIngreso = "INGRESO".equalsIgnoreCase(ultima.getTipo()) || "ENTRADA".equalsIgnoreCase(ultima.getTipo());
+
+            if (esDeHoy && esIngreso) {
+                SplashStorage.guardarEntradaHoy(requireContext(), idUsuarioActual);
+                horaStr = ultima.getHora();
+            } else if (!esDeHoy && !marcadoEntradaEnSesion) {
+                // Solo si la respuesta explícita del servidor es de un día anterior (ayer o antes)
+                SplashStorage.limpiarEntradaHoy(requireContext(), idUsuarioActual);
+            }
+        }
+
+        boolean yaIngreso = marcadoEntradaEnSesion || yaRegistroIngresoHoy();
+
+        binding.btnMarcarEntrada.setEnabled(!yaIngreso);
+        binding.btnMarcarEntrada.setText(yaIngreso ? "REGISTRADO" : "ENTRADA");
+        binding.btnMarcarSalida.setEnabled(true);
+        binding.btnMarcarSalida.setText("SALIDA");
+
+        if (binding.cardJustificacionContainer != null) {
+            binding.cardJustificacionContainer.setVisibility(yaIngreso ? View.GONE : View.VISIBLE);
+        }
+
+        if (yaIngreso) {
+            if (horaStr != null && !horaStr.trim().isEmpty() && !horaStr.contains("--:--")) {
+                String horaFormatted = formatearHoraAmPm(horaStr);
+                binding.tvEstadoHoy.setText("Última marca: Entrada a las " + horaFormatted + " (Lima)");
+                SplashStorage.guardarHoraEntradaHoy(requireContext(), idUsuarioActual, horaFormatted);
+            } else {
+                String hLocal = SplashStorage.obtenerHoraEntradaHoy(requireContext(), idUsuarioActual);
+                if (hLocal != null && !hLocal.trim().isEmpty()) {
+                    binding.tvEstadoHoy.setText("Última marca: Entrada a las " + hLocal + " (Lima)");
+                } else {
+                    binding.tvEstadoHoy.setText("Última marca: Entrada registrada hoy");
+                }
+            }
+        } else {
+            binding.tvEstadoHoy.setText("Sin marcas registradas hoy");
+        }
+    }
+
+    private String formatearHoraAmPm(String str) {
+        if (str == null || str.trim().isEmpty()) return "";
+        try {
+            String s = str.trim();
+            if (s.contains(" ")) {
+                String[] parts = s.split(" ");
+                if (parts.length > 1) s = parts[1];
+            }
+            if (s.length() >= 5) {
+                SimpleDateFormat inFormat = new SimpleDateFormat("HH:mm", LOCALE_PERU);
+                inFormat.setTimeZone(TIME_ZONE_LIMA);
+                SimpleDateFormat outFormat = new SimpleDateFormat("hh:mm a", LOCALE_PERU);
+                outFormat.setTimeZone(TIME_ZONE_LIMA);
+                Date date = inFormat.parse(s.substring(0, 5));
+                if (date != null) {
+                    return outFormat.format(date);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return str;
     }
 
     private void setBotonesEstado(boolean enabled, @Nullable String loadingText) {
         if (binding == null) return;
-        binding.btnMarcarEntrada.setEnabled(enabled);
-        if (binding.btnMarcarRefrigerio != null) binding.btnMarcarRefrigerio.setEnabled(enabled);
-        binding.btnMarcarSalida.setEnabled(enabled);
+
+        if (binding.pbLoadingAsistencia != null) {
+            binding.pbLoadingAsistencia.setVisibility(!enabled ? View.VISIBLE : View.GONE);
+        }
 
         if (!enabled && loadingText != null) {
+            binding.btnMarcarEntrada.setEnabled(false);
+            binding.btnMarcarSalida.setEnabled(false);
             if ("INGRESO".equalsIgnoreCase(tipoMarcaActual)) {
                 binding.btnMarcarEntrada.setText(loadingText);
-            } else if ("REFRIGERIO".equalsIgnoreCase(tipoMarcaActual) && binding.btnMarcarRefrigerio != null) {
-                binding.btnMarcarRefrigerio.setText(loadingText);
             } else if ("SALIDA".equalsIgnoreCase(tipoMarcaActual)) {
                 binding.btnMarcarSalida.setText(loadingText);
             }
         } else {
-            binding.btnMarcarEntrada.setText("Marcar Entrada");
-            if (binding.btnMarcarRefrigerio != null) binding.btnMarcarRefrigerio.setText("Marcar Refrigerio");
-            binding.btnMarcarSalida.setText("Marcar Salida");
+            boolean yaIngreso = yaRegistroIngresoHoy();
+            binding.btnMarcarEntrada.setEnabled(!yaIngreso);
+            binding.btnMarcarEntrada.setText(yaIngreso ? "REGISTRADO" : "ENTRADA");
+            binding.btnMarcarSalida.setEnabled(true);
+            binding.btnMarcarSalida.setText("SALIDA");
+
+            // Ocultar sección de justificación si ya registró su ingreso
+            if (binding.cardJustificacionContainer != null) {
+                binding.cardJustificacionContainer.setVisibility(yaIngreso ? View.GONE : View.VISIBLE);
+            }
         }
     }
 
@@ -533,6 +768,24 @@ public class AsistenciasFragment extends Fragment {
         binding.tvEstadoHoy.setText("Última marca: " + tipoTexto + " a las " + horaCorta + " (Lima)");
     }
 
+    private String calcularEstadoSegunHora(String fechaHoraStr) {
+        try {
+            if (fechaHoraStr != null && fechaHoraStr.length() >= 19) {
+                String horaOnly = fechaHoraStr.substring(11, 19);
+                if (horaOnly.compareTo("10:30:00") > 0) {
+                    return "FALTA";
+                } else if (horaOnly.compareTo("09:40:00") > 0) {
+                    return "TARDANZA";
+                } else {
+                    return "A_TIEMPO";
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "A_TIEMPO";
+    }
+
     private void guardarMarcaEnLocal(int idUsuario, String tipo, String fechaHora, double lat, double lng, String sede) {
         if (!isAdded()) return;
         RegistroAsistencia reg = new RegistroAsistencia();
@@ -541,7 +794,7 @@ public class AsistenciasFragment extends Fragment {
         reg.setNombres(nombreCompleto != null && !nombreCompleto.isEmpty() ? nombreCompleto : "Colaborador " + idUsuario);
         reg.setTipo(tipo);
         reg.setSede(sede);
-        reg.setEstado("A_TIEMPO");
+        reg.setEstado(calcularEstadoSegunHora(fechaHora));
         reg.setHoraMarcado(fechaHora);
         reg.setFechaHoraServidor(fechaHora);
         reg.setLatitud(lat);
@@ -610,6 +863,9 @@ public class AsistenciasFragment extends Fragment {
 
     private void enviarJustificacion(String motivo, String detalle) {
         int idUsuario = SplashStorage.obtenerUsuarioId(requireContext());
+        if (idUsuario <= 0) {
+            idUsuario = 1;
+        }
         SimpleDateFormat dateSdf = new SimpleDateFormat("yyyy-MM-dd", LOCALE_PERU);
         dateSdf.setTimeZone(TIME_ZONE_LIMA);
         String fechaHoy = dateSdf.format(new Date());
@@ -620,33 +876,35 @@ public class AsistenciasFragment extends Fragment {
             binding.btnAbrirJustificacionBS.setEnabled(false);
         }
 
-        // Guardar justificación localmente para vincular de inmediato
-        SplashStorage.guardarJustificacionLocal(requireContext(), idUsuario, motivo, detalle, fotoSustentoBase64);
+        mostrarResumenJustificacion(motivo, detalle);
+        viewModel.registrarJustificacion(request, requireContext());
+    }
 
-        if (apiService != null) {
-            apiService.registrarJustificacion(request).enqueue(new Callback<ApiResponse<Object>>() {
-                @Override
-                public void onResponse(@NonNull Call<ApiResponse<Object>> call, @NonNull Response<ApiResponse<Object>> response) {
-                    if (!isAdded() || binding == null) return;
-                    if (binding.btnAbrirJustificacionBS != null) binding.btnAbrirJustificacionBS.setEnabled(true);
+    private void mostrarDialogoExitoMinimal(String titulo, String mensaje) {
+        if (!isAdded() || getContext() == null) return;
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_confirmacion_minimal, null);
 
-                    mostrarResumenJustificacion(motivo, detalle);
-                    Toast.makeText(getContext(), "Justificación enviada correctamente al administrador", Toast.LENGTH_LONG).show();
-                    limpiarFormularioJustificacion();
-                }
+        TextView tvTitle = dialogView.findViewById(R.id.tvDialogTitle);
+        TextView tvMessage = dialogView.findViewById(R.id.tvDialogMessage);
+        View btnEntendido = dialogView.findViewById(R.id.btnEntendido);
 
-                @Override
-                public void onFailure(@NonNull Call<ApiResponse<Object>> call, @NonNull Throwable t) {
-                    if (!isAdded() || binding == null) return;
-                    if (binding.btnAbrirJustificacionBS != null) binding.btnAbrirJustificacionBS.setEnabled(true);
+        if (tvTitle != null) tvTitle.setText(titulo);
+        if (tvMessage != null) tvMessage.setText(mensaje);
 
-                    // fallback local para la UI
-                    mostrarResumenJustificacion(motivo, detalle);
-                    Toast.makeText(getContext(), "Justificación registrada localmente", Toast.LENGTH_LONG).show();
-                    limpiarFormularioJustificacion();
-                }
-            });
+        androidx.appcompat.app.AlertDialog dialog = new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setView(dialogView)
+                .setCancelable(true)
+                .create();
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         }
+
+        if (btnEntendido != null) {
+            btnEntendido.setOnClickListener(v -> dialog.dismiss());
+        }
+
+        dialog.show();
     }
 
     private void mostrarResumenJustificacion(String motivo, String detalle) {
