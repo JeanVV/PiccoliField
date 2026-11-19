@@ -305,8 +305,8 @@ public class AsistenciasFragment extends Fragment {
     private void calcularDistanciaGeocerca() {
         if (binding == null || !isAdded()) return;
 
-        double latSede = -6.7711982;
-        double lngSede = -79.8385571;
+        double latSede = -6.77137;
+        double lngSede = -79.84088;
 
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -532,9 +532,9 @@ public class AsistenciasFragment extends Fragment {
                         return;
                     }
 
-                    // Validación de Geocerca (Radio máximo 100m - USAT Chiclayo)
-                    double latSede = -6.7711982;
-                    double lngSede = -79.8385571;
+                    // Validación de Geocerca (Radio máximo 100m - Sede Central Chiclayo BD)
+                    double latSede = -6.77137;
+                    double lngSede = -79.84088;
                     float radioMaximoMetros = 100f;
 
                     float[] results = new float[1];

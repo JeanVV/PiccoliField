@@ -500,8 +500,8 @@ public class DetalleAsistenciaFragment extends Fragment {
                 double lng = registro.getLongitud();
 
                 if (lat == 0.0 && lng == 0.0) {
-                    lat = -6.7714;
-                    lng = -79.8409;
+                    lat = -6.77137;
+                    lng = -79.84088;
                 }
 
                 LatLng ubicacion = new LatLng(lat, lng);

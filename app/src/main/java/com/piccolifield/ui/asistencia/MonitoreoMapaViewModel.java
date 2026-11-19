@@ -54,8 +54,8 @@ public class MonitoreoMapaViewModel extends ViewModel {
     }
 
     private void inicializarSedeAsignada() {
-        // Sede por defecto: Sede Principal Chiclayo
-        SedeInfo sede = new SedeInfo("Sede Principal Chiclayo - Piccoli Cocktail", -6.7711982, -79.8385571, 100f);
+        // Sede por defecto: Sede Central Chiclayo (Coordenadas de MySQL BD)
+        SedeInfo sede = new SedeInfo("Sede Principal Chiclayo - Piccoli Cocktail", -6.77137, -79.84088, 100f);
         sedeAsignada.setValue(sede);
     }
 

@@ -62,8 +62,8 @@ public class MapaFragment extends Fragment {
     private ApiService apiService;
     private RecentPersonnelAdapter listAdapter;
 
-    private double latSede = -6.7711982;
-    private double lngSede = -79.8385571;
+    private double latSede = -6.77137;
+    private double lngSede = -79.84088;
     private String nombreSede = "Sede Principal Chiclayo - Piccoli Cocktail";
     private float radioGeocerca = 100f;
     private boolean esAdmin = false;
