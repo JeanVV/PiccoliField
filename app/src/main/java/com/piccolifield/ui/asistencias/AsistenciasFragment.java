@@ -78,6 +78,11 @@ public class AsistenciasFragment extends Fragment {
     private String tipoMarcaPendiente;
     private boolean marcadoEntradaEnSesion = false;
 
+    private double latSedeDinamica = -6.760481;
+    private double lngSedeDinamica = -79.863352;
+    private float radioSedeDinamica = 2900f;
+    private String nombreSedeDinamica = "Sede Principal Chiclayo";
+
     // Referencias para actualizar el preview en la ventana emergente / BottomSheetDialog
     private ImageView currentDialogIvPreview;
     private View currentDialogLayoutPreview;
@@ -145,6 +150,22 @@ public class AsistenciasFragment extends Fragment {
             }
             actualizarEstadoSegunUltimaMarca(ultima);
         });
+
+        // Cargar Sede Principal Dinámica desde BD MySQL
+        viewModel.getSedePrincipalLiveData().observe(getViewLifecycleOwner(), resource -> {
+            if (!isAdded() || binding == null || resource == null) return;
+            if (resource.status == com.piccolifield.data.remote.Resource.Status.SUCCESS && resource.data != null) {
+                com.piccolifield.data.model.SedeDto sede = resource.data;
+                this.latSedeDinamica = sede.getLatitud();
+                this.lngSedeDinamica = sede.getLongitud();
+                this.radioSedeDinamica = sede.getRadioGeocerca();
+                if (sede.getSede() != null && !sede.getSede().isEmpty()) {
+                    this.nombreSedeDinamica = sede.getSede();
+                }
+                calcularDistanciaGeocerca();
+            }
+        });
+        viewModel.cargarSedePrincipal();
 
         // Cargar última asistencia guardada en la base de datos para el usuario activo
         int idUserStart = SplashStorage.obtenerUsuarioId(requireContext());
@@ -305,8 +326,9 @@ public class AsistenciasFragment extends Fragment {
     private void calcularDistanciaGeocerca() {
         if (binding == null || !isAdded()) return;
 
-        double latSede = -6.77137;
-        double lngSede = -79.84088;
+        double latSede = latSedeDinamica;
+        double lngSede = lngSedeDinamica;
+        float radioMaximoMetros = radioSedeDinamica;
 
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -330,7 +352,7 @@ public class AsistenciasFragment extends Fragment {
                     android.location.Location.distanceBetween(latSede, lngSede, userLat, userLng, results);
                     int distanciaMetros = Math.round(results[0]);
 
-                    if (distanciaMetros <= 100) {
+                    if (distanciaMetros <= radioMaximoMetros) {
                         binding.tvDistanciaSede.setText("Distancia: " + distanciaMetros + " m (En zona)");
                         binding.tvGeofenceBadge.setText("EN RANGO");
                         binding.tvGeofenceBadge.setBackgroundResource(R.drawable.bg_badge_on_time);
@@ -532,10 +554,10 @@ public class AsistenciasFragment extends Fragment {
                         return;
                     }
 
-                    // Validación de Geocerca (Radio máximo 100m - Sede Central Chiclayo BD)
-                    double latSede = -6.77137;
-                    double lngSede = -79.84088;
-                    float radioMaximoMetros = 100f;
+                    // Validación de Geocerca (Lectura Dinámica desde BD MySQL)
+                    double latSede = latSedeDinamica;
+                    double lngSede = lngSedeDinamica;
+                    float radioMaximoMetros = radioSedeDinamica;
 
                     float[] results = new float[1];
                     android.location.Location.distanceBetween(latSede, lngSede, location.getLatitude(), location.getLongitude(), results);
@@ -635,7 +657,7 @@ public class AsistenciasFragment extends Fragment {
         fullSdf.setTimeZone(TIME_ZONE_LIMA);
         String fechaHora = fullSdf.format(new Date());
 
-        String sede = "Sede Chiclayo Principal";
+        String sede = nombreSedeDinamica != null ? nombreSedeDinamica : "Sede Chiclayo Principal";
 
         MarcarAsistenciaRequest request = new MarcarAsistenciaRequest();
         request.setIdUsuario(idUsuario);

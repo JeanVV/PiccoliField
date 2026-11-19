@@ -13,6 +13,7 @@ import com.piccolifield.data.model.TiposIncidenciaResponse;
 import com.piccolifield.data.model.ReasignarImpulsadorResponse;
 import com.piccolifield.data.model.RegistroAsistencia;
 import com.piccolifield.data.model.ResumenDashboard;
+import com.piccolifield.data.model.SedeDto;
 import com.piccolifield.data.model.TurnoHistorial;
 import com.piccolifield.data.model.Usuario;
 import com.piccolifield.data.model.VendedorDetalle;
@@ -66,6 +67,12 @@ public interface ApiService {
     // =============================================================
     @GET("/")
     Call<ResponseBody> pingApi();
+
+    @GET("sedes")
+    Call<ApiResponse<List<SedeDto>>> obtenerSedes();
+
+    @GET("sedes/{id}")
+    Call<ApiResponse<SedeDto>> obtenerSedePorId(@Path("id") int idSede);
 
     @POST("auth/login")
     Call<ResponseBody> iniciarSesion(@Body LoginRequest request);

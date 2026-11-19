@@ -10,6 +10,7 @@ import com.piccolifield.data.local.AppDatabase;
 import com.piccolifield.data.local.entity.AsistenciaOfflineEntity;
 import com.piccolifield.data.local.sync.SyncWorker;
 import com.piccolifield.data.model.RegistroAsistencia;
+import com.piccolifield.data.model.SedeDto;
 import com.piccolifield.data.model.TurnoHistorial;
 import com.piccolifield.data.remote.Resource;
 import com.piccolifield.data.remote.RetrofitClient;
@@ -289,6 +290,52 @@ public class AsistenciaRepository {
             @Override
             public void onFailure(@NonNull Call<ApiResponse<List<TurnoHistorial>>> call, @NonNull Throwable t) {
                 result.setValue(Resource.error("Error al obtener historial", null));
+            }
+        });
+
+        return result;
+    }
+
+    // 8. Obtener Sede Principal Dinámica desde BD MySQL
+    public LiveData<Resource<SedeDto>> obtenerSedePrincipal() {
+        MutableLiveData<Resource<SedeDto>> result = new MutableLiveData<>();
+        result.setValue(Resource.loading(null));
+
+        apiService.obtenerSedes().enqueue(new Callback<ApiResponse<List<SedeDto>>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<List<SedeDto>>> call, @NonNull Response<ApiResponse<List<SedeDto>>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null && !response.body().getData().isEmpty()) {
+                    List<SedeDto> sedes = response.body().getData();
+                    SedeDto sedeSeleccionada = sedes.get(0);
+                    for (SedeDto s : sedes) {
+                        if (s.getIdSede() == 1 || (s.getSede() != null && s.getSede().toLowerCase().contains("central"))) {
+                            sedeSeleccionada = s;
+                            break;
+                        }
+                    }
+                    result.setValue(Resource.success(sedeSeleccionada));
+                } else {
+                    apiService.obtenerSedePorId(1).enqueue(new Callback<ApiResponse<SedeDto>>() {
+                        @Override
+                        public void onResponse(@NonNull Call<ApiResponse<SedeDto>> call, @NonNull Response<ApiResponse<SedeDto>> responseSingle) {
+                            if (responseSingle.isSuccessful() && responseSingle.body() != null && responseSingle.body().getData() != null) {
+                                result.setValue(Resource.success(responseSingle.body().getData()));
+                            } else {
+                                result.setValue(Resource.error("No se pudo cargar la sede de BD", null));
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(@NonNull Call<ApiResponse<SedeDto>> call, @NonNull Throwable t) {
+                            result.setValue(Resource.error("Error al obtener sede", null));
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<List<SedeDto>>> call, @NonNull Throwable t) {
+                result.setValue(Resource.error("Error de red al consultar sedes", null));
             }
         });
 

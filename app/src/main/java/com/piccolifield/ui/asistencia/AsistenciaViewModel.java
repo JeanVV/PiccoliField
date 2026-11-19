@@ -27,6 +27,7 @@ public class AsistenciaViewModel extends ViewModel {
     private final MutableLiveData<Resource<String>> revisionJustificacionLiveData = new MutableLiveData<>();
     private final MutableLiveData<Resource<RegistroAsistencia>> justificacionUsuarioLiveData = new MutableLiveData<>();
     private final MutableLiveData<Resource<List<TurnoHistorial>>> historialTurnosLiveData = new MutableLiveData<>();
+    private final MutableLiveData<Resource<com.piccolifield.data.model.SedeDto>> sedePrincipalLiveData = new MutableLiveData<>();
 
     public AsistenciaViewModel() {
         this.repository = new AsistenciaRepository();
@@ -34,6 +35,19 @@ public class AsistenciaViewModel extends ViewModel {
 
     public AsistenciaViewModel(AsistenciaRepository repository) {
         this.repository = repository;
+    }
+
+    public LiveData<Resource<com.piccolifield.data.model.SedeDto>> getSedePrincipalLiveData() {
+        return sedePrincipalLiveData;
+    }
+
+    public void cargarSedePrincipal() {
+        LiveData<Resource<com.piccolifield.data.model.SedeDto>> res = repository.obtenerSedePrincipal();
+        res.observeForever(resource -> {
+            if (resource != null) {
+                sedePrincipalLiveData.setValue(resource);
+            }
+        });
     }
 
     public LiveData<AsistenciaUiState> getUiState() {
