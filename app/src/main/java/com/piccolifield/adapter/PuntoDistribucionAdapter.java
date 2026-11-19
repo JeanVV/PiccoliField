@@ -208,6 +208,13 @@ public class PuntoDistribucionAdapter extends RecyclerView.Adapter<PuntoDistribu
                                               @NonNull Throwable t) {
                         }
                     });
+        } else if (idPdv > 0) {
+            descargarFotoPdv(
+                    iv,
+                    idPdv,
+                    0,
+                    com.piccolifield.data.remote.RetrofitClient.BASE_SERVER_URL + "api/puntos-venta/" + idPdv + "/foto"
+            );
         }
     }
 
@@ -230,12 +237,23 @@ public class PuntoDistribucionAdapter extends RecyclerView.Adapter<PuntoDistribu
                                         mostrarBitmapEnItem(iv, bmp);
                                     }
                                 });
+                                return;
                             }
+                        }
+                        String pdvEndpoint = com.piccolifield.data.remote.RetrofitClient.BASE_SERVER_URL
+                                + "api/puntos-venta/" + idPdv + "/foto";
+                        if (idPdv > 0 && !pdvEndpoint.equals(url)) {
+                            descargarFotoPdv(iv, idPdv, idProspectoOrigen, pdvEndpoint);
                         }
                     }
 
                     @Override
                     public void onFailure(@NonNull retrofit2.Call<okhttp3.ResponseBody> call, @NonNull Throwable t) {
+                        String pdvEndpoint = com.piccolifield.data.remote.RetrofitClient.BASE_SERVER_URL
+                                + "api/puntos-venta/" + idPdv + "/foto";
+                        if (idPdv > 0 && !pdvEndpoint.equals(url)) {
+                            descargarFotoPdv(iv, idPdv, idProspectoOrigen, pdvEndpoint);
+                        }
                     }
                 });
     }

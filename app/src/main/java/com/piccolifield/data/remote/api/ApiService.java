@@ -88,11 +88,11 @@ public interface ApiService {
     @PUT("perfil/foto")
     Call<ApiResponse<Usuario>> actualizarFotoMiPerfil(@Body ActualizarFotoUsuarioRequest request);
 
-    @POST("perfil/foto")
+    @PUT("perfil/foto")
     Call<ApiResponse<Usuario>> registrarFotoMiPerfil(@Body ActualizarFotoUsuarioRequest request);
 
     @Multipart
-    @POST("perfil/foto")
+    @PUT("perfil/foto")
     Call<ApiResponse<Usuario>> subirFotoMiPerfilMultipart(@Part MultipartBody.Part foto);
 
     @GET("usuarios/{id}/foto")
@@ -104,14 +104,14 @@ public interface ApiService {
             @Body ActualizarFotoUsuarioRequest request
     );
 
-    @POST("usuarios/{id}/foto")
+    @PUT("usuarios/{id}/foto")
     Call<ApiResponse<Usuario>> registrarFotoUsuario(
             @Path("id") int idUsuario,
             @Body ActualizarFotoUsuarioRequest request
     );
 
     @Multipart
-    @POST("usuarios/{id}/foto")
+    @PUT("usuarios/{id}/foto")
     Call<ApiResponse<Usuario>> subirFotoUsuarioMultipart(
             @Path("id") int idUsuario,
             @Part MultipartBody.Part foto
@@ -346,6 +346,26 @@ public interface ApiService {
             @Part("longitud") okhttp3.RequestBody longitud,
             @Part("idDistrito") okhttp3.RequestBody idDistrito,
             @Part("idUsuario") okhttp3.RequestBody idUsuario,
+            @Part MultipartBody.Part foto
+    );
+
+    @GET("prospectos/{id}/foto")
+    Call<ResponseBody> obtenerFotoProspecto(@Path("id") int id);
+
+    @Multipart
+    @POST("prospectos/{id}/foto")
+    Call<ApiResponse<Object>> subirFotoProspecto(
+            @Path("id") int id,
+            @Part MultipartBody.Part foto
+    );
+
+    @GET("puntos-venta/{id}/foto")
+    Call<ResponseBody> obtenerFotoPuntoVenta(@Path("id") int id);
+
+    @Multipart
+    @POST("puntos-venta/{id}/foto")
+    Call<ApiResponse<Object>> subirFotoPuntoVenta(
+            @Path("id") int id,
             @Part MultipartBody.Part foto
     );
 

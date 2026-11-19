@@ -157,23 +157,23 @@ public class NuevoPuntoDistribucionFragment extends Fragment {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
 
         String[] tiposLocal = {"Bodega (Minorista)", "Minimarket (Minorista)", "Licorería (Minorista)", "Distribuidora (Mayorista)", "Supermercado (Mayorista)"};
-        ArrayAdapter<String> adapterTipo = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, tiposLocal);
-        adapterTipo.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<String> adapterTipo = new ArrayAdapter<>(requireContext(), R.layout.item_spinner_oscuro, tiposLocal);
+        adapterTipo.setDropDownViewResource(R.layout.item_spinner_dropdown_oscuro);
         spCriterioNegocio.setAdapter(adapterTipo);
 
         String[] potenciales = {"MEDIO", "ALTO", "BAJO"};
-        ArrayAdapter<String> adapterPotencial = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, potenciales);
-        adapterPotencial.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<String> adapterPotencial = new ArrayAdapter<>(requireContext(), R.layout.item_spinner_oscuro, potenciales);
+        adapterPotencial.setDropDownViewResource(R.layout.item_spinner_dropdown_oscuro);
         spPotencialProspecto.setAdapter(adapterPotencial);
 
         String[] distritos = {"Chiclayo", "José Leonardo Ortiz", "La Victoria", "Pimentel", "Lambayeque", "Miraflores", "San Isidro", "Lima Cercado"};
-        ArrayAdapter<String> adapterDistrito = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, distritos);
-        adapterDistrito.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<String> adapterDistrito = new ArrayAdapter<>(requireContext(), R.layout.item_spinner_oscuro, distritos);
+        adapterDistrito.setDropDownViewResource(R.layout.item_spinner_dropdown_oscuro);
         spDistritoPunto.setAdapter(adapterDistrito);
 
         String[] estados = {"NUEVO"};
-        ArrayAdapter<String> adapterEstado = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, estados);
-        adapterEstado.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<String> adapterEstado = new ArrayAdapter<>(requireContext(), R.layout.item_spinner_oscuro, estados);
+        adapterEstado.setDropDownViewResource(R.layout.item_spinner_dropdown_oscuro);
         spEstadoPunto.setAdapter(adapterEstado);
 
         btnBackNuevoPunto.setOnClickListener(v -> cerrarFragment());
@@ -536,6 +536,13 @@ public class NuevoPuntoDistribucionFragment extends Fragment {
                 if (pbNuevoPunto != null) pbNuevoPunto.setVisibility(View.GONE);
 
                 if (response.isSuccessful()) {
+                    int idCreado = (response.body() != null && response.body().getData() != null)
+                            ? response.body().getData().getId() : 0;
+                    if (idCreado > 0 && fotoFachadaBytes != null && fotoFachadaBytes.length > 0) {
+                        UserPhotoLoader.guardarFotoProspectoBytesLocal(requireContext(), idCreado, fotoFachadaBytes);
+                        subirFotoProspectoLuego(apiService, idCreado);
+                        return;
+                    }
                     Toast.makeText(requireContext(), "Prospecto registrado con estado NUEVO", Toast.LENGTH_SHORT).show();
                     if (onPuntoRegistrado != null) {
                         onPuntoRegistrado.run();
@@ -563,6 +570,40 @@ public class NuevoPuntoDistribucionFragment extends Fragment {
                 Toast.makeText(requireContext(), "Error de red al registrar prospecto: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    private void subirFotoProspectoLuego(ApiService apiService, int idProspecto) {
+        try {
+            File tempFile = new File(requireContext().getCacheDir(), "prospecto_foto_" + idProspecto + ".jpg");
+            try (java.io.FileOutputStream fos = new java.io.FileOutputStream(tempFile)) {
+                fos.write(fotoFachadaBytes);
+            }
+            okhttp3.RequestBody fileBody = okhttp3.RequestBody.create(okhttp3.MediaType.parse("image/jpeg"), tempFile);
+            okhttp3.MultipartBody.Part fotoPart = okhttp3.MultipartBody.Part.createFormData("foto", tempFile.getName(), fileBody);
+            apiService.subirFotoProspecto(idProspecto, fotoPart).enqueue(new Callback<ApiResponse<Object>>() {
+                @Override
+                public void onResponse(@NonNull Call<ApiResponse<Object>> call, @NonNull Response<ApiResponse<Object>> response) {
+                    if (!isAdded()) return;
+                    Toast.makeText(requireContext(), "Prospecto y foto registrados con estado NUEVO", Toast.LENGTH_SHORT).show();
+                    if (onPuntoRegistrado != null) onPuntoRegistrado.run();
+                    cerrarFragment();
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<ApiResponse<Object>> call, @NonNull Throwable t) {
+                    if (!isAdded()) return;
+                    Toast.makeText(requireContext(), "Prospecto registrado con estado NUEVO", Toast.LENGTH_SHORT).show();
+                    if (onPuntoRegistrado != null) onPuntoRegistrado.run();
+                    cerrarFragment();
+                }
+            });
+        } catch (Exception e) {
+            if (isAdded()) {
+                Toast.makeText(requireContext(), "Prospecto registrado con estado NUEVO", Toast.LENGTH_SHORT).show();
+                if (onPuntoRegistrado != null) onPuntoRegistrado.run();
+                cerrarFragment();
+            }
+        }
     }
 
     private void cerrarFragment() {

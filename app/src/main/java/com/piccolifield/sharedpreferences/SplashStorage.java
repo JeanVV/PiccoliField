@@ -94,6 +94,39 @@ public class SplashStorage {
         editor.apply();
     }
 
+    public static void guardarCredencialesRecordadas(Context context, boolean recordar, String email, String password) {
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return;
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("remember_me", recordar);
+        if (recordar) {
+            editor.putString("remember_email", email != null ? email : "");
+            editor.putString("remember_password", password != null ? password : "");
+        } else {
+            editor.remove("remember_email");
+            editor.remove("remember_password");
+        }
+        editor.apply();
+    }
+
+    public static boolean isRecordarmeActivo(Context context) {
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return false;
+        return sharedPreferences.getBoolean("remember_me", false);
+    }
+
+    public static String obtenerEmailRecordado(Context context) {
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return "";
+        return sharedPreferences.getString("remember_email", "");
+    }
+
+    public static String obtenerPasswordRecordado(Context context) {
+        SharedPreferences sharedPreferences = getSharedPreferences(context);
+        if (sharedPreferences == null) return "";
+        return sharedPreferences.getString("remember_password", "");
+    }
+
     public static void guardarToken(Context context, String token) {
         SharedPreferences sharedPreferences = getSharedPreferences(context);
         if (sharedPreferences == null) return;

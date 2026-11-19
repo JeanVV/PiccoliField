@@ -389,6 +389,11 @@ public class DetallePuntoDistribucionActivity extends AppCompatActivity {
                         public void onFailure(@NonNull Call<ApiResponse<com.piccolifield.model.Prospecto>> call, @NonNull Throwable t) {
                         }
                     });
+        } else if (idPuntoVenta > 0) {
+            descargarHeroFotoUrl(
+                    RetrofitClient.BASE_SERVER_URL + "api/puntos-venta/" + idPuntoVenta + "/foto",
+                    0
+            );
         }
     }
 
@@ -407,12 +412,24 @@ public class DetallePuntoDistribucionActivity extends AppCompatActivity {
                                     com.piccolifield.util.UserPhotoLoader.guardarFotoProspectoLocal(DetallePuntoDistribucionActivity.this, idProspectoOrigen, bmp);
                                 }
                                 ivHeroPuntoFoto.post(() -> ivHeroPuntoFoto.setImageBitmap(bmp));
+                                return;
                             }
+                        }
+                        String pdvEndpoint = RetrofitClient.BASE_SERVER_URL
+                                + "api/puntos-venta/" + idPuntoVenta + "/foto";
+                        if (idPuntoVenta > 0 && !pdvEndpoint.equals(url)) {
+                            descargarHeroFotoUrl(pdvEndpoint, idProspectoOrigen);
                         }
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<okhttp3.ResponseBody> call, @NonNull Throwable t) {
+                        if (isFinishing() || isDestroyed()) return;
+                        String pdvEndpoint = RetrofitClient.BASE_SERVER_URL
+                                + "api/puntos-venta/" + idPuntoVenta + "/foto";
+                        if (idPuntoVenta > 0 && !pdvEndpoint.equals(url)) {
+                            descargarHeroFotoUrl(pdvEndpoint, idProspectoOrigen);
+                        }
                     }
                 });
     }

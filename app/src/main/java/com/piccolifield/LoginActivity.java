@@ -53,6 +53,18 @@ public class LoginActivity extends AppCompatActivity {
             return insets;
         });
 
+        if (SplashStorage.isRecordarmeActivo(this)) {
+            binding.cbRecordarme.setChecked(true);
+            binding.etUser.setText(SplashStorage.obtenerEmailRecordado(this));
+            binding.etPassword.setText(SplashStorage.obtenerPasswordRecordado(this));
+        }
+
+        binding.cbRecordarme.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (!isChecked) {
+                SplashStorage.guardarCredencialesRecordadas(LoginActivity.this, false, "", "");
+            }
+        });
+
         binding.btnIniciarSesion.setOnClickListener(v -> realizarLogin());
     }
 
@@ -152,6 +164,12 @@ public class LoginActivity extends AppCompatActivity {
                                 }
                             }
 
+                            SplashStorage.guardarCredencialesRecordadas(
+                                    LoginActivity.this,
+                                    binding.cbRecordarme.isChecked(),
+                                    email,
+                                    password
+                            );
                             SplashStorage.registrarSesionActiva(LoginActivity.this);
 
                             Toast.makeText(LoginActivity.this, "¡Bienvenido a Piccoli!", Toast.LENGTH_SHORT).show();

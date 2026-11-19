@@ -146,7 +146,7 @@
                     android:textSize="15sp" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Opciones: Recordarme & Olvidaste tu contraseña -->
+            <!-- Opción: Recordarme -->
             <com.google.android.material.checkbox.MaterialCheckBox
                 android:id="@+id/cbRecordarme"
                 android:layout_width="wrap_content"
@@ -159,20 +159,6 @@
                 app:layout_constraintBottom_toTopOf="@id/btnIniciarSesion"
                 app:layout_constraintStart_toStartOf="@id/tilPassword"
                 app:layout_constraintTop_toBottomOf="@id/tilPassword" />
-
-            <TextView
-                android:id="@+id/tvOlvidaste"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:focusable="true"
-                android:text="@string/olvidaste_contrasena"
-                android:textColor="@color/caramelo"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="@id/cbRecordarme"
-                app:layout_constraintEnd_toEndOf="@id/tilPassword"
-                app:layout_constraintTop_toTopOf="@id/cbRecordarme" />
 
             <!-- Botón Iniciar Sesión -->
             <com.google.android.material.button.MaterialButton

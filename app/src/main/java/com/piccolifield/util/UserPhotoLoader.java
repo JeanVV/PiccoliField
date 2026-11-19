@@ -1186,46 +1186,8 @@ public class UserPhotoLoader {
             final Bitmap finalBitmap = scaled;
             final int targetUserId = idUsuario > 0 ? idUsuario : resolveMyUserId(context);
 
-            ActualizarFotoUsuarioRequest request = new ActualizarFotoUsuarioRequest(dataUri);
-            ApiService apiService = RetrofitClient.createService();
-
-            Call<ApiResponse<Usuario>> call = esMiPerfil
-                    ? apiService.actualizarFotoMiPerfil(request)
-                    : apiService.actualizarFotoUsuario(targetUserId, request);
-
-            call.enqueue(new Callback<ApiResponse<Usuario>>() {
-                @Override
-                public void onResponse(@NonNull Call<ApiResponse<Usuario>> call, @NonNull Response<ApiResponse<Usuario>> response) {
-                    if (response.isSuccessful() && response.body() != null && response.body().isStatus()) {
-                        Usuario data = response.body().getData();
-                        String nuevaRuta = (data != null && data.getFotoPerfil() != null && !data.getFotoPerfil().isEmpty())
-                                ? data.getFotoPerfil()
-                                : dataUri;
-                        int resolvedId = (data != null && data.getIdUsuario() > 0) ? data.getIdUsuario() : targetUserId;
-
-                        guardarEnCaches(context, resolvedId, esMiPerfil, finalBitmap, dataUri, nuevaRuta);
-
-                        if (esMiPerfil && resolvedId > 0) {
-                            apiService.actualizarFotoUsuario(resolvedId, request).enqueue(new Callback<ApiResponse<Usuario>>() {
-                                @Override public void onResponse(@NonNull Call<ApiResponse<Usuario>> c, @NonNull Response<ApiResponse<Usuario>> r) {}
-                                @Override public void onFailure(@NonNull Call<ApiResponse<Usuario>> c, @NonNull Throwable t) {}
-                            });
-                        }
-
-                        String msg = response.body().getMessage() != null
-                                ? response.body().getMessage()
-                                : "Foto de perfil actualizada correctamente";
-                        listener.onSuccess(finalBitmap, nuevaRuta, msg);
-                    } else {
-                        intentarSubidaMultipart(context, targetUserId, jpegBytes, dataUri, finalBitmap, esMiPerfil, listener);
-                    }
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<ApiResponse<Usuario>> call, @NonNull Throwable t) {
-                    intentarSubidaMultipart(context, targetUserId, jpegBytes, dataUri, finalBitmap, esMiPerfil, listener);
-                }
-            });
+            // Priorizar subida multipart para que la API guarde el archivo físico en uploads/perfiles/
+            intentarSubidaMultipartPrimero(context, targetUserId, jpegBytes, dataUri, finalBitmap, esMiPerfil, listener);
 
         } catch (Exception e) {
             Log.e(TAG, "Error preparando foto para subir", e);
@@ -1233,7 +1195,7 @@ public class UserPhotoLoader {
         }
     }
 
-    private static void intentarSubidaMultipart(
+    private static void intentarSubidaMultipartPrimero(
             Context context,
             int idUsuario,
             byte[] jpegBytes,
@@ -1252,7 +1214,7 @@ public class UserPhotoLoader {
             MultipartBody.Part bodyPart = MultipartBody.Part.createFormData("foto", tempFile.getName(), reqFile);
 
             ApiService apiService = RetrofitClient.createService();
-            Call<ApiResponse<Usuario>> call = (esMiPerfil && idUsuario <= 0)
+            Call<ApiResponse<Usuario>> call = esMiPerfil
                     ? apiService.subirFotoMiPerfilMultipart(bodyPart)
                     : (idUsuario > 0 ? apiService.subirFotoUsuarioMultipart(idUsuario, bodyPart) : apiService.subirFotoMiPerfilMultipart(bodyPart));
 
@@ -1272,34 +1234,41 @@ public class UserPhotoLoader {
                                 : "Foto de perfil actualizada correctamente";
                         listener.onSuccess(finalBitmap, nuevaRuta, msg);
                     } else if (esMiPerfil && idUsuario > 0) {
-                        apiService.actualizarFotoUsuario(idUsuario, new ActualizarFotoUsuarioRequest(dataUri)).enqueue(new Callback<ApiResponse<Usuario>>() {
+                        // Segundo intento multipart por /usuarios/{id}/foto antes de caer a JSON Base64
+                        apiService.subirFotoUsuarioMultipart(idUsuario, bodyPart).enqueue(new Callback<ApiResponse<Usuario>>() {
                             @Override
-                            public void onResponse(@NonNull Call<ApiResponse<Usuario>> c, @NonNull Response<ApiResponse<Usuario>> r) {
-                                if (r.isSuccessful() && r.body() != null) {
-                                    guardarEnCaches(context, idUsuario, true, finalBitmap, dataUri, dataUri);
-                                    listener.onSuccess(finalBitmap, dataUri, "Foto de perfil actualizada correctamente");
+                            public void onResponse(@NonNull Call<ApiResponse<Usuario>> c2, @NonNull Response<ApiResponse<Usuario>> r2) {
+                                if (r2.isSuccessful() && r2.body() != null) {
+                                    Usuario data = r2.body().getData();
+                                    String nuevaRuta = (data != null && data.getFotoPerfil() != null && !data.getFotoPerfil().isEmpty())
+                                            ? data.getFotoPerfil()
+                                            : dataUri;
+                                    guardarEnCaches(context, idUsuario, true, finalBitmap, dataUri, nuevaRuta);
+                                    listener.onSuccess(finalBitmap, nuevaRuta, "Foto de perfil actualizada correctamente");
                                 } else {
-                                    listener.onError("No se pudo actualizar la foto en el servidor (HTTP " + r.code() + ")");
+                                    listener.onError("El servidor rechazó el archivo físico (Multipart): HTTP " + r2.code());
                                 }
                             }
 
                             @Override
-                            public void onFailure(@NonNull Call<ApiResponse<Usuario>> c, @NonNull Throwable t) {
-                                listener.onError("Error de red al actualizar la foto: " + t.getMessage());
+                            public void onFailure(@NonNull Call<ApiResponse<Usuario>> c2, @NonNull Throwable t2) {
+                                listener.onError("Error de red en Multipart 2: " + t2.getMessage());
                             }
                         });
                     } else {
-                        listener.onError("No se pudo actualizar la foto en el servidor (HTTP " + response.code() + ")");
+                        String error = "Error HTTP " + response.code();
+                        try { if (response.errorBody() != null) error = response.errorBody().string(); } catch (Exception ignored) {}
+                        listener.onError("El servidor rechazó el archivo físico (Multipart): " + error);
                     }
                 }
 
                 @Override
                 public void onFailure(@NonNull Call<ApiResponse<Usuario>> call, @NonNull Throwable t) {
-                    listener.onError("Error de red al subir la foto: " + t.getMessage());
+                    listener.onError("Error de red al subir archivo físico: " + t.getMessage());
                 }
             });
         } catch (Exception e) {
-            listener.onError("Error al enviar archivo de foto: " + e.getMessage());
+            listener.onError("Excepción subiendo archivo: " + e.getMessage());
         }
     }
 
