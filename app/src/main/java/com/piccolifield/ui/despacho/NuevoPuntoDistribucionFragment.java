@@ -1,11 +1,19 @@
 package com.piccolifield.ui.despacho;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.provider.Settings;
 import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,7 +36,12 @@ import androidx.core.widget.ImageViewCompat;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
+import com.google.android.gms.tasks.CancellationTokenSource;
 import com.google.android.material.button.MaterialButton;
 import com.piccolifield.R;
 import com.piccolifield.data.remote.RetrofitClient;
@@ -56,6 +69,7 @@ public class NuevoPuntoDistribucionFragment extends Fragment {
     private MaterialButton btnCapturarGpsPunto, btnGuardarNuevoPunto, btnSeleccionarFotoProspecto;
     private TextView tvCoordenadasPunto, tvEstadoFotoProspecto;
     private ImageView btnBackNuevoPunto, ivFotoFachadaProspecto;
+    private android.widget.ProgressBar pbNuevoPunto;
 
     private FusedLocationProviderClient fusedLocationClient;
     private double latitudActual = -6.77140;
@@ -65,6 +79,11 @@ public class NuevoPuntoDistribucionFragment extends Fragment {
 
     private Uri cameraPhotoUri;
     private byte[] fotoFachadaBytes;
+    private final Handler gpsTimeoutHandler = new Handler(Looper.getMainLooper());
+    private Runnable gpsTimeoutRunnable;
+    private CancellationTokenSource gpsCancellationTokenSource;
+    private LocationCallback activeLocationCallback;
+    private boolean ubicacionResuelta = false;
 
     private final ActivityResultLauncher<String> requestCameraPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
@@ -72,6 +91,17 @@ public class NuevoPuntoDistribucionFragment extends Fragment {
                     abrirCamaraFachada();
                 } else {
                     Toast.makeText(getContext(), "Permiso de cámara requerido", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+    private final ActivityResultLauncher<String[]> requestLocationPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
+                Boolean fine = result.get(Manifest.permission.ACCESS_FINE_LOCATION);
+                Boolean coarse = result.get(Manifest.permission.ACCESS_COARSE_LOCATION);
+                if (Boolean.TRUE.equals(fine) || Boolean.TRUE.equals(coarse)) {
+                    capturarUbicacion();
+                } else {
+                    Toast.makeText(getContext(), "Permiso de ubicación requerido para obtener tus coordenadas", Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -122,6 +152,7 @@ public class NuevoPuntoDistribucionFragment extends Fragment {
         ivFotoFachadaProspecto = view.findViewById(R.id.ivFotoFachadaProspecto);
         tvEstadoFotoProspecto = view.findViewById(R.id.tvEstadoFotoProspecto);
         btnSeleccionarFotoProspecto = view.findViewById(R.id.btnSeleccionarFotoProspecto);
+        pbNuevoPunto = view.findViewById(R.id.pbNuevoPunto);
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
 
@@ -225,21 +256,151 @@ public class NuevoPuntoDistribucionFragment extends Fragment {
         }
     }
 
+    private boolean estaGpsActivo() {
+        LocationManager lm = (LocationManager) requireContext().getSystemService(Context.LOCATION_SERVICE);
+        return lm != null && lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    }
+
+    private void mostrarDialogoActivarGps() {
+        if (!isAdded()) return;
+        new AlertDialog.Builder(requireContext())
+                .setTitle("GPS desactivado")
+                .setMessage("El GPS del equipo está apagado. Actívalo para obtener tu latitud y longitud actual.")
+                .setPositiveButton("Activar GPS", (dialog, which) -> {
+                    startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    @SuppressLint("MissingPermission")
     private void capturarUbicacion() {
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1002);
-        } else {
-            fusedLocationClient.getLastLocation().addOnSuccessListener(requireActivity(), location -> {
-                if (!isAdded()) return;
-                if (location != null) {
-                    latitudActual = location.getLatitude();
-                    longitudActual = location.getLongitude();
-                }
-                tvCoordenadasPunto.setText(String.format(Locale.US, "%.5f, %.5f", latitudActual, longitudActual));
-                tvCoordenadasPunto.setTextColor(ContextCompat.getColor(requireContext(), R.color.chocolate));
-                Toast.makeText(requireContext(), "Coordenadas actualizadas", Toast.LENGTH_SHORT).show();
+        boolean tieneFine = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        boolean tieneCoarse = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+
+        if (!tieneFine && !tieneCoarse) {
+            requestLocationPermissionLauncher.launch(new String[]{
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
             });
+            return;
         }
+
+        if (!estaGpsActivo()) {
+            mostrarDialogoActivarGps();
+            return;
+        }
+
+        limpiarSolicitudUbicacion();
+        ubicacionResuelta = false;
+        btnCapturarGpsPunto.setEnabled(false);
+        btnCapturarGpsPunto.setText("Obteniendo...");
+        if (pbNuevoPunto != null) pbNuevoPunto.setVisibility(View.VISIBLE);
+
+        gpsTimeoutRunnable = () -> {
+            if (!isAdded() || ubicacionResuelta) return;
+            limpiarSolicitudUbicacion();
+            finalizarCapturaUbicacionSinResultado();
+        };
+        gpsTimeoutHandler.postDelayed(gpsTimeoutRunnable, 10000L);
+
+        gpsCancellationTokenSource = new CancellationTokenSource();
+        fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, gpsCancellationTokenSource.getToken())
+                .addOnSuccessListener(requireActivity(), location -> {
+                    if (!isAdded() || ubicacionResuelta) return;
+                    if (location != null) {
+                        aplicarUbicacionObtenida(location);
+                    } else {
+                        intentarUltimaUbicacionOActualizacion();
+                    }
+                })
+                .addOnFailureListener(requireActivity(), e -> {
+                    if (!isAdded() || ubicacionResuelta) return;
+                    intentarUltimaUbicacionOActualizacion();
+                });
+    }
+
+    @SuppressLint("MissingPermission")
+    private void intentarUltimaUbicacionOActualizacion() {
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(requireActivity(), lastLocation -> {
+                    if (!isAdded() || ubicacionResuelta) return;
+                    if (lastLocation != null) {
+                        aplicarUbicacionObtenida(lastLocation);
+                        return;
+                    }
+                    LocationRequest request = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000L)
+                            .setMaxUpdates(1)
+                            .setDurationMillis(8000L)
+                            .build();
+
+                    activeLocationCallback = new LocationCallback() {
+                        @Override
+                        public void onLocationResult(@NonNull LocationResult locationResult) {
+                            if (!isAdded() || ubicacionResuelta) return;
+                            Location loc = locationResult.getLastLocation();
+                            if (loc != null) {
+                                aplicarUbicacionObtenida(loc);
+                            } else {
+                                limpiarSolicitudUbicacion();
+                                finalizarCapturaUbicacionSinResultado();
+                            }
+                        }
+                    };
+                    fusedLocationClient.requestLocationUpdates(request, activeLocationCallback, Looper.getMainLooper())
+                            .addOnFailureListener(e -> {
+                                if (!isAdded() || ubicacionResuelta) return;
+                                limpiarSolicitudUbicacion();
+                                finalizarCapturaUbicacionSinResultado();
+                            });
+                })
+                .addOnFailureListener(requireActivity(), e -> {
+                    if (!isAdded() || ubicacionResuelta) return;
+                    limpiarSolicitudUbicacion();
+                    finalizarCapturaUbicacionSinResultado();
+                });
+    }
+
+    private void limpiarSolicitudUbicacion() {
+        if (gpsTimeoutRunnable != null) {
+            gpsTimeoutHandler.removeCallbacks(gpsTimeoutRunnable);
+            gpsTimeoutRunnable = null;
+        }
+        if (gpsCancellationTokenSource != null) {
+            gpsCancellationTokenSource.cancel();
+            gpsCancellationTokenSource = null;
+        }
+        if (activeLocationCallback != null && fusedLocationClient != null) {
+            fusedLocationClient.removeLocationUpdates(activeLocationCallback);
+            activeLocationCallback = null;
+        }
+    }
+
+    private void aplicarUbicacionObtenida(@NonNull Location location) {
+        ubicacionResuelta = true;
+        limpiarSolicitudUbicacion();
+        latitudActual = location.getLatitude();
+        longitudActual = location.getLongitude();
+        tvCoordenadasPunto.setText(String.format(Locale.US, "Lat: %.6f  |  Lon: %.6f", latitudActual, longitudActual));
+        tvCoordenadasPunto.setTextColor(ContextCompat.getColor(requireContext(), R.color.cafe_profundo));
+        btnCapturarGpsPunto.setEnabled(true);
+        btnCapturarGpsPunto.setText("Obtener Coordenadas");
+        if (pbNuevoPunto != null) pbNuevoPunto.setVisibility(View.GONE);
+        Toast.makeText(requireContext(), "Coordenadas actualizadas", Toast.LENGTH_SHORT).show();
+    }
+
+    private void finalizarCapturaUbicacionSinResultado() {
+        ubicacionResuelta = true;
+        btnCapturarGpsPunto.setEnabled(true);
+        btnCapturarGpsPunto.setText("Obtener Coordenadas");
+        if (pbNuevoPunto != null) pbNuevoPunto.setVisibility(View.GONE);
+        Toast.makeText(requireContext(), "No se pudo obtener tu ubicación. Verifica la señal GPS e inténtalo nuevamente.", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onDestroyView() {
+        limpiarSolicitudUbicacion();
+        super.onDestroyView();
     }
 
     private void guardarProspecto() {
@@ -290,6 +451,7 @@ public class NuevoPuntoDistribucionFragment extends Fragment {
         }
 
         btnGuardarNuevoPunto.setEnabled(false);
+        if (pbNuevoPunto != null) pbNuevoPunto.setVisibility(View.VISIBLE);
         ApiService apiService = RetrofitClient.createService();
 
         if (fotoFachadaBytes != null && fotoFachadaBytes.length > 0) {
@@ -335,6 +497,14 @@ public class NuevoPuntoDistribucionFragment extends Fragment {
                     if (!isAdded()) return;
                     if (response.isSuccessful()) {
                         btnGuardarNuevoPunto.setEnabled(true);
+                        if (pbNuevoPunto != null) pbNuevoPunto.setVisibility(View.GONE);
+                        if (response.body() != null && response.body().getData() != null && response.body().getData().getId() > 0) {
+                            UserPhotoLoader.guardarFotoProspectoBytesLocal(
+                                    requireContext(),
+                                    response.body().getData().getId(),
+                                    fotoFachadaBytes
+                            );
+                        }
                         Toast.makeText(requireContext(), "Prospecto y foto registrados con estado NUEVO", Toast.LENGTH_SHORT).show();
                         if (onPuntoRegistrado != null) {
                             onPuntoRegistrado.run();
@@ -363,6 +533,7 @@ public class NuevoPuntoDistribucionFragment extends Fragment {
             public void onResponse(@NonNull Call<ApiResponse<Prospecto>> call, @NonNull Response<ApiResponse<Prospecto>> response) {
                 if (!isAdded()) return;
                 btnGuardarNuevoPunto.setEnabled(true);
+                if (pbNuevoPunto != null) pbNuevoPunto.setVisibility(View.GONE);
 
                 if (response.isSuccessful()) {
                     Toast.makeText(requireContext(), "Prospecto registrado con estado NUEVO", Toast.LENGTH_SHORT).show();
@@ -388,6 +559,7 @@ public class NuevoPuntoDistribucionFragment extends Fragment {
             public void onFailure(@NonNull Call<ApiResponse<Prospecto>> call, @NonNull Throwable t) {
                 if (!isAdded()) return;
                 btnGuardarNuevoPunto.setEnabled(true);
+                if (pbNuevoPunto != null) pbNuevoPunto.setVisibility(View.GONE);
                 Toast.makeText(requireContext(), "Error de red al registrar prospecto: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });

@@ -91,6 +91,9 @@ public class ProspectosFragment extends Fragment {
     }
 
     private void cargarProspectos() {
+        if (RetrofitClient.API_TOKEN == null || RetrofitClient.API_TOKEN.isEmpty()) {
+            RetrofitClient.API_TOKEN = com.piccolifield.sharedpreferences.SplashStorage.obtenerToken(requireContext());
+        }
         ApiService apiService = RetrofitClient.createService();
         apiService.listarProspectos(null, null, null).enqueue(new Callback<ApiResponse<List<Prospecto>>>() {
             @Override
@@ -102,12 +105,16 @@ public class ProspectosFragment extends Fragment {
                     listaFiltrada.addAll(listaProspectos);
                     adapter.notifyDataSetChanged();
                 } else {
+                    String error = "Error " + response.code();
+                    try { if (response.errorBody() != null) error = response.errorBody().string(); } catch (Exception ignored) {}
+                    Toast.makeText(requireContext(), "Fallo red/API: " + error, Toast.LENGTH_LONG).show();
                     cargarMock();
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<ApiResponse<List<Prospecto>>> call, @NonNull Throwable t) {
+                Toast.makeText(requireContext(), "Error red: " + t.getMessage(), Toast.LENGTH_LONG).show();
                 cargarMock();
             }
         });

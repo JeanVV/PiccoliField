@@ -891,15 +891,63 @@ public class UserPhotoLoader {
     @Nullable
     public static String buildFullImageUrl(String urlFoto) {
         if (urlFoto == null) return null;
-        String trimmed = urlFoto.trim();
+        String trimmed = urlFoto.trim().replace("\\", "/");
         if (trimmed.isEmpty() || trimmed.startsWith("data:") || trimmed.length() > 300) return null;
-        if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+
+        if (trimmed.startsWith("http://localhost") || trimmed.startsWith("http://127.0.0.1") || trimmed.startsWith("http://0.0.0.0")) {
+            int idx = trimmed.indexOf('/', 8);
+            trimmed = idx >= 0 ? trimmed.substring(idx + 1) : "";
+        } else if (trimmed.startsWith("http://piccolifield-api-smkc.onrender.com")) {
+            return "https://" + trimmed.substring("http://".length());
+        } else if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
             return trimmed;
         }
+
         while (trimmed.startsWith("/")) {
             trimmed = trimmed.substring(1);
         }
+        if (trimmed.isEmpty()) return null;
         return RetrofitClient.BASE_SERVER_URL + trimmed;
+    }
+
+    public static void guardarFotoProspectoLocal(Context context, int idProspecto, Bitmap bmp) {
+        if (context == null || idProspecto <= 0 || bmp == null) return;
+        try {
+            File dir = new File(context.getFilesDir(), "prospecto_fotos");
+            if (!dir.exists()) dir.mkdirs();
+            File file = new File(dir, "prospecto_" + idProspecto + ".jpg");
+            try (java.io.FileOutputStream fos = new java.io.FileOutputStream(file)) {
+                bmp.compress(Bitmap.CompressFormat.JPEG, 85, fos);
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "No se pudo guardar foto local de prospecto " + idProspecto, e);
+        }
+    }
+
+    public static void guardarFotoProspectoBytesLocal(Context context, int idProspecto, byte[] bytes) {
+        if (context == null || idProspecto <= 0 || bytes == null || bytes.length == 0) return;
+        try {
+            File dir = new File(context.getFilesDir(), "prospecto_fotos");
+            if (!dir.exists()) dir.mkdirs();
+            File file = new File(dir, "prospecto_" + idProspecto + ".jpg");
+            try (java.io.FileOutputStream fos = new java.io.FileOutputStream(file)) {
+                fos.write(bytes);
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "No se pudo guardar bytes locales de prospecto " + idProspecto, e);
+        }
+    }
+
+    @Nullable
+    public static Bitmap cargarFotoProspectoLocal(Context context, int idProspecto) {
+        if (context == null || idProspecto <= 0) return null;
+        try {
+            File file = new File(new File(context.getFilesDir(), "prospecto_fotos"), "prospecto_" + idProspecto + ".jpg");
+            if (!file.exists() || file.length() == 0) return null;
+            return BitmapFactory.decodeFile(file.getAbsolutePath());
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /**

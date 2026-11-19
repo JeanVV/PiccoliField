@@ -56,6 +56,14 @@
                     android:src="@drawable/ic_store"
                     app:tint="@color/cafe_profundo" />
 
+                <ImageView
+                    android:id="@+id/ivPuntoFoto"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@null"
+                    android:scaleType="centerCrop"
+                    android:visibility="gone" />
+
                 <TextView
                     android:id="@+id/tvBadgeNumero"
                     android:layout_width="22dp"

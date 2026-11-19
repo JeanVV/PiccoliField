@@ -62,10 +62,21 @@ public class PuntosDespachoFragment extends Fragment implements OnMapReadyCallba
     private GoogleMap googleMap;
     private String filtroCriterioActual = "TODOS";
     private String filtroEstadoActual = "TODOS";
+    private static final String ARG_INITIAL_TAB = "arg_initial_tab";
     private int tabActual = 1; // 0 = Mapa, 1 = Lista, 2 = Prospectos
+    private boolean cargandoPuntos = false;
+    private boolean cargandoProspectos = false;
 
     public PuntosDespachoFragment() {
         // Required empty public constructor
+    }
+
+    public static PuntosDespachoFragment newInstance(int initialTab) {
+        PuntosDespachoFragment fragment = new PuntosDespachoFragment();
+        Bundle args = new Bundle();
+        args.putInt(ARG_INITIAL_TAB, initialTab);
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
@@ -85,9 +96,13 @@ public class PuntosDespachoFragment extends Fragment implements OnMapReadyCallba
 
         setupRecyclerView();
         setupSpinnersFiltros();
+        if (getArguments() != null) {
+            tabActual = getArguments().getInt(ARG_INITIAL_TAB, 1);
+        }
         cargarDatosDesdeApi();
         cargarProspectosDesdeApi();
         setupToggleViews();
+        seleccionarTab(tabActual);
         setupListeners();
 
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager()
@@ -151,10 +166,20 @@ public class PuntosDespachoFragment extends Fragment implements OnMapReadyCallba
         binding.rvProspectosPuntos.setLayoutManager(new LinearLayoutManager(requireContext()));
         prospectoAdapter = new ProspectoAdapter(
                 listaProspectosFiltrada,
-                this::mostrarDialogoCambiarEstadoProspecto,
+                this::mostrarDetalleProspecto,
                 this::mostrarDialogoCambiarEstadoProspecto
         );
         binding.rvProspectosPuntos.setAdapter(prospectoAdapter);
+    }
+
+    private void mostrarDetalleProspecto(Prospecto prospecto) {
+        if (!isAdded() || prospecto == null) return;
+        DetalleProspectoBottomSheet bottomSheet = DetalleProspectoBottomSheet.newInstance(prospecto);
+        bottomSheet.setOnEstadoActualizadoListener((prospectoActualizado, nuevoEstado) -> {
+            if (!isAdded()) return;
+            aplicarCambioEstadoExitoso(prospectoActualizado, nuevoEstado);
+        });
+        bottomSheet.show(getChildFragmentManager(), "DetalleProspectoBottomSheet");
     }
 
     private void mostrarDialogoCambiarEstadoProspecto(Prospecto prospecto) {
@@ -315,6 +340,8 @@ public class PuntosDespachoFragment extends Fragment implements OnMapReadyCallba
     }
 
     private void cargarDatosDesdeApi() {
+        cargandoPuntos = true;
+        actualizarIndicadorCarga();
         if (RetrofitClient.API_TOKEN == null || RetrofitClient.API_TOKEN.isEmpty()) {
             RetrofitClient.API_TOKEN = SplashStorage.obtenerToken(requireContext());
         }
@@ -325,10 +352,12 @@ public class PuntosDespachoFragment extends Fragment implements OnMapReadyCallba
                 if (!isAdded() || binding == null) return;
 
                 if (response.isSuccessful() && response.body() != null && response.body().getData() != null && !response.body().getData().isEmpty()) {
+                    cargandoPuntos = false;
                     listaPuntosOriginal.clear();
                     listaPuntosOriginal.addAll(response.body().getData());
                     sincronizarPuntosLocales();
                     actualizarUI();
+                    actualizarIndicadorCarga();
                 } else {
                     cargarPuntosConFiltroDistribucion(apiService);
                 }
@@ -347,6 +376,7 @@ public class PuntosDespachoFragment extends Fragment implements OnMapReadyCallba
             @Override
             public void onResponse(@NonNull Call<ApiResponse<List<PuntoDistribucion>>> call, @NonNull Response<ApiResponse<List<PuntoDistribucion>>> response) {
                 if (!isAdded() || binding == null) return;
+                cargandoPuntos = false;
                 listaPuntosOriginal.clear();
                 if (response.isSuccessful() && response.body() != null && response.body().getData() != null && !response.body().getData().isEmpty()) {
                     listaPuntosOriginal.addAll(response.body().getData());
@@ -355,20 +385,25 @@ public class PuntosDespachoFragment extends Fragment implements OnMapReadyCallba
                 }
                 sincronizarPuntosLocales();
                 actualizarUI();
+                actualizarIndicadorCarga();
             }
 
             @Override
             public void onFailure(@NonNull Call<ApiResponse<List<PuntoDistribucion>>> call, @NonNull Throwable t) {
                 if (!isAdded() || binding == null) return;
+                cargandoPuntos = false;
                 listaPuntosOriginal.clear();
                 cargarPuntosRespaldo();
                 sincronizarPuntosLocales();
                 actualizarUI();
+                actualizarIndicadorCarga();
             }
         });
     }
 
     private void cargarProspectosDesdeApi() {
+        cargandoProspectos = true;
+        actualizarIndicadorCarga();
         if (RetrofitClient.API_TOKEN == null || RetrofitClient.API_TOKEN.isEmpty()) {
             RetrofitClient.API_TOKEN = SplashStorage.obtenerToken(requireContext());
         }
@@ -377,17 +412,32 @@ public class PuntosDespachoFragment extends Fragment implements OnMapReadyCallba
             @Override
             public void onResponse(@NonNull Call<ApiResponse<List<Prospecto>>> call, @NonNull Response<ApiResponse<List<Prospecto>>> response) {
                 if (!isAdded() || binding == null) return;
-                listaProspectosOriginal.clear();
-                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
-                    listaProspectosOriginal.addAll(response.body().getData());
+                cargandoProspectos = false;
+                if (response.isSuccessful() && response.body() != null) {
+                    listaProspectosOriginal.clear();
+                    if (response.body().getData() != null) {
+                        listaProspectosOriginal.addAll(response.body().getData());
+                    }
+                } else {
+                    String error = "Error " + response.code();
+                    try { if (response.errorBody() != null) error = response.errorBody().string(); } catch (Exception ignored) {}
+                    Toast.makeText(requireContext(),
+                            "No se pudieron cargar los prospectos (HTTP " + error + ")",
+                            Toast.LENGTH_LONG).show();
                 }
                 aplicarFiltrosProspectos();
+                actualizarIndicadorCarga();
             }
 
             @Override
             public void onFailure(@NonNull Call<ApiResponse<List<Prospecto>>> call, @NonNull Throwable t) {
                 if (!isAdded() || binding == null) return;
+                cargandoProspectos = false;
+                Toast.makeText(requireContext(),
+                        "Error al cargar prospectos: " + t.getMessage(),
+                        Toast.LENGTH_SHORT).show();
                 aplicarFiltrosProspectos();
+                actualizarIndicadorCarga();
             }
         });
     }
@@ -489,6 +539,25 @@ public class PuntosDespachoFragment extends Fragment implements OnMapReadyCallba
             binding.btnToggleProspectos.setBackgroundTintList(ColorStateList.valueOf(colorCafe));
             binding.btnToggleProspectos.setTextColor(colorBlanco);
         }
+        actualizarIndicadorCarga();
+    }
+
+    private void actualizarIndicadorCarga() {
+        if (binding == null) return;
+        boolean cargandoActual = (tabActual == 2) ? cargandoProspectos : cargandoPuntos;
+        binding.pbPuntosDespacho.setVisibility(cargandoActual ? View.VISIBLE : View.GONE);
+
+        if (cargandoActual) {
+            binding.tvEmptyPuntosDespacho.setVisibility(View.GONE);
+        } else if (tabActual == 1) {
+            binding.tvEmptyPuntosDespacho.setText("No hay puntos de distribución para mostrar");
+            binding.tvEmptyPuntosDespacho.setVisibility(listaPuntosFiltrada.isEmpty() ? View.VISIBLE : View.GONE);
+        } else if (tabActual == 2) {
+            binding.tvEmptyPuntosDespacho.setText("No hay prospectos registrados");
+            binding.tvEmptyPuntosDespacho.setVisibility(listaProspectosFiltrada.isEmpty() ? View.VISIBLE : View.GONE);
+        } else {
+            binding.tvEmptyPuntosDespacho.setVisibility(View.GONE);
+        }
     }
 
     private void setupListeners() {
@@ -573,6 +642,7 @@ public class PuntosDespachoFragment extends Fragment implements OnMapReadyCallba
             }
         }
         adapter.notifyDataSetChanged();
+        actualizarIndicadorCarga();
     }
 
     private void aplicarFiltrosProspectos() {
@@ -594,6 +664,7 @@ public class PuntosDespachoFragment extends Fragment implements OnMapReadyCallba
             }
         }
         prospectoAdapter.notifyDataSetChanged();
+        actualizarIndicadorCarga();
     }
 
     @Override

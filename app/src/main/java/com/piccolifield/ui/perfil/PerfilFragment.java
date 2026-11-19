@@ -161,7 +161,11 @@ public class PerfilFragment extends Fragment {
         binding.cardSupervision.setOnClickListener(v -> navegarDesdeElMenu(2));
         binding.cardAsistencias.setOnClickListener(v -> navegarDesdeElMenu(1));
         binding.cardPuntosDespacho.setOnClickListener(v -> navegarDesdeElMenu(3));
-        binding.cardProspectos.setOnClickListener(v -> navegarDesdeElMenu(4));
+        binding.cardProspectos.setOnClickListener(v -> {
+            if (getActivity() instanceof MenuActivity) {
+                ((MenuActivity) getActivity()).abrirPuntosDistribucionEnProspectos();
+            }
+        });
     }
 
     private void navegarDesdeElMenu(int index) {

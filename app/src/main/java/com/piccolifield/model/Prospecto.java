@@ -1,8 +1,9 @@
 package com.piccolifield.model;
 
 import com.google.gson.annotations.SerializedName;
+import java.io.Serializable;
 
-public class Prospecto {
+public class Prospecto implements Serializable {
 
     @SerializedName(value = "idProspectos", alternate = {"id", "id_prospecto", "idProspecto"})
     private int id;

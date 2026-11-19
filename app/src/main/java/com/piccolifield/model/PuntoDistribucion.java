@@ -44,6 +44,9 @@ public class PuntoDistribucion {
     @SerializedName("categoria")
     private String categoria;
 
+    @SerializedName(value = "url_foto", alternate = {"fotoUrl", "foto_fachada", "foto"})
+    private String fotoUrl;
+
     // Campos auxiliares para la UI de Despacho y Puntos
     private String distancia;
     private int imagenResId;
@@ -156,6 +159,18 @@ public class PuntoDistribucion {
     public String getNumeroPedido() { return numeroPedido != null ? numeroPedido : getCodigo(); }
     public String getEstadoDespacho() { return estadoDespacho != null ? estadoDespacho : ""; }
     public String getBadgeNumero() { return badgeNumero != null ? badgeNumero : String.valueOf(idPuntosVenta > 0 ? idPuntosVenta : 1); }
+    public String getFotoUrl() { return fotoUrl; }
+
+    public int getIdProspectoOrigen() {
+        String cod = getCodigo();
+        if (cod != null && cod.toUpperCase().startsWith("DIST-")) {
+            try {
+                return Integer.parseInt(cod.substring(5).trim());
+            } catch (Exception ignored) {
+            }
+        }
+        return 0;
+    }
 
     public void setIdPuntosVenta(int idPuntosVenta) { this.idPuntosVenta = idPuntosVenta; }
     public void setCodigo(String codigo) { this.codigo = codigo; }
@@ -173,4 +188,5 @@ public class PuntoDistribucion {
     public void setNumeroPedido(String numeroPedido) { this.numeroPedido = numeroPedido; }
     public void setEstadoDespacho(String estadoDespacho) { this.estadoDespacho = estadoDespacho; }
     public void setBadgeNumero(String badgeNumero) { this.badgeNumero = badgeNumero; }
+    public void setFotoUrl(String fotoUrl) { this.fotoUrl = fotoUrl; }
 }

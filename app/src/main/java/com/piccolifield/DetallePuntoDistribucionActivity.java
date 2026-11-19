@@ -41,7 +41,7 @@ import retrofit2.Response;
 
 public class DetallePuntoDistribucionActivity extends AppCompatActivity {
 
-    private ImageView btnBack;
+    private ImageView btnBack, ivHeroPuntoFoto;
     private TextView tvBadgeNumero, tvNombreTienda, tvCodigoDetalleSub, tvTipoNegocioBadge, tvEstadoBadge;
     private TextView tvDireccionVal, tvDistanciaVal, tvPedidoNumVal, tvRepartidorVal, btnNuevoPedido, tvPedidosSub;
     private MaterialButton btnVerRuta;
@@ -58,6 +58,7 @@ public class DetallePuntoDistribucionActivity extends AppCompatActivity {
     private String direccionPunto;
     private String distanciaPunto;
     private String estadoPunto;
+    private String fotoUrlPunto;
     private int badgeNumero = 1;
     private PuntoDistribucion puntoDistribucionInfo;
 
@@ -91,6 +92,7 @@ public class DetallePuntoDistribucionActivity extends AppCompatActivity {
 
         // 1. Vincular Vistas
         btnBack = findViewById(R.id.btnBack);
+        ivHeroPuntoFoto = findViewById(R.id.ivHeroPuntoFoto);
         pbLoading = findViewById(R.id.pbLoading);
         tvBadgeNumero = findViewById(R.id.tvBadgeNumero);
         tvNombreTienda = findViewById(R.id.tvNombreTienda);
@@ -132,6 +134,7 @@ public class DetallePuntoDistribucionActivity extends AppCompatActivity {
             direccionPunto = getIntent().getStringExtra("DIRECCION");
             distanciaPunto = getIntent().getStringExtra("DISTANCIA");
             estadoPunto = getIntent().getStringExtra("ESTADO_PDV");
+            fotoUrlPunto = getIntent().getStringExtra("FOTO_URL_PDV");
             badgeNumero = getIntent().getIntExtra("BADGE_NUMERO", -1);
             if (badgeNumero <= 0) {
                 String badgeStr = getIntent().getStringExtra("BADGE_NUMERO");
@@ -154,6 +157,7 @@ public class DetallePuntoDistribucionActivity extends AppCompatActivity {
             actualizarVistaDetalle();
 
             pbLoading.setVisibility(View.VISIBLE);
+            cargarHeroFotoPunto();
             cargarDetallePunto(idPuntoVenta);
             cargarPedidos(idPuntoVenta);
         }
@@ -305,7 +309,122 @@ public class DetallePuntoDistribucionActivity extends AppCompatActivity {
         if (pdv.getEstado() != null && !pdv.getEstado().trim().isEmpty()) {
             estadoPunto = pdv.getEstado().trim();
         }
+        if (pdv.getFotoUrl() != null && !pdv.getFotoUrl().trim().isEmpty()) {
+            fotoUrlPunto = pdv.getFotoUrl().trim();
+        }
         actualizarVistaDetalle();
+        cargarHeroFotoPunto();
+    }
+
+    private void cargarHeroFotoPunto() {
+        if (ivHeroPuntoFoto == null) return;
+
+        android.graphics.Bitmap cachedPdv = com.piccolifield.adapter.PuntoDistribucionAdapter.obtenerFotoCache(idPuntoVenta);
+        if (cachedPdv != null) {
+            ivHeroPuntoFoto.setImageBitmap(cachedPdv);
+            return;
+        }
+
+        int idProspectoOrigen = obtenerIdProspectoDesdeCodigo();
+        if (idProspectoOrigen > 0) {
+            android.graphics.Bitmap cachedProspecto = com.piccolifield.adapter.ProspectoAdapter.obtenerFotoCache(idProspectoOrigen);
+            if (cachedProspecto == null) {
+                cachedProspecto = com.piccolifield.util.UserPhotoLoader.cargarFotoProspectoLocal(this, idProspectoOrigen);
+                if (cachedProspecto != null) {
+                    com.piccolifield.adapter.ProspectoAdapter.guardarFotoCache(idProspectoOrigen, cachedProspecto);
+                }
+            }
+            if (cachedProspecto != null) {
+                com.piccolifield.adapter.PuntoDistribucionAdapter.guardarFotoCache(idPuntoVenta, cachedProspecto);
+                ivHeroPuntoFoto.setImageBitmap(cachedProspecto);
+                return;
+            }
+        }
+
+        if (fotoUrlPunto != null && !fotoUrlPunto.trim().isEmpty()) {
+            android.graphics.Bitmap b64 = com.piccolifield.util.UserPhotoLoader.decodeBase64OrDataUri(fotoUrlPunto);
+            if (b64 != null) {
+                com.piccolifield.adapter.PuntoDistribucionAdapter.guardarFotoCache(idPuntoVenta, b64);
+                ivHeroPuntoFoto.setImageBitmap(b64);
+                return;
+            }
+            String fullUrl = com.piccolifield.util.UserPhotoLoader.buildFullImageUrl(fotoUrlPunto);
+            if (fullUrl != null) {
+                descargarHeroFotoUrl(fullUrl, idProspectoOrigen);
+                return;
+            }
+        }
+
+        if (idProspectoOrigen > 0) {
+            RetrofitClient.createService().obtenerProspecto(idProspectoOrigen)
+                    .enqueue(new Callback<ApiResponse<com.piccolifield.model.Prospecto>>() {
+                        @Override
+                        public void onResponse(@NonNull Call<ApiResponse<com.piccolifield.model.Prospecto>> call,
+                                               @NonNull Response<ApiResponse<com.piccolifield.model.Prospecto>> response) {
+                            if (isFinishing() || isDestroyed()) return;
+                            if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                                String pFoto = response.body().getData().getFotoUrl();
+                                if (pFoto != null && !pFoto.trim().isEmpty()) {
+                                    android.graphics.Bitmap b64 = com.piccolifield.util.UserPhotoLoader.decodeBase64OrDataUri(pFoto);
+                                    if (b64 != null) {
+                                        com.piccolifield.adapter.PuntoDistribucionAdapter.guardarFotoCache(idPuntoVenta, b64);
+                                        com.piccolifield.adapter.ProspectoAdapter.guardarFotoCache(idProspectoOrigen, b64);
+                                        ivHeroPuntoFoto.setImageBitmap(b64);
+                                        return;
+                                    }
+                                    String fullUrl = com.piccolifield.util.UserPhotoLoader.buildFullImageUrl(pFoto);
+                                    if (fullUrl != null) {
+                                        descargarHeroFotoUrl(fullUrl, idProspectoOrigen);
+                                        return;
+                                    }
+                                }
+                            }
+                            descargarHeroFotoUrl(
+                                    RetrofitClient.BASE_SERVER_URL + "api/prospectos/" + idProspectoOrigen + "/foto",
+                                    idProspectoOrigen
+                            );
+                        }
+
+                        @Override
+                        public void onFailure(@NonNull Call<ApiResponse<com.piccolifield.model.Prospecto>> call, @NonNull Throwable t) {
+                        }
+                    });
+        }
+    }
+
+    private void descargarHeroFotoUrl(String url, int idProspectoOrigen) {
+        RetrofitClient.createService().descargarArchivoPorUrl(url)
+                .enqueue(new Callback<okhttp3.ResponseBody>() {
+                    @Override
+                    public void onResponse(@NonNull Call<okhttp3.ResponseBody> call, @NonNull Response<okhttp3.ResponseBody> response) {
+                        if (isFinishing() || isDestroyed()) return;
+                        if (response.isSuccessful() && response.body() != null) {
+                            android.graphics.Bitmap bmp = com.piccolifield.util.UserPhotoLoader.decodeBitmapFromResponseBody(response.body());
+                            if (bmp != null) {
+                                com.piccolifield.adapter.PuntoDistribucionAdapter.guardarFotoCache(idPuntoVenta, bmp);
+                                if (idProspectoOrigen > 0) {
+                                    com.piccolifield.adapter.ProspectoAdapter.guardarFotoCache(idProspectoOrigen, bmp);
+                                    com.piccolifield.util.UserPhotoLoader.guardarFotoProspectoLocal(DetallePuntoDistribucionActivity.this, idProspectoOrigen, bmp);
+                                }
+                                ivHeroPuntoFoto.post(() -> ivHeroPuntoFoto.setImageBitmap(bmp));
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<okhttp3.ResponseBody> call, @NonNull Throwable t) {
+                    }
+                });
+    }
+
+    private int obtenerIdProspectoDesdeCodigo() {
+        if (codigoPuntoVenta != null && codigoPuntoVenta.toUpperCase(Locale.ROOT).startsWith("DIST-")) {
+            try {
+                return Integer.parseInt(codigoPuntoVenta.substring(5).trim());
+            } catch (Exception ignored) {
+            }
+        }
+        return 0;
     }
 
     private void cargarPedidos(int idPdv) {

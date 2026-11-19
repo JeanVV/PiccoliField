@@ -664,6 +664,28 @@
                     android:visibility="gone"
                     tools:listitem="@layout/item_prospecto" />
 
+                <!-- ESTADO VACÍO -->
+                <TextView
+                    android:id="@+id/tvEmptyPuntosDespacho"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:padding="24dp"
+                    android:text="No hay registros para mostrar"
+                    android:textColor="@color/color_text_muted"
+                    android:textSize="14sp"
+                    android:visibility="gone" />
+
+                <!-- CARGANDO -->
+                <ProgressBar
+                    android:id="@+id/pbPuntosDespacho"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:indeterminateTint="@color/cafe_profundo"
+                    android:visibility="gone" />
+
             </FrameLayout>
 
         </LinearLayout>
@@ -675,7 +697,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="20dp"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="90dp"
         android:contentDescription="Agregar nuevo punto de distribución"
         android:src="@drawable/ic_add"
         app:backgroundTint="@color/cafe_profundo"
