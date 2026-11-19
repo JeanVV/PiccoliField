@@ -429,6 +429,9 @@ public class MapaFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        if (viewModel != null) {
+            viewModel.recargarSedePrincipal();
+        }
         if (binding != null && binding.mapView != null) {
             binding.mapView.onResume();
         }

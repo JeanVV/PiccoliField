@@ -54,9 +54,26 @@ public class MonitoreoMapaViewModel extends ViewModel {
     }
 
     private void inicializarSedeAsignada() {
-        // Sede por defecto: Sede 1 Central Chiclayo (Coordenadas de MySQL BD)
-        SedeInfo sede = new SedeInfo("Sede Principal Chiclayo - Piccoli Cocktail", -6.760481, -79.863352, 100f);
-        sedeAsignada.setValue(sede);
+        // Sede por defecto inicial de reserva
+        SedeInfo sedeDefault = new SedeInfo("Sede Principal Chiclayo - Piccoli Cocktail", -6.760481, -79.863352, 100f);
+        sedeAsignada.setValue(sedeDefault);
+        recargarSedePrincipal();
+    }
+
+    public void recargarSedePrincipal() {
+        // Carga dinámica desde la BD MySQL mediante API
+        repository.obtenerSedePrincipal().observeForever(resource -> {
+            if (resource != null && resource.status == com.piccolifield.data.remote.Resource.Status.SUCCESS && resource.data != null) {
+                com.piccolifield.data.model.SedeDto s = resource.data;
+                SedeInfo sedeBD = new SedeInfo(
+                        s.getSede() != null ? s.getSede() : "Sede Principal Chiclayo",
+                        s.getLatitud(),
+                        s.getLongitud(),
+                        s.getRadioGeocerca()
+                );
+                sedeAsignada.setValue(sedeBD);
+            }
+        });
     }
 
     public LiveData<SedeInfo> getSedeAsignada() { return sedeAsignada; }

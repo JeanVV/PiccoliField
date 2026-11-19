@@ -372,6 +372,7 @@ public class AsistenciasFragment extends Fragment {
             binding.swipeRefreshLayout.setColorSchemeResources(R.color.cafe_profundo, R.color.caramelo);
             binding.swipeRefreshLayout.setOnRefreshListener(() -> {
                 int idUser = SplashStorage.obtenerUsuarioId(requireContext());
+                viewModel.cargarSedePrincipal();
                 viewModel.cargarUltimaAsistencia(idUser);
                 viewModel.cargarJustificacionUsuario(idUser);
             });
