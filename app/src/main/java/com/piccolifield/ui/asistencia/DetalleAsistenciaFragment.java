@@ -156,6 +156,10 @@ public class DetalleAsistenciaFragment extends Fragment {
             binding.tvAttendanceTime.setText(fmtDisp);
             binding.tvServerTime.setText(fmtServ);
 
+            if (registro.getIdUsuario() > 0) {
+                viewModel.cargarUltimaAsistencia(registro.getIdUsuario());
+            }
+
             String tipo = registro.getTipo();
             binding.tvStatusTitle.setText(tipo != null && !tipo.isEmpty() ? tipo : "INGRESO");
 
@@ -228,6 +232,29 @@ public class DetalleAsistenciaFragment extends Fragment {
                 binding.rvShiftHistory.setAdapter(new TurnoHistorialAdapter(historial));
             }
         });
+
+        // Observador de Última Asistencia (Carga dinámica de hora y datos del servidor)
+        viewModel.getUltimaAsistencia().observe(getViewLifecycleOwner(), ultima -> {
+            if (!isAdded() || binding == null || ultima == null) return;
+            String horaUltima = formatearHoraCorta(ultima.getHora());
+            if ("--:--".equals(horaUltima) && ultima.getFecha() != null) {
+                horaUltima = formatearHoraCorta(ultima.getFecha());
+            }
+            if (!"--:--".equals(horaUltima)) {
+                if (binding.tvAttendanceTime != null) {
+                    binding.tvAttendanceTime.setText(horaUltima);
+                }
+                if (binding.tvServerTime != null) {
+                    binding.tvServerTime.setText(horaUltima);
+                }
+            }
+            if (ultima.getTipo() != null && !ultima.getTipo().isEmpty() && binding.tvStatusTitle != null) {
+                binding.tvStatusTitle.setText(ultima.getTipo());
+            }
+            if (ultima.getEstado() != null && !ultima.getEstado().isEmpty() && binding.tvUserStatusBadge != null) {
+                configurarBadge(binding.tvUserStatusBadge, ultima.getEstado());
+            }
+        });
     }
 
     private static final java.util.TimeZone TIME_ZONE_LIMA = java.util.TimeZone.getTimeZone("America/Lima");
@@ -238,25 +265,35 @@ public class DetalleAsistenciaFragment extends Fragment {
             return "--:--";
         }
         try {
-            String s = str.trim();
+            String s = str.trim().replace('T', ' ');
+
+            if (s.toLowerCase().contains("am") || s.toLowerCase().contains("pm") || s.toLowerCase().contains("a. m.") || s.toLowerCase().contains("p. m.")) {
+                return s;
+            }
+
             if (s.contains(" ")) {
                 String[] parts = s.split(" ");
-                if (parts.length > 1) {
-                    s = parts[1];
+                for (String part : parts) {
+                    if (part.contains(":")) {
+                        s = part;
+                        break;
+                    }
                 }
             }
-            if (s.length() >= 5) {
-                java.text.SimpleDateFormat inFormat = new java.text.SimpleDateFormat("HH:mm", LOCALE_PERU);
-                inFormat.setTimeZone(TIME_ZONE_LIMA);
-                java.text.SimpleDateFormat outFormat = new java.text.SimpleDateFormat("hh:mm a", LOCALE_PERU);
-                outFormat.setTimeZone(TIME_ZONE_LIMA);
-                java.util.Date date = inFormat.parse(s.substring(0, 5));
-                if (date != null) {
-                    return outFormat.format(date);
+
+            if (s.contains(":")) {
+                String[] timeParts = s.split(":");
+                if (timeParts.length >= 2) {
+                    int hh = Integer.parseInt(timeParts[0].trim());
+                    int mm = Integer.parseInt(timeParts[1].trim());
+
+                    String amPm = (hh >= 12) ? "p. m." : "a. m.";
+                    int hh12 = hh % 12;
+                    if (hh12 == 0) hh12 = 12;
+
+                    return String.format(java.util.Locale.US, "%02d:%02d %s", hh12, mm, amPm);
                 }
-                return s.substring(0, 5);
             }
-            return s;
         } catch (Exception e) {
             e.printStackTrace();
         }

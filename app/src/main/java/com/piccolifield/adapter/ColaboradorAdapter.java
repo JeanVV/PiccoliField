@@ -92,9 +92,12 @@ public class ColaboradorAdapter extends RecyclerView.Adapter<ColaboradorAdapter.
             binding.tvCollaboratorLocation.setText(item.getSede());
 
             String hora = item.getHoraMarcado();
-            if (hora != null && hora.length() >= 16) {
+            if (hora == null || hora.trim().isEmpty() || "--:--".equals(hora)) {
+                hora = item.getFechaHoraServidor();
+            }
+            if (hora != null && hora.length() >= 16 && hora.contains(" ")) {
                 binding.tvCollaboratorTime.setText(hora.substring(11, 16));
-            } else if (hora != null) {
+            } else if (hora != null && !hora.trim().isEmpty()) {
                 binding.tvCollaboratorTime.setText(hora);
             } else {
                 binding.tvCollaboratorTime.setText("--:--");

@@ -211,12 +211,33 @@ public class AsistenciasFragment extends Fragment {
 
         viewModel.getJustificacionResultLiveData().observe(getViewLifecycleOwner(), resource -> {
             if (!isAdded() || binding == null || resource == null) return;
-            if (binding.btnAbrirJustificacionBS != null) binding.btnAbrirJustificacionBS.setEnabled(true);
-            if (resource.status == com.piccolifield.data.remote.Resource.Status.SUCCESS) {
+            if (resource.status == com.piccolifield.data.remote.Resource.Status.LOADING) {
+                if (binding.pbLoadingJustificacion != null) {
+                    binding.pbLoadingJustificacion.setVisibility(View.VISIBLE);
+                }
+                if (binding.btnAbrirJustificacionBS != null) {
+                    binding.btnAbrirJustificacionBS.setEnabled(false);
+                    binding.btnAbrirJustificacionBS.setText("Guardando justificación...");
+                }
+            } else if (resource.status == com.piccolifield.data.remote.Resource.Status.SUCCESS) {
+                if (binding.pbLoadingJustificacion != null) {
+                    binding.pbLoadingJustificacion.setVisibility(View.GONE);
+                }
+                if (binding.btnAbrirJustificacionBS != null) {
+                    binding.btnAbrirJustificacionBS.setEnabled(true);
+                    binding.btnAbrirJustificacionBS.setText("Registrar Justificación");
+                }
                 String msg = resource.data != null ? resource.data : "Justificación registrada exitosamente.";
                 mostrarDialogoExitoMinimal("¡Justificación Registrada!", msg);
                 limpiarFormularioJustificacion();
             } else if (resource.status == com.piccolifield.data.remote.Resource.Status.ERROR) {
+                if (binding.pbLoadingJustificacion != null) {
+                    binding.pbLoadingJustificacion.setVisibility(View.GONE);
+                }
+                if (binding.btnAbrirJustificacionBS != null) {
+                    binding.btnAbrirJustificacionBS.setEnabled(true);
+                    binding.btnAbrirJustificacionBS.setText("Registrar Justificación");
+                }
                 String err = resource.message != null ? resource.message : "Error al registrar justificación";
                 Toast.makeText(getContext(), err, Toast.LENGTH_LONG).show();
             }

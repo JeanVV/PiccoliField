@@ -401,6 +401,18 @@
                     app:icon="@drawable/ic_warning_alert"
                     app:iconTint="@color/marfil_suave" />
 
+                <!-- PROGRESS BAR DE CARGA AL GUARDAR JUSTIFICACIÓN -->
+                <ProgressBar
+                    android:id="@+id/pbLoadingJustificacion"
+                    style="?android:attr/progressBarStyleSmall"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="10dp"
+                    android:indeterminateTint="@color/cafe_profundo"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

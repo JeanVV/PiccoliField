@@ -9,12 +9,18 @@
     android:background="@color/color_fondo"
     tools:context=".ui.asistencia.AsistenciaHomeFragment">
 
-    <!-- ScrollView para acomodar todos los elementos suavemente -->
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/scrollViewContent"
+    <!-- SwipeRefreshLayout para Deslizar y Actualizar -->
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:layout_height="match_parent">
+
+        <!-- ScrollView para acomodar todos los elementos suavemente -->
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/scrollViewContent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -54,18 +60,6 @@
                     android:textColor="@color/cafe_profundo"
                     android:textSize="20sp"
                     android:textStyle="bold" />
-
-                <ImageView
-                    android:id="@+id/btnNotification"
-                    android:layout_width="26dp"
-                    android:layout_height="26dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:clickable="true"
-                    android:contentDescription="@string/cd_notification"
-                    android:focusable="true"
-                    android:src="@drawable/ic_notification_bell" />
             </RelativeLayout>
 
             <!-- ProgressBar de Carga Sutil para Inicio -->
@@ -683,5 +677,7 @@
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -79,6 +79,7 @@ public class AsistenciaHomeFragment extends Fragment {
 
                 case SUCCESS:
                     if (binding.pbLoadingHome != null) binding.pbLoadingHome.setVisibility(View.GONE);
+                    if (binding.swipeRefreshLayout != null) binding.swipeRefreshLayout.setRefreshing(false);
                     List<RegistroAsistencia> listaRemote = resource.data != null ? resource.data : new ArrayList<>();
 
                     verificarJustificacionesPendientes(listaRemote);
@@ -106,6 +107,7 @@ public class AsistenciaHomeFragment extends Fragment {
 
                 case ERROR:
                     if (binding.pbLoadingHome != null) binding.pbLoadingHome.setVisibility(View.GONE);
+                    if (binding.swipeRefreshLayout != null) binding.swipeRefreshLayout.setRefreshing(false);
                     Log.e("AsistenciaHome", "Error cargando personal: " + resource.message);
                     binding.layoutEmptyRecentState.setVisibility(View.VISIBLE);
                     binding.rvRecentPersonnel.setVisibility(View.GONE);
@@ -146,11 +148,10 @@ public class AsistenciaHomeFragment extends Fragment {
             );
         }
 
-        // Botón Notificación
-        if (binding.btnNotification != null) {
-            binding.btnNotification.setOnClickListener(v ->
-                Toast.makeText(getContext(), "Notificaciones de asistencias", Toast.LENGTH_SHORT).show()
-            );
+        // Configuración de Deslizar para Actualizar (SwipeRefreshLayout)
+        if (binding.swipeRefreshLayout != null) {
+            binding.swipeRefreshLayout.setColorSchemeResources(R.color.cafe_profundo, R.color.caramelo);
+            binding.swipeRefreshLayout.setOnRefreshListener(this::cargarDatos);
         }
 
         // Búsqueda en tiempo real
