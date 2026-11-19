@@ -120,26 +120,33 @@ public class ColaboradoresFragment extends Fragment {
     }
 
     private void mostrarPopupMenuFiltros(View view) {
-        PopupMenu popup = new PopupMenu(requireContext(), view);
-        popup.getMenu().add(0, 1, 0, "Todos los estados");
-        popup.getMenu().add(0, 2, 1, "A tiempo");
-        popup.getMenu().add(0, 3, 2, "Tardanza");
-        popup.getMenu().add(0, 4, 3, "Falta");
+        androidx.appcompat.view.ContextThemeWrapper contextWrapper = new androidx.appcompat.view.ContextThemeWrapper(requireContext(), R.style.Theme_PiccoliField_PopupMenu);
+        PopupMenu popup = new PopupMenu(contextWrapper, view);
+        popup.getMenuInflater().inflate(R.menu.menu_filtros_asistencia, popup.getMenu());
+
+        try {
+            java.lang.reflect.Field field = popup.getClass().getDeclaredField("mPopup");
+            field.setAccessible(true);
+            Object menuPopupHelper = field.get(popup);
+            if (menuPopupHelper != null) {
+                Class<?> classPopupHelper = Class.forName(menuPopupHelper.getClass().getName());
+                java.lang.reflect.Method setForceIcons = classPopupHelper.getMethod("setForceShowIcon", boolean.class);
+                setForceIcons.invoke(menuPopupHelper, true);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         popup.setOnMenuItemClickListener(item -> {
-            switch (item.getItemId()) {
-                case 1:
-                    estadoFiltroActual = "TODOS";
-                    break;
-                case 2:
-                    estadoFiltroActual = "A_TIEMPO";
-                    break;
-                case 3:
-                    estadoFiltroActual = "TARDANZA";
-                    break;
-                case 4:
-                    estadoFiltroActual = "FALTA";
-                    break;
+            int itemId = item.getItemId();
+            if (itemId == R.id.filter_todos) {
+                estadoFiltroActual = "TODOS";
+            } else if (itemId == R.id.filter_a_tiempo) {
+                estadoFiltroActual = "A_TIEMPO";
+            } else if (itemId == R.id.filter_tardanza) {
+                estadoFiltroActual = "TARDANZA";
+            } else if (itemId == R.id.filter_falta) {
+                estadoFiltroActual = "FALTA";
             }
 
             if (adapter != null && binding.etSearchCollaborator != null) {
