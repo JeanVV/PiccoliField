@@ -25,7 +25,8 @@
             android:src="@drawable/ic_avatar_placeholder"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:contentDescription="@string/hint_nombre_producto" />
 
         <TextView
             android:id="@+id/tvNombreProducto"
@@ -58,10 +59,10 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="@string/label_stock_minimo_valor"
-            android:textColor="#D32F2F"
+            android:textColor="#388E3C"
             android:textSize="12sp"
             android:textStyle="bold"
-            android:background="#FFEBEE"
+            android:background="#E8F5E9"
             android:paddingHorizontal="6dp"
             android:paddingVertical="2dp"
             app:layout_constraintStart_toStartOf="@id/tvNombreProducto"

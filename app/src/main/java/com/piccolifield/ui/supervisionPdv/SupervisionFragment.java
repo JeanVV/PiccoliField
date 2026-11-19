@@ -371,6 +371,12 @@ public class SupervisionFragment extends Fragment {
         tvTabAlertas.setTextColor(Color.parseColor("#757575"));
         tvTabAlertas.setTypeface(null, Typeface.NORMAL);
 
+        if (tvTabIncidencias != null) {
+            tvTabIncidencias.setBackgroundResource(R.drawable.bg_chip_unselected);
+            tvTabIncidencias.setTextColor(Color.parseColor("#757575"));
+            tvTabIncidencias.setTypeface(null, Typeface.NORMAL);
+        }
+
         switch (indice) {
             case 0: // INICIO
                 if (layoutFiltrosAlertas != null) layoutFiltrosAlertas.setVisibility(View.GONE);
@@ -1272,12 +1278,41 @@ public class SupervisionFragment extends Fragment {
 
                     ProductoSupervisionAdapter adapter = new ProductoSupervisionAdapter(pdvLista, ctx, producto -> {
                         bottomSheetDialog.dismiss();
-                        ProductoBuscado pb = new ProductoBuscado();
-                        pb.setId(producto.getIdProductos());
-                        pb.setNombre(producto.getProducto());
-                        pb.setStockActual(producto.getStockActual());
-                        pb.setPrecio(0.0);
-                        mostrarBottomSheetVenta(pb, producto.getSku() != null ? producto.getSku() : "7750000000000");
+                        String ean = producto.getSku();
+                        if (ean != null && !ean.isEmpty() && NetworkUtils.isNetworkAvailable(ctx)) {
+                            ApiService apiService = RetrofitClient.createService();
+                            apiService.buscarProductoPorCodigo(ean).enqueue(new Callback<ApiResponse<ProductoBuscado>>() {
+                                @Override
+                                public void onResponse(@NonNull Call<ApiResponse<ProductoBuscado>> call, @NonNull Response<ApiResponse<ProductoBuscado>> response) {
+                                    if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                                        mostrarBottomSheetVenta(response.body().getData(), ean);
+                                    } else {
+                                        ProductoBuscado pb = new ProductoBuscado();
+                                        pb.setId(producto.getIdProductos());
+                                        pb.setNombre(producto.getProducto());
+                                        pb.setStockActual(producto.getStockActual());
+                                        pb.setPrecio(0.0);
+                                        mostrarBottomSheetVenta(pb, ean);
+                                    }
+                                }
+                                @Override
+                                public void onFailure(@NonNull Call<ApiResponse<ProductoBuscado>> call, @NonNull Throwable t) {
+                                    ProductoBuscado pb = new ProductoBuscado();
+                                    pb.setId(producto.getIdProductos());
+                                    pb.setNombre(producto.getProducto());
+                                    pb.setStockActual(producto.getStockActual());
+                                    pb.setPrecio(0.0);
+                                    mostrarBottomSheetVenta(pb, ean);
+                                }
+                            });
+                        } else {
+                            ProductoBuscado pb = new ProductoBuscado();
+                            pb.setId(producto.getIdProductos());
+                            pb.setNombre(producto.getProducto());
+                            pb.setStockActual(producto.getStockActual());
+                            pb.setPrecio(0.0);
+                            mostrarBottomSheetVenta(pb, ean != null ? ean : "7750000000000");
+                        }
                     });
                     rvCatalogo.setAdapter(adapter);
 
@@ -1295,12 +1330,41 @@ public class SupervisionFragment extends Fragment {
                                 }
                                 rvCatalogo.setAdapter(new ProductoSupervisionAdapter(filtrada, ctx, producto -> {
                                     bottomSheetDialog.dismiss();
-                                    ProductoBuscado pb = new ProductoBuscado();
-                                    pb.setId(producto.getIdProductos());
-                                    pb.setNombre(producto.getProducto());
-                                    pb.setStockActual(producto.getStockActual());
-                                    pb.setPrecio(0.0);
-                                    mostrarBottomSheetVenta(pb, producto.getSku() != null ? producto.getSku() : "7750000000000");
+                                    String ean = producto.getSku();
+                                    if (ean != null && !ean.isEmpty() && NetworkUtils.isNetworkAvailable(ctx)) {
+                                        ApiService apiService = RetrofitClient.createService();
+                                        apiService.buscarProductoPorCodigo(ean).enqueue(new Callback<ApiResponse<ProductoBuscado>>() {
+                                            @Override
+                                            public void onResponse(@NonNull Call<ApiResponse<ProductoBuscado>> call, @NonNull Response<ApiResponse<ProductoBuscado>> response) {
+                                                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                                                    mostrarBottomSheetVenta(response.body().getData(), ean);
+                                                } else {
+                                                    ProductoBuscado pb = new ProductoBuscado();
+                                                    pb.setId(producto.getIdProductos());
+                                                    pb.setNombre(producto.getProducto());
+                                                    pb.setStockActual(producto.getStockActual());
+                                                    pb.setPrecio(0.0);
+                                                    mostrarBottomSheetVenta(pb, ean);
+                                                }
+                                            }
+                                            @Override
+                                            public void onFailure(@NonNull Call<ApiResponse<ProductoBuscado>> call, @NonNull Throwable t) {
+                                                ProductoBuscado pb = new ProductoBuscado();
+                                                pb.setId(producto.getIdProductos());
+                                                pb.setNombre(producto.getProducto());
+                                                pb.setStockActual(producto.getStockActual());
+                                                pb.setPrecio(0.0);
+                                                mostrarBottomSheetVenta(pb, ean);
+                                            }
+                                        });
+                                    } else {
+                                        ProductoBuscado pb = new ProductoBuscado();
+                                        pb.setId(producto.getIdProductos());
+                                        pb.setNombre(producto.getProducto());
+                                        pb.setStockActual(producto.getStockActual());
+                                        pb.setPrecio(0.0);
+                                        mostrarBottomSheetVenta(pb, ean != null ? ean : "7750000000000");
+                                    }
                                 }));
                             }
                             @Override public void afterTextChanged(Editable s) {}

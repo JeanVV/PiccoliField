@@ -100,6 +100,25 @@ public class MenuActivity extends AppCompatActivity {
             }
         }
 
+        String rolActual = SplashStorage.obtenerRol(this);
+        if (rolActual != null) {
+            String rol = rolActual.toUpperCase();
+            if ("TRABAJADOR".equalsIgnoreCase(rol)) {
+                binding.curvedBottomNav.setTabVisibility(0, View.GONE);
+                binding.curvedBottomNav.setTabVisibility(2, View.GONE);
+                binding.curvedBottomNav.setTabVisibility(3, View.GONE);
+                binding.curvedBottomNav.setTabVisibility(4, View.GONE);
+            } else if ("IMPULSADOR".equalsIgnoreCase(rol)) {
+                binding.curvedBottomNav.setTabVisibility(0, View.GONE);
+                binding.curvedBottomNav.setTabVisibility(3, View.GONE);
+                binding.curvedBottomNav.setTabVisibility(4, View.GONE);
+            } else if ("PROMOTOR".equalsIgnoreCase(rol)) {
+                binding.curvedBottomNav.setTabVisibility(0, View.GONE);
+                binding.curvedBottomNav.setTabVisibility(2, View.GONE);
+                binding.curvedBottomNav.setTabVisibility(4, View.GONE);
+            }
+        }
+
         // Cargar por defecto la primera pantalla (Inicio) o la pantalla de asistencia/justificación solicitada por la notificación
         String pantallaExtra = getIntent() != null ? getIntent().getStringExtra("PANTALLA") : null;
         if ("RESUMEN_ASISTENCIA".equalsIgnoreCase(pantallaExtra) || "JUSTIFICACION".equalsIgnoreCase(pantallaExtra)) {
@@ -109,6 +128,20 @@ public class MenuActivity extends AppCompatActivity {
         }
 
         binding.curvedBottomNav.setOnTabSelectedListener(position -> {
+            String rol = SplashStorage.obtenerRol(MenuActivity.this).toUpperCase();
+            if ("TRABAJADOR".equalsIgnoreCase(rol) && position != 1) {
+                Toast.makeText(MenuActivity.this, "Solo disponible para Asistencia", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if ("IMPULSADOR".equalsIgnoreCase(rol) && position != 1 && position != 2) {
+                Toast.makeText(MenuActivity.this, "Sección no disponible para tu rol", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if ("PROMOTOR".equalsIgnoreCase(rol) && position != 1 && position != 3) {
+                Toast.makeText(MenuActivity.this, "Sección no disponible para tu rol", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             switch (position) {
                 case 0:
                     // Inicio / Home
