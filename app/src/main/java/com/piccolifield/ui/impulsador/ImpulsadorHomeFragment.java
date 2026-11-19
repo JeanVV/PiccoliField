@@ -86,6 +86,12 @@ public class ImpulsadorHomeFragment extends Fragment {
             // TODO: Abrir form
         });
 
+        androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
+        if (swipeRefreshLayout != null) {
+            swipeRefreshLayout.setColorSchemeResources(R.color.cafe_profundo, R.color.caramelo);
+            swipeRefreshLayout.setOnRefreshListener(this::cargarDashboard);
+        }
+
         cargarDashboard();
     }
 
@@ -204,6 +210,7 @@ public class ImpulsadorHomeFragment extends Fragment {
             @Override
             public void onResponse(Call<ApiResponse<ImpulsadorDashboard>> call, Response<ApiResponse<ImpulsadorDashboard>> response) {
                 if (!isAdded()) return;
+                ocultarRefresh();
 
                 if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
                     ImpulsadorDashboard data = response.body().getData();
@@ -240,8 +247,16 @@ public class ImpulsadorHomeFragment extends Fragment {
             @Override
             public void onFailure(Call<ApiResponse<ImpulsadorDashboard>> call, Throwable t) {
                 if (!isAdded()) return;
+                ocultarRefresh();
                 Toast.makeText(getContext(), "Error al cargar dashboard: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void ocultarRefresh() {
+        if (getView() != null) {
+            androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipe = getView().findViewById(R.id.swipeRefreshLayout);
+            if (swipe != null) swipe.setRefreshing(false);
+        }
     }
 }

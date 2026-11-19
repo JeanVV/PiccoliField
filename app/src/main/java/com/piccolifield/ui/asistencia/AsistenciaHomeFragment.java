@@ -74,11 +74,9 @@ public class AsistenciaHomeFragment extends Fragment {
 
             switch (resource.status) {
                 case LOADING:
-                    if (binding.pbLoadingHome != null) binding.pbLoadingHome.setVisibility(View.VISIBLE);
                     break;
 
                 case SUCCESS:
-                    if (binding.pbLoadingHome != null) binding.pbLoadingHome.setVisibility(View.GONE);
                     if (binding.swipeRefreshLayout != null) binding.swipeRefreshLayout.setRefreshing(false);
                     List<RegistroAsistencia> listaRemote = resource.data != null ? resource.data : new ArrayList<>();
 
@@ -106,7 +104,6 @@ public class AsistenciaHomeFragment extends Fragment {
                     break;
 
                 case ERROR:
-                    if (binding.pbLoadingHome != null) binding.pbLoadingHome.setVisibility(View.GONE);
                     if (binding.swipeRefreshLayout != null) binding.swipeRefreshLayout.setRefreshing(false);
                     Log.e("AsistenciaHome", "Error cargando personal: " + resource.message);
                     binding.layoutEmptyRecentState.setVisibility(View.VISIBLE);

@@ -74,6 +74,12 @@ public class ProspectosFragment extends Fragment {
             Toast.makeText(requireContext(), "Abrir Filtros (Bottom Sheet)", Toast.LENGTH_SHORT).show()
         );
 
+        androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
+        if (swipeRefreshLayout != null) {
+            swipeRefreshLayout.setColorSchemeResources(R.color.cafe_profundo, R.color.caramelo);
+            swipeRefreshLayout.setOnRefreshListener(this::cargarProspectos);
+        }
+
         etBuscarProspecto.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -98,6 +104,7 @@ public class ProspectosFragment extends Fragment {
         apiService.listarProspectos(null, null, null).enqueue(new Callback<ApiResponse<List<Prospecto>>>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse<List<Prospecto>>> call, @NonNull Response<ApiResponse<List<Prospecto>>> response) {
+                ocultarRefresh();
                 if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
                     listaProspectos.clear();
                     listaProspectos.addAll(response.body().getData());
@@ -114,10 +121,18 @@ public class ProspectosFragment extends Fragment {
 
             @Override
             public void onFailure(@NonNull Call<ApiResponse<List<Prospecto>>> call, @NonNull Throwable t) {
+                ocultarRefresh();
                 Toast.makeText(requireContext(), "Error red: " + t.getMessage(), Toast.LENGTH_LONG).show();
                 cargarMock();
             }
         });
+    }
+
+    private void ocultarRefresh() {
+        if (getView() != null) {
+            androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipe = getView().findViewById(R.id.swipeRefreshLayout);
+            if (swipe != null) swipe.setRefreshing(false);
+        }
     }
 
     private void cargarMock() {

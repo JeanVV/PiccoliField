@@ -117,6 +117,12 @@ public class ColaboradoresFragment extends Fragment {
         if (btnFiltroTarget != null) {
             btnFiltroTarget.setOnClickListener(this::mostrarPopupMenuFiltros);
         }
+
+        // Swipe Refresh Layout
+        if (binding.swipeRefreshLayout != null) {
+            binding.swipeRefreshLayout.setColorSchemeResources(R.color.cafe_profundo, R.color.caramelo);
+            binding.swipeRefreshLayout.setOnRefreshListener(this::cargarColaboradores);
+        }
     }
 
     private void mostrarPopupMenuFiltros(View view) {
@@ -161,13 +167,11 @@ public class ColaboradoresFragment extends Fragment {
     private void cargarColaboradores() {
         if (apiService == null || binding == null) return;
 
-        if (binding.pbLoadingColaboradores != null) binding.pbLoadingColaboradores.setVisibility(View.VISIBLE);
-
         apiService.obtenerColaboradoresConAsistencia().enqueue(new Callback<ApiResponse<List<RegistroAsistencia>>>() {
             @Override
             public void onResponse(@NonNull Call<ApiResponse<List<RegistroAsistencia>>> call, @NonNull Response<ApiResponse<List<RegistroAsistencia>>> response) {
                 if (!isAdded() || binding == null) return;
-                if (binding.pbLoadingColaboradores != null) binding.pbLoadingColaboradores.setVisibility(View.GONE);
+                if (binding.swipeRefreshLayout != null) binding.swipeRefreshLayout.setRefreshing(false);
 
                 List<RegistroAsistencia> listaRemote = (response.isSuccessful() && response.body() != null && response.body().getData() != null)
                         ? response.body().getData()
@@ -197,7 +201,7 @@ public class ColaboradoresFragment extends Fragment {
             @Override
             public void onFailure(@NonNull Call<ApiResponse<List<RegistroAsistencia>>> call, @NonNull Throwable t) {
                 if (!isAdded() || binding == null) return;
-                if (binding.pbLoadingColaboradores != null) binding.pbLoadingColaboradores.setVisibility(View.GONE);
+                if (binding.swipeRefreshLayout != null) binding.swipeRefreshLayout.setRefreshing(false);
                 Log.e("ColaboradoresFragment", "Error red: " + t.getMessage());
                 binding.layoutEmptyCollaboratorsState.setVisibility(View.VISIBLE);
                 binding.rvCollaborators.setVisibility(View.GONE);

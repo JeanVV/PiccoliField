@@ -44,18 +44,6 @@
             android:textColor="@color/cafe_profundo"
             android:textSize="20sp"
             android:textStyle="bold" />
-
-        <ImageView
-            android:id="@+id/btnNotification"
-            android:layout_width="26dp"
-            android:layout_height="26dp"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:clickable="true"
-            android:contentDescription="@string/cd_notification"
-            android:focusable="true"
-            android:src="@drawable/ic_notification_bell" />
     </RelativeLayout>
 
     <!-- Buscador y Botón de Filtros (Estilo Puntos Despacho) -->
@@ -156,63 +144,63 @@
 
     </LinearLayout>
 
-    <!-- Estado Vacío -->
-    <LinearLayout
-        android:id="@+id/layoutEmptyCollaboratorsState"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:padding="32dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layoutSearchAndFilter"
-        tools:visibility="gone">
-
-        <ImageView
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:contentDescription="@null"
-            app:srcCompat="@drawable/ic_empty_data" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="@string/empty_collaborators"
-            android:textColor="@color/chocolate"
-            android:textSize="13sp" />
-
-    </LinearLayout>
-
-    <!-- ProgressBar de carga sutil para Colaboradores -->
-    <ProgressBar
-        android:id="@+id/pbLoadingColaboradores"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:indeterminateTint="@color/cafe_profundo"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layoutSearchAndFilter"
-        tools:visibility="visible" />
-
-    <!-- Lista de Colaboradores (RecyclerView) -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvCollaborators"
+    <!-- SwipeRefreshLayout para Deslizar y Actualizar Colaboradores -->
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="12dp"
-        android:clipToPadding="false"
-        android:paddingHorizontal="16dp"
-        android:paddingBottom="90dp"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layoutSearchAndFilter"
-        tools:itemCount="4"
-        tools:listitem="@layout/item_collaborator" />
+        app:layout_constraintTop_toBottomOf="@+id/layoutSearchAndFilter">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <!-- Estado Vacío -->
+            <LinearLayout
+                android:id="@+id/layoutEmptyCollaboratorsState"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="32dp"
+                android:visibility="gone"
+                tools:visibility="gone">
+
+                <ImageView
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:contentDescription="@null"
+                    app:srcCompat="@drawable/ic_empty_data" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/empty_collaborators"
+                    android:textColor="@color/chocolate"
+                    android:textSize="13sp" />
+
+            </LinearLayout>
+
+            <!-- Lista de Colaboradores (RecyclerView) -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvCollaborators"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingHorizontal="16dp"
+                android:paddingBottom="90dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:itemCount="4"
+                tools:listitem="@layout/item_collaborator" />
+
+        </FrameLayout>
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

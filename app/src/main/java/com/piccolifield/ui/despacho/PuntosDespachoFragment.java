@@ -519,6 +519,13 @@ public class PuntosDespachoFragment extends Fragment implements OnMapReadyCallba
     }
 
     private void setupToggleViews() {
+        if (binding.swipeRefreshLayout != null) {
+            binding.swipeRefreshLayout.setColorSchemeResources(R.color.cafe_profundo, R.color.caramelo);
+            binding.swipeRefreshLayout.setOnRefreshListener(() -> {
+                cargarDatosDesdeApi();
+                cargarProspectosDesdeApi();
+            });
+        }
         binding.btnToggleMapa.setOnClickListener(v -> seleccionarTab(0));
         binding.btnToggleLista.setOnClickListener(v -> seleccionarTab(1));
         binding.btnToggleProspectos.setOnClickListener(v -> {
@@ -566,6 +573,9 @@ public class PuntosDespachoFragment extends Fragment implements OnMapReadyCallba
         if (binding == null) return;
         boolean cargandoActual = (tabActual == 2) ? cargandoProspectos : cargandoPuntos;
         binding.pbPuntosDespacho.setVisibility(cargandoActual ? View.VISIBLE : View.GONE);
+        if (!cargandoActual && binding.swipeRefreshLayout != null) {
+            binding.swipeRefreshLayout.setRefreshing(false);
+        }
 
         if (cargandoActual) {
             binding.tvEmptyPuntosDespacho.setVisibility(View.GONE);

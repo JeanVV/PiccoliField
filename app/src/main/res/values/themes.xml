@@ -13,7 +13,7 @@
 
     <style name="ShapeAppearanceOverlay.App.CornerSize16dp" parent="">
         <item name="cornerSize">16dp</item>
-    </style>
+        </style>
 
     <style name="Theme.PiccoliField.PopupMenu" parent="Widget.AppCompat.PopupMenu">
         <item name="android:popupBackground">@drawable/bg_popup_menu_piccoli</item>
