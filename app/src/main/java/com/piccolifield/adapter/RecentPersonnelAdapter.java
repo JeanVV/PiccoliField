@@ -101,13 +101,8 @@ public class RecentPersonnelAdapter extends RecyclerView.Adapter<RecentPersonnel
             binding.tvPersonnelName.setText(item.getNombreCompleto());
             binding.tvPersonnelLocation.setText(item.getSede());
 
-            String hora = item.getHoraMarcado();
-            if (hora != null && hora.length() >= 16) {
-                binding.tvPersonnelTime.setText(hora.substring(11, 16));
-            } else if (hora != null) {
-                binding.tvPersonnelTime.setText(hora);
-            } else {
-                binding.tvPersonnelTime.setText("--:--");
+            if (binding.tvPersonnelTime != null) {
+                binding.tvPersonnelTime.setVisibility(android.view.View.GONE);
             }
 
             configurarBadge(binding.tvPersonnelStatusBadge, item.getEstado());

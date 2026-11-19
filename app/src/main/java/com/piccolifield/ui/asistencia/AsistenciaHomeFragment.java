@@ -83,7 +83,16 @@ public class AsistenciaHomeFragment extends Fragment {
                     verificarJustificacionesPendientes(listaRemote);
                     actualizarMetricasFaltas(listaRemote);
 
-                    if (listaRemote.isEmpty()) {
+                    // Filtrar para "Personal Reciente": Excluir colaboradores con estado "SIN_REGISTRO" o "SIN_MARCAR"
+                    List<RegistroAsistencia> listaPersonalReciente = new ArrayList<>();
+                    for (RegistroAsistencia item : listaRemote) {
+                        String est = item.getEstado() != null ? item.getEstado().toUpperCase().trim() : "";
+                        if (!est.equals("SIN_REGISTRO") && !est.equals("SIN_MARCAR") && !est.equals("SIN REGISTRO") && !est.equals("SIN MARCAR")) {
+                            listaPersonalReciente.add(item);
+                        }
+                    }
+
+                    if (listaPersonalReciente.isEmpty()) {
                         binding.layoutEmptyRecentState.setVisibility(View.VISIBLE);
                         binding.rvRecentPersonnel.setVisibility(View.GONE);
                     } else {
@@ -91,7 +100,7 @@ public class AsistenciaHomeFragment extends Fragment {
                         binding.rvRecentPersonnel.setVisibility(View.VISIBLE);
                         binding.rvRecentPersonnel.setLayoutManager(new LinearLayoutManager(getContext()));
 
-                        adapter = new RecentPersonnelAdapter(listaRemote);
+                        adapter = new RecentPersonnelAdapter(listaPersonalReciente);
                         adapter.setOnItemClickListener(item -> {
                             DetalleAsistenciaFragment fragment = DetalleAsistenciaFragment.newInstance(item);
                             getParentFragmentManager().beginTransaction()

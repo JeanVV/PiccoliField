@@ -85,6 +85,7 @@
             android:layout_height="wrap_content"
             android:textColor="@color/color_text_muted"
             android:textSize="11sp"
+            android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/tvPersonnelName"
             tools:text="08:02 a.m." />

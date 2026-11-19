@@ -196,6 +196,15 @@
                         android:textSize="16sp"
                         android:textStyle="bold" />
 
+                    <TextView
+                        android:id="@+id/tvAttendanceDate"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:textColor="@color/chocolate"
+                        android:textSize="12sp"
+                        tools:text="Fecha: Miércoles, 18 de Noviembre de 2026" />
+
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
@@ -545,27 +554,88 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- 5. Sección: Historial de Turnos -->
-            <TextView
-                android:id="@+id/tvShiftHistoryHeader"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:fontFamily="serif"
-                android:text="@string/label_historial_turnos"
-                android:textColor="@color/cafe_profundo"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvShiftHistory"
+            <!-- 5. Sección Desplegable: Historial de Turnos -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardShiftHistoryContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:clipToPadding="false"
-                android:nestedScrollingEnabled="false"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:itemCount="2"
-                tools:listitem="@layout/item_shift_history" />
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="24dp"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="1dp"
+                app:strokeColor="#E5D5C0"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <!-- Cabecera Clicable para Desplegar/Colapsar -->
+                    <RelativeLayout
+                        android:id="@+id/layoutShiftHistoryHeader"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:layout_toStartOf="@+id/ivShiftHistoryExpandArrow"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/tvShiftHistoryHeader"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="serif"
+                                android:text="@string/label_historial_turnos"
+                                android:textColor="@color/cafe_profundo"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/tvShiftHistorySubtext"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="Toca para desplegar las entradas y salidas"
+                                android:textColor="@color/chocolate"
+                                android:textSize="12sp" />
+                        </LinearLayout>
+
+                        <ImageView
+                            android:id="@+id/ivShiftHistoryExpandArrow"
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:src="@drawable/ic_arrow_drop_down"
+                            app:tint="@color/cafe_profundo" />
+                    </RelativeLayout>
+
+                    <!-- RecyclerView de Historial Desplegable -->
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvShiftHistory"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:clipToPadding="false"
+                        android:nestedScrollingEnabled="false"
+                        android:visibility="gone"
+                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                        tools:listitem="@layout/item_shift_history"
+                        tools:visibility="visible" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
 

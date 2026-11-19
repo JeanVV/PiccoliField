@@ -156,6 +156,10 @@ public class DetalleAsistenciaFragment extends Fragment {
             binding.tvAttendanceTime.setText(fmtDisp);
             binding.tvServerTime.setText(fmtServ);
 
+            String fechaRaw = horaServidor != null && !horaServidor.isEmpty() ? horaServidor : horaDisp;
+            if (fechaRaw == null || fechaRaw.isEmpty()) fechaRaw = registro.getFechaJustificacion();
+            binding.tvAttendanceDate.setText(formatearFechaLarga(fechaRaw));
+
             if (registro.getIdUsuario() > 0) {
                 viewModel.cargarUltimaAsistencia(registro.getIdUsuario());
             }
@@ -223,13 +227,23 @@ public class DetalleAsistenciaFragment extends Fragment {
             }
         });
 
-        // Observador de Historial de Turnos
+        // Observador de Historial de Turnos Desplegable
         viewModel.getHistorialTurnosLiveData().observe(getViewLifecycleOwner(), resource -> {
             if (!isAdded() || binding == null || resource == null) return;
             if (resource.status == Resource.Status.SUCCESS && resource.data != null) {
                 List<TurnoHistorial> historial = resource.data;
+                int count = historial.size();
+                binding.tvShiftHistorySubtext.setText(count + " evento(s) registrado(s) · Toca para desplegar");
                 binding.rvShiftHistory.setLayoutManager(new LinearLayoutManager(getContext()));
                 binding.rvShiftHistory.setAdapter(new TurnoHistorialAdapter(historial));
+
+                binding.layoutShiftHistoryHeader.setOnClickListener(v -> {
+                    boolean estaVisible = binding.rvShiftHistory.getVisibility() == View.VISIBLE;
+                    binding.rvShiftHistory.setVisibility(estaVisible ? View.GONE : View.VISIBLE);
+                    binding.ivShiftHistoryExpandArrow.animate().rotation(estaVisible ? 0f : 180f).setDuration(200).start();
+                });
+            } else if (resource.status == Resource.Status.ERROR) {
+                binding.tvShiftHistorySubtext.setText("Sin historial disponible");
             }
         });
 
@@ -248,6 +262,9 @@ public class DetalleAsistenciaFragment extends Fragment {
                     binding.tvServerTime.setText(horaUltima);
                 }
             }
+            if (ultima.getFecha() != null && !ultima.getFecha().isEmpty() && binding.tvAttendanceDate != null) {
+                binding.tvAttendanceDate.setText(formatearFechaLarga(ultima.getFecha()));
+            }
             if (ultima.getTipo() != null && !ultima.getTipo().isEmpty() && binding.tvStatusTitle != null) {
                 binding.tvStatusTitle.setText(ultima.getTipo());
             }
@@ -259,6 +276,33 @@ public class DetalleAsistenciaFragment extends Fragment {
 
     private static final java.util.TimeZone TIME_ZONE_LIMA = java.util.TimeZone.getTimeZone("America/Lima");
     private static final java.util.Locale LOCALE_PERU = new java.util.Locale("es", "PE");
+
+    private String formatearFechaLarga(String str) {
+        if (str == null || str.trim().isEmpty() || str.contains("%H")) {
+            return "Fecha: --";
+        }
+        try {
+            String s = str.trim().replace('T', ' ');
+            if (s.contains(" ")) {
+                s = s.split(" ")[0];
+            }
+            if (s.length() >= 10) {
+                java.text.SimpleDateFormat inFormat = new java.text.SimpleDateFormat("yyyy-MM-dd", LOCALE_PERU);
+                java.text.SimpleDateFormat outFormat = new java.text.SimpleDateFormat("EEEE, d 'de' MMMM 'de' yyyy", LOCALE_PERU);
+                java.util.Date date = inFormat.parse(s.substring(0, 10));
+                if (date != null) {
+                    String formatted = outFormat.format(date);
+                    if (!formatted.isEmpty()) {
+                        formatted = formatted.substring(0, 1).toUpperCase(LOCALE_PERU) + formatted.substring(1);
+                    }
+                    return "Fecha: " + formatted;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "Fecha: " + str;
+    }
 
     private String formatearHoraCorta(String str) {
         if (str == null || str.trim().isEmpty() || str.contains("%H") || str.contains("%i") || str.contains("%s")) {
