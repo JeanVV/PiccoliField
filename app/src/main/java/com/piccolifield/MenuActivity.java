@@ -235,6 +235,22 @@ public class MenuActivity extends AppCompatActivity {
                 .commit();
     }
 
+    public void navegarAPantallaPrincipal() {
+        if (binding != null && binding.curvedBottomNav != null) {
+            binding.curvedBottomNav.selectTab(0, true);
+        } else {
+            cargarFragmento(new PerfilFragment());
+        }
+    }
+
+    public void abrirPuntosDistribucionEnProspectos() {
+        if (binding != null && binding.curvedBottomNav != null) {
+            binding.curvedBottomNav.selectTab(3, true); 
+        } else {
+            cargarFragmento(new PuntosDespachoFragment());
+        }
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
