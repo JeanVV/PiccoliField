@@ -331,17 +331,10 @@ public class AsistenciaHomeFragment extends Fragment {
 
             if (esDeHoy) {
                 String estadoReal = item.getEstado();
-                if (fechaReg.length() >= 19) {
-                    String horaOnly = fechaReg.substring(11, 19);
-                    if (horaOnly.compareTo("10:30:00") > 0) {
-                        estadoReal = "FALTA";
-                    } else if (horaOnly.compareTo("09:40:00") > 0) {
-                        estadoReal = "TARDANZA";
-                    } else {
-                        estadoReal = "A_TIEMPO";
-                    }
-                } else if (estadoReal == null || estadoReal.trim().isEmpty()) {
-                    estadoReal = "A_TIEMPO";
+                if (estadoReal == null || estadoReal.trim().isEmpty() || "SIN_REGISTRO".equalsIgnoreCase(estadoReal) || "SIN_MARCAR".equalsIgnoreCase(estadoReal)) {
+                    estadoReal = com.piccolifield.data.repository.AsistenciaRepository.calcularEstado(fechaReg);
+                } else if (!"A_TIEMPO".equalsIgnoreCase(estadoReal) && !"TARDANZA".equalsIgnoreCase(estadoReal) && !"FALTA".equalsIgnoreCase(estadoReal)) {
+                    estadoReal = com.piccolifield.data.repository.AsistenciaRepository.calcularEstado(fechaReg);
                 }
                 item.setEstado(estadoReal);
 

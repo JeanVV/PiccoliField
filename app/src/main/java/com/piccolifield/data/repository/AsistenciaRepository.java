@@ -64,7 +64,8 @@ public class AsistenciaRepository {
                             reg.setSede(request.getSede());
                             reg.setFechaHoraServidor(request.getFechaHoraDispositivo());
                             reg.setHoraMarcado(request.getFechaHoraDispositivo());
-                            reg.setEstado("A_TIEMPO");
+                            reg.setEstado(calcularEstado(request.getFechaHoraDispositivo()));
+                            reg.setMinutosTardanza(calcularMinutosTardanza(request.getFechaHoraDispositivo()));
                             SplashStorage.guardarRegistroAsistenciaLocal(context, reg);
                         }
                         result.setValue(Resource.success(msg));
@@ -107,7 +108,8 @@ public class AsistenciaRepository {
                 reg.setSede(request.getSede());
                 reg.setFechaHoraServidor(request.getFechaHoraDispositivo());
                 reg.setHoraMarcado(request.getFechaHoraDispositivo());
-                reg.setEstado("A_TIEMPO");
+                reg.setEstado(calcularEstado(request.getFechaHoraDispositivo()));
+                reg.setMinutosTardanza(calcularMinutosTardanza(request.getFechaHoraDispositivo()));
                 SplashStorage.guardarRegistroAsistenciaLocal(context, reg);
 
                 result.setValue(Resource.success(mensajeFallback));
@@ -291,5 +293,71 @@ public class AsistenciaRepository {
         });
 
         return result;
+    }
+
+    public static String calcularEstado(String horaStr) {
+        if (horaStr == null || horaStr.trim().isEmpty()) return "A_TIEMPO";
+        try {
+            String s = horaStr.trim().replace('T', ' ');
+            if (s.contains(" ")) {
+                String[] parts = s.split(" ");
+                for (String p : parts) {
+                    if (p.contains(":")) {
+                        s = p;
+                        break;
+                    }
+                }
+            }
+            if (s.contains(":")) {
+                String[] timeParts = s.split(":");
+                if (timeParts.length >= 2) {
+                    int hh = Integer.parseInt(timeParts[0].trim());
+                    int mm = Integer.parseInt(timeParts[1].trim());
+                    int totalMinutes = hh * 60 + mm;
+
+                    // Regla de Negocio: Hasta las 09:40 AM es A_TIEMPO, posterior a 09:40 AM es TARDANZA
+                    if (totalMinutes <= 580) {
+                        return "A_TIEMPO";
+                    } else {
+                        return "TARDANZA";
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "A_TIEMPO";
+    }
+
+    public static int calcularMinutosTardanza(String horaStr) {
+        if (horaStr == null || horaStr.trim().isEmpty()) return 0;
+        try {
+            String s = horaStr.trim().replace('T', ' ');
+            if (s.contains(" ")) {
+                String[] parts = s.split(" ");
+                for (String p : parts) {
+                    if (p.contains(":")) {
+                        s = p;
+                        break;
+                    }
+                }
+            }
+            if (s.contains(":")) {
+                String[] timeParts = s.split(":");
+                if (timeParts.length >= 2) {
+                    int hh = Integer.parseInt(timeParts[0].trim());
+                    int mm = Integer.parseInt(timeParts[1].trim());
+                    int totalMinutes = hh * 60 + mm;
+
+                    // Inicio de turno oficial: 09:00 AM (540 minutos)
+                    if (totalMinutes > 540) {
+                        return totalMinutes - 540;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 }
