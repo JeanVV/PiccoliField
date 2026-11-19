@@ -64,6 +64,13 @@ public class MenuActivity extends AppCompatActivity {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             binding.fragmentContainer.setPadding(systemBars.left, systemBars.top, systemBars.right, 0);
 
+            // Colocar el banner offline justo debajo de la barra de estado / cámara
+            if (binding.tvBannerOffline.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) binding.tvBannerOffline.getLayoutParams();
+                params.topMargin = systemBars.top;
+                binding.tvBannerOffline.setLayoutParams(params);
+            }
+
             // Elevar la barra de navegación curva por encima de los botones/gestos del celular
             if (binding.curvedBottomNav.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
                 ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) binding.curvedBottomNav.getLayoutParams();
@@ -187,18 +194,18 @@ public class MenuActivity extends AppCompatActivity {
                 String token = task.getResult();
                 android.util.Log.e("FCM_TOKEN_DEBUG", ">>> TOKEN FCM: " + token);
 
-                String deviceId = android.provider.Settings.Secure.getString(getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
+                String deviceModel = android.os.Build.MODEL;
 
                 if (RetrofitClient.API_TOKEN == null || RetrofitClient.API_TOKEN.isEmpty()) {
                     RetrofitClient.API_TOKEN = SplashStorage.obtenerToken(this);
                 }
 
                 ApiService apiService = RetrofitClient.createService();
-                apiService.actualizarFcmToken(new FcmTokenRequest(token, deviceId)).enqueue(new Callback<ApiResponse<Object>>() {
+                apiService.actualizarDispositivo(new com.piccolifield.data.remote.dto.request.DispositivoRequest(token, "ANDROID", deviceModel)).enqueue(new Callback<ApiResponse<Object>>() {
                     @Override
                     public void onResponse(@NonNull Call<ApiResponse<Object>> call, @NonNull Response<ApiResponse<Object>> response) {
                         if (response.isSuccessful()) {
-                            android.util.Log.d("MenuActivity", "Token FCM registrado exitosamente en el servidor");
+                            android.util.Log.d("MenuActivity", "Token FCM registrado exitosamente en /api/dispositivo");
                         } else {
                             android.util.Log.e("MenuActivity", "Fallo al registrar token FCM en servidor: " + response.code());
                         }
