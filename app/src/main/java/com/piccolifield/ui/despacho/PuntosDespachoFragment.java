@@ -24,6 +24,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.piccolifield.DetallePuntoDistribucionActivity;
 import com.piccolifield.R;
@@ -131,19 +132,37 @@ public class PuntosDespachoFragment extends Fragment implements OnMapReadyCallba
         if (googleMap == null) return;
         googleMap.clear();
 
-        if (listaPuntosOriginal.isEmpty()) return;
+        if (listaPuntosFiltrada.isEmpty()) return;
 
-        for (PuntoDistribucion p : listaPuntosOriginal) {
-            LatLng posicion = new LatLng(p.getLatitud(), p.getLongitud());
+        LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
+        LatLng ultimaPosicion = null;
+        int validCount = 0;
+
+        for (PuntoDistribucion p : listaPuntosFiltrada) {
+            double lat = p.getLatitud();
+            double lng = p.getLongitud();
+            if (Double.isNaN(lat) || Double.isNaN(lng) || (lat == 0.0 && lng == 0.0)) {
+                continue;
+            }
+            LatLng posicion = new LatLng(lat, lng);
             googleMap.addMarker(new MarkerOptions()
                     .position(posicion)
                     .title(p.getNombre() + " (" + p.getCodigo() + ")")
-                    .snippet(p.getDireccion()));
+                    .snippet(p.getDireccion() + " · " + p.getCriterioNegocio()));
+            boundsBuilder.include(posicion);
+            ultimaPosicion = posicion;
+            validCount++;
         }
 
-        PuntoDistribucion primero = listaPuntosOriginal.get(0);
-        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                new LatLng(primero.getLatitud(), primero.getLongitud()), 12f));
+        if (validCount == 1 && ultimaPosicion != null) {
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(ultimaPosicion, 15f));
+        } else if (validCount > 1 && ultimaPosicion != null) {
+            try {
+                googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 100));
+            } catch (Exception e) {
+                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(ultimaPosicion, 12f));
+            }
+        }
     }
 
     private void setupRecyclerView() {
@@ -532,6 +551,7 @@ public class PuntosDespachoFragment extends Fragment implements OnMapReadyCallba
         if (tab == 0) {
             binding.btnToggleMapa.setBackgroundTintList(ColorStateList.valueOf(colorCafe));
             binding.btnToggleMapa.setTextColor(colorBlanco);
+            binding.layoutMapView.post(this::actualizarPinesMapa);
         } else if (tab == 1) {
             binding.btnToggleLista.setBackgroundTintList(ColorStateList.valueOf(colorCafe));
             binding.btnToggleLista.setTextColor(colorBlanco);
@@ -568,12 +588,10 @@ public class PuntosDespachoFragment extends Fragment implements OnMapReadyCallba
         });
 
         binding.fabMyLocation.setOnClickListener(v -> {
-            if (googleMap != null && !listaPuntosOriginal.isEmpty()) {
-                PuntoDistribucion primero = listaPuntosOriginal.get(0);
-                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                        new LatLng(primero.getLatitud(), primero.getLongitud()), 12f));
+            if (googleMap != null && !listaPuntosFiltrada.isEmpty()) {
+                actualizarPinesMapa();
             } else {
-                Toast.makeText(requireContext(), "Centrando en ubicación actual", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), "No hay puntos filtrados para centrar", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -642,6 +660,7 @@ public class PuntosDespachoFragment extends Fragment implements OnMapReadyCallba
             }
         }
         adapter.notifyDataSetChanged();
+        actualizarPinesMapa();
         actualizarIndicadorCarga();
     }
 
